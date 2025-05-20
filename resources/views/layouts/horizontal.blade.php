@@ -19,7 +19,7 @@
 
     {{-- <<<  เปลี่ยนจาก @yield เป็น @stack  >>> --}}
     @stack('css')
-    {{-- <script>
+   <script>
       // แบบกำหนดเองถาวร:
       sessionStorage.setItem('__CONFIG__', JSON.stringify({
           theme:'light',
@@ -30,7 +30,7 @@
           sidenav:{size:'default',user:false}
       }));
       // หรือจะใช้ removeItem('__CONFIG__') ถ้าอยากให้ยึดค่าจาก Blade
-    </script> --}}
+    </script> 
 
     {{-- head-css --}}
     @include('layouts.shared.head-css', ['mode' => $mode, 'demo' => $demo])

@@ -3,6 +3,8 @@
 use App\Livewire\Dashboards;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Products\ProductIndex;
+use App\Livewire\Customers\CustomerIndex;
+use App\Livewire\Customers\CustomerCreate;
 use App\Http\Controllers\RoutingController;
 use App\Livewire\Globalsets\GlobalSetManager;
 
@@ -28,6 +30,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/global-sets', GlobalSetManager::class)->name('global-sets.index');
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/customers', CustomerIndex::class)->name('customers.index');
+    Route::get('/customer/create', CustomerCreate::class)->name('customers.create');
 });
 
 Route::group(['middleware' => 'auth'], function () {
