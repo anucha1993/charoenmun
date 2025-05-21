@@ -55,8 +55,9 @@ class RoutingController extends Controller
         $mode = $request->query('mode');
         $demo = $request->query('demo');
 
-        if ($first == "assets")
-            return redirect('home');
+       if ($first === 'customer' && $second === 'create') {
+        return redirect()->route('customers.create');   // ✅ ชี้ไป Livewire
+    }
 
 
 

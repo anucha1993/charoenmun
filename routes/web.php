@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\customers\CustomerController;
 use App\Livewire\Dashboards;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Products\ProductIndex;
+use App\Livewire\Customers\CustomerEdit;
 use App\Livewire\Customers\CustomerIndex;
 use App\Livewire\Customers\CustomerCreate;
 use App\Http\Controllers\RoutingController;
@@ -33,8 +35,13 @@ Route::middleware(['auth'])->group(function () {
 });
 Route::middleware(['auth'])->group(function () {
     Route::get('/customers', CustomerIndex::class)->name('customers.index');
-    Route::get('/customer/create', CustomerCreate::class)->name('customers.create');
+    Route::get('/customers/create', CustomerCreate::class)->name('customers.create');
+Route::get('/customers/{id}/edit', CustomerEdit::class)->name('customers.edit');
+
 });
+
+// Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
+
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', [RoutingController::class, 'index'])->name('root');
