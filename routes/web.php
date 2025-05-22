@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Route;
 
 use App\Livewire\Products\ProductIndex;
 
+use App\Livewire\Customers\CustomerEdit;
 use App\Livewire\Customers\CustomerIndex;
+use App\Livewire\Customers\CustomerCreate;
 use App\Http\Controllers\RoutingController;
 use App\Livewire\Globalsets\GlobalSetManager;
 use App\Http\Controllers\customers\CustomerController;
-use App\Livewire\Customers\CustomerEdit;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -49,6 +50,8 @@ Route::middleware(['auth'])->group(function () {
 
 // routes/web.php
 Route::get('/customers/edit/{customerId}', CustomerEdit::class)->name('customers.edit');
+Route::get('/customers/create', CustomerCreate::class)->name('customers.create');
+Route::get('/customers', CustomerIndex::class)->name('customers.index');
 
 
 
