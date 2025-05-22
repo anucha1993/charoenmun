@@ -27,10 +27,14 @@ class CustomerCreate extends Component
         $customer_district = '',
         $customer_zipcode = '';
 
-    public array $provinces = [], $amphures = [], $districts = [];
+    public array $provinces = [],
+        $amphures = [],
+        $districts = [];
 
     public Collection $customerType;
     public Collection $customerLevel;
+    public bool $isDuplicateCustomer = false;
+    public string $duplicateMessage = '';
 
     public function mount()
     {
@@ -38,9 +42,44 @@ class CustomerCreate extends Component
 
         $set = GlobalSetModel::with('values')->find(1); // ประเภทลูกค้า
         $setLevel = GlobalSetModel::with('values')->find(2); // ระดับลูกค้า
-       $this->customerType = $set?->values->where('status', 'Enable')->values() ?? collect();
-       $this->customerLevel = $setLevel?->values->where('status', 'Enable')->values() ?? collect();
+        $this->customerType = $set?->values->where('status', 'Enable')->values() ?? collect();
+        $this->customerLevel = $setLevel?->values->where('status', 'Enable')->values() ?? collect();
     }
+
+    public function updatedCustomerTaxid()
+    {
+        $this->checkDuplicateCustomer();
+    }
+
+    public function updatedCustomerName()
+    {
+        $this->checkDuplicateCustomer();
+    }
+
+    public function checkDuplicateCustomer()
+{
+    if (!$this->customer_name || !$this->customer_taxid) {
+        $this->isDuplicateCustomer = false;
+        $this->duplicateMessage = '';
+        return;
+    }
+
+    $query = CustomerModel::query()
+        ->where('customer_name', $this->customer_name)
+        ->where('customer_taxid', $this->customer_taxid);
+
+    if (isset($this->customerId)) {
+        $query->where('id', '!=', $this->customerId);
+    }
+
+    $this->isDuplicateCustomer = $query->exists();
+
+    if ($this->isDuplicateCustomer) {
+        $this->duplicateMessage = '❌ พบข้อมูลลูกค้าชื่อนี้และเลขภาษีนี้ในระบบแล้ว';
+    } else {
+        $this->duplicateMessage = '';
+    }
+}
 
     public function updatedCustomerProvince()
     {
@@ -63,10 +102,14 @@ class CustomerCreate extends Component
 
     public function updatedCustomerZipcode($zip)
     {
-        if (strlen($zip) !== 5) return;
+        if (strlen($zip) !== 5) {
+            return;
+        }
 
         $districts = districtsModel::where('zipcode', $zip)->get();
-        if ($districts->isEmpty()) return;
+        if ($districts->isEmpty()) {
+            return;
+        }
 
         $this->customer_province = $districts->first()->province_code;
         $this->updatedCustomerProvince();
@@ -113,8 +156,7 @@ class CustomerCreate extends Component
             'customer_zipcode' => $this->customer_zipcode,
         ]);
 
-        return redirect()->route('customers.edit', $customer->id)
-            ->with('success', 'เพิ่มลูกค้าเรียบร้อยแล้ว กรุณาเพิ่มที่อยู่จัดส่ง');
+        return redirect()->route('customers.edit', $customer->id)->with('success', 'เพิ่มลูกค้าเรียบร้อยแล้ว กรุณาเพิ่มที่อยู่จัดส่ง');
     }
 
     public function render()

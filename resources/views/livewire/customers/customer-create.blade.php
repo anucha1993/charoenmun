@@ -1,4 +1,3 @@
-
 <div>
 
     <br>
@@ -51,13 +50,26 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-2">
-                                    <label for="">ชื่อลูกค้า <span class="text-danger">*</span></label>
-                                    <input type="text" wire:model="customer_name" id="" class="form-control"
-                                        required>
+                                    <label for="">ชื่อลูกค้า <span class="text-danger">*</span>
+                                        @if ($isDuplicateCustomer)
+                                            <div class="col-12 mb-2">
+                                                <span class="text-danger">{{ $duplicateMessage }}</span>
+                                            </div>
+                                        @endif
+                                    </label>
+                                    <input type="text" wire:model.live.debounce.500ms="customer_name" id=""
+                                        class="form-control" required>
                                 </div>
                                 <div class="col-md-6 mb-2">
-                                    <label for="">เลขประจำตัวผู้เสียภาษี</label>
-                                    <input type="text" wire:model="customer_taxid" id=""
+                                    <label for="">เลขประจำตัวผู้เสียภาษี
+                                        @if ($isDuplicateCustomer)
+                                            <div class="col-12 mb-2">
+                                                <span class="text-danger">{{ $duplicateMessage }}</span>
+                                            </div>
+                                        @endif
+
+                                    </label>
+                                    <input type="text" wire:model.live.debounce.500ms="customer_taxid" id=""
                                         class="form-control">
                                 </div>
 
@@ -138,7 +150,7 @@
 
                             </div>
 
-                            <button type="submit" class="btn btn-primary">บันทึก</button>
+                            <button type="submit" class="btn btn-primary" {{ $isDuplicateCustomer ? 'disabled' : '' }}>บันทึก</button>
                         </form>
                     </div>
                 </div>
@@ -176,7 +188,7 @@
 
 
 
-    
+
 
     <script>
         document.addEventListener('livewire:init', () => {

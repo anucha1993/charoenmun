@@ -1,8 +1,45 @@
 <div>
     <br>
+
+<div class="row">
+        <div class="col-md-4">
+            <div class="card border-secondary border">
+                <div class="card-body">
+                    <h5 class="card-title">จำนวนลูกค้าทั้งหมด</h5>
+                    <h2 class="my-2">{{$customers->count()}} ราย</h2>
+                    <p class="card-text">นับจำนวนจากข้อมูลลูกค้าทั้งหมด</p>
+                    
+                </div> <!-- end card-body-->
+            </div> <!-- end card-->
+        </div> <!-- end col-->
+
+        <div class="col-md-4">
+            <div class="card border-primary border">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">ลูกค้ารายใหม่</h5>
+                     <h2 class="my-2">{{$customers->count()}} ราย</h2>
+                    <p class="card-text">คิดจากลูกค้าที่เพิ่มในระบบในระยะเวลา 3 เดือน</p>
+                  
+                </div> <!-- end card-body-->
+            </div> <!-- end card-->
+        </div> <!-- end col-->
+
+        <div class="col-md-4">
+            <div class="card border-success border">
+                <div class="card-body">
+                    <h5 class="card-title text-success">ลูกค้าที่ไม่การเคลือนไหว</h5>
+                        <h2 class="my-2">{{$customers->count()}} ราย</h2>
+                    <p class="card-text">คิดจากลูกค้าที่ไม่มีการสั่งซื้อสินค้าเป็นระยะยเวลานาน</p>
+                </div> <!-- end card-body-->
+            </div> <!-- end card-->
+        </div> <!-- end col-->
+    </div>
+    <!-- end row -->
+
      <div class="card">
         <div class="card-header">
             <h4>รายการข้อมูลลูกค้าทั้งหมด</h4>
+            <a href="{{route('customers.create')}}" class="float-end btn btn-outline-success" style="font-size: 18px">+ เพิ่มข้อมูลลูกค้า</a>
         </div>
         <div class="card-body">
 
@@ -13,15 +50,13 @@
 
     {{-- Table --}}
 
-
-
-
     <div class="table-responsive">
         <table class="table table">
             <thead class="table-dark">
                 <tr>
                     <th>รหัสลูกค้า</th>
                     <th>ชื่อลูกค้า</th>
+                    <th>ชื่อผู้ติดต่อ</th>
                     <th>เบอร์โทร</th>
                     <th>ประเภท</th>
                     <th>ระดับ</th>
@@ -33,6 +68,7 @@
                     <tr>
                         <td>{{ $customer->customer_code }}</td>
                         <td>{{ $customer->customer_name }}</td>
+                        <td>{{ $customer->customer_contract_name }}</td>
                         <td>{{ $customer->customer_phone }}</td>
                         <td>
                               <span class="badge bg-primary">{{ $customer->type->value }}</span>

@@ -5,15 +5,16 @@
 
             <!-- Topbar Brand Logo -->
             <div class="logo-topbar">
+                  <h3  class="logo-light">เจริญมั่น คอนกรีต</h3>
                 <!-- Logo light -->
-                <a href="{{route('any', 'index')}}" class="logo-light">
+                {{-- <a href="{{route('any', 'index')}}" class="logo-light">
                     <span class="logo-lg">
                         <img src="/images/logo.png" alt="logo">
                     </span>
                     <span class="logo-sm">
                         <img src="/images/logo-sm.png" alt="small logo">
                     </span>
-                </a>
+                </a> --}}
 
                 <!-- Logo Dark -->
                 <a href="{{route('any', 'index')}}" class="logo-dark">
@@ -42,17 +43,17 @@
 
             <!-- Topbar Search Form -->
             <div class="app-search d-none d-lg-block">
-                <form>
+                {{-- <form>
                     <div class="input-group">
                         <input type="search" class="form-control" placeholder="Search...">
                         <span class="ri-search-line search-icon text-muted"></span>
                     </div>
-                </form>
+                </form> --}}
             </div>
         </div>
 
         <ul class="topbar-menu d-flex align-items-center gap-3">
-            <li class="dropdown d-lg-none">
+            {{-- <li class="dropdown d-lg-none">
                 <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button"
                     aria-haspopup="false" aria-expanded="false">
                     <i class="ri-search-line fs-22"></i>
@@ -99,9 +100,9 @@
                     </a>
 
                 </div>
-            </li>
+            </li> --}}
 
-            <li class="dropdown notification-list">
+            {{-- <li class="dropdown notification-list">
                 <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button"
                     aria-haspopup="false" aria-expanded="false">
                     <i class="ri-mail-line fs-22"></i>
@@ -233,9 +234,9 @@
                     </a>
 
                 </div>
-            </li>
+            </li> --}}
 
-            <li class="dropdown notification-list">
+            {{-- <li class="dropdown notification-list">
                 <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button"
                     aria-haspopup="false" aria-expanded="false">
                     <i class="ri-notification-3-line fs-22"></i>
@@ -324,9 +325,9 @@
                     </a>
 
                 </div>
-            </li>
+            </li> --}}
 
-            <li class="d-none d-sm-inline-block">
+            {{-- <li class="d-none d-sm-inline-block">
                 <a class="nav-link" data-bs-toggle="offcanvas" href="#theme-settings-offcanvas">
                     <i class="ri-settings-3-line fs-22"></i>
                 </a>
@@ -336,7 +337,7 @@
                 <div class="nav-link" id="light-dark-mode">
                     <i class="ri-moon-line fs-22"></i>
                 </div>
-            </li>
+            </li> --}}
 
             <li class="dropdown">
                 <a class="nav-link dropdown-toggle arrow-none nav-user" data-bs-toggle="dropdown" href="#" role="button"
@@ -345,7 +346,7 @@
                         <img src="/images/users/avatar-1.jpg" alt="user-image" width="32" class="rounded-circle">
                     </span>
                     <span class="d-lg-block d-none">
-                        <h5 class="my-0 fw-normal">Thomson <i
+                        <h5 class="my-0 fw-normal">{{Auth::user()->name}} <i
                                 class="ri-arrow-down-s-line d-none d-sm-inline-block align-middle"></i></h5>
                     </span>
                 </a>
@@ -356,7 +357,7 @@
                     </div>
 
                     <!-- item-->
-                    <a href="pages-profile.html" class="dropdown-item">
+                    {{-- <a href="pages-profile.html" class="dropdown-item">
                         <i class="ri-account-circle-line fs-18 align-middle me-1"></i>
                         <span>My Account</span>
                     </a>
@@ -377,7 +378,7 @@
                     <a href="auth-lock-screen.html" class="dropdown-item">
                         <i class="ri-lock-password-line fs-18 align-middle me-1"></i>
                         <span>Lock Screen</span>
-                    </a>
+                    </a> --}}
 
                     <!-- item-->
                     <a href="auth-logout-2.html" class="dropdown-item">
