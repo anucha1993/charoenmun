@@ -213,9 +213,9 @@
             </div>
         </div>
 
- 
 
- 
+
+
 
 
 
@@ -228,36 +228,36 @@
                     <p class="text-muted mb-0">
                         ประวัติการจ่ายเงิน <code> Pocket Money </code>.
                     </p>
- 
+
                 </div>
                 <div class="card-body">
                     <div class="responsive">
-                    <table class="table table">
-                        <thead>
-                            <tr>
-                            <th>วันที่ส่งตรวจ</th>
-                            <th>ผู้โอน</th>
-                            <th>ผู้รับ</th>
-                            <th>จำนวนเงิน</th>
-                            <th>ประเภทสลิป</th>
-                            <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>19 พ.ค. 256807:57น.</td>
-                                <td>นาง ปิยมาส มะโนรมณ์ xxx-x-xx141-5<br></td>
-                                <td>MR. ANUCHA YOTHANAN 307-3-13923-4<br></td>
-                                <td>42,450</td>
-                                <td class="text-success">สลิปถูกต้อง</td>
-                                <td class="text-success">ยืนยันยอดแล้ว</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                        <table class="table table">
+                            <thead>
+                                <tr>
+                                    <th>วันที่ส่งตรวจ</th>
+                                    <th>ผู้โอน</th>
+                                    <th>ผู้รับ</th>
+                                    <th>จำนวนเงิน</th>
+                                    <th>ประเภทสลิป</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>19 พ.ค. 256807:57น.</td>
+                                    <td>นาง ปิยมาส มะโนรมณ์ xxx-x-xx141-5<br></td>
+                                    <td>MR. ANUCHA YOTHANAN 307-3-13923-4<br></td>
+                                    <td>42,450</td>
+                                    <td class="text-success">สลิปถูกต้อง</td>
+                                    <td class="text-success">ยืนยันยอดแล้ว</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-      
+
 
 
             <div class="card">
@@ -310,7 +310,7 @@
     </div>
 
     <!-- Modal: แก้ไข Pocket Money -->
-    <div wire:ignore.self class="modal fade" id="pocketMoneyModal" tabindex="-1" role="dialog"
+    <div wire:ignore.self class="modal fade" id="pocketMoneyModal" tabindex="-1000" role="dialog"
         aria-labelledby="modalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <form wire:submit.prevent="savePocketMoney">
@@ -329,7 +329,8 @@
 
                         <div class="mb-3">
                             <label for="confirm_password" class="form-label">รหัสยืนยันการแก้ไข</label>
-                            <input type="password" class="form-control" wire:model="confirm_password" placeholder="***********">
+                            <input type="password" class="form-control" wire:model="confirm_password"
+                                placeholder="***********">
                         </div>
                     </div>
 
@@ -393,7 +394,10 @@
                                 @disabled(!$deliveryAmphures) required>
                                 <option value="">-- เลือกอำเภอ --</option>
                                 @foreach ($deliveryAmphures as $code => $name)
-                                    <option value="{{ $code }}">{{ $name }}</option>
+                                    <option value="{{ $code }}"
+                                        @if ($deliveryForm['delivery_amphur'] == $code) selected @endif>
+                                        {{ $name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -404,9 +408,15 @@
                             <select class="form-select" wire:model.live="deliveryForm.delivery_district"
                                 @disabled(!$deliveryDistricts) required>
                                 <option value="">-- เลือกตำบล --</option>
-                                @foreach ($deliveryDistricts as $code => $name)
-                                    <option value="{{ $code }}">{{ $name }}</option>
+
+                                 @foreach ($deliveryDistricts as $code => $name)
+                                    <option value="{{ $code }}"
+                                        @if ($deliveryForm['delivery_district'] == $code) selected @endif>
+                                        {{ $name }}
+                                    </option>
                                 @endforeach
+
+                           
                             </select>
                         </div>
 

@@ -2,16 +2,19 @@
 
 namespace App\Models\customers;
 
+use Illuminate\Database\Eloquent\Model;
+use App\Models\addressList\amphuresModel;
+use App\Models\addressList\districtsModel;
+use App\Models\addressList\provincesModel;
 use App\Models\globalsets\GlobalSetValueModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
 class CustomerModel extends Model
 {
     use HasFactory;
 
     protected $table = 'customers';
-    protected $fillable = ['customer_code', 'customer_name', 'customer_type', 'customer_level', 'customer_taxid', 'customer_contract_name', 'customer_phone', 'customer_email', 'customer_idline', 'customer_address', 'customer_province', 'customer_amphur', 'customer_district', 'customer_zipcode','customer_pocket_money'];
+    protected $fillable = ['customer_code', 'customer_name', 'customer_type', 'customer_level', 'customer_taxid', 'customer_contract_name', 'customer_phone', 'customer_email', 'customer_idline', 'customer_address', 'customer_province', 'customer_amphur', 'customer_district', 'customer_zipcode', 'customer_pocket_money'];
 
     /* -------- รหัสอัตโนมัติ -------- */
     protected static function booted()
@@ -45,11 +48,31 @@ class CustomerModel extends Model
 
     public function type()
     {
-        return $this->belongsTo(GlobalSetValueModel::class,'customer_type');
+        return $this->belongsTo(GlobalSetValueModel::class, 'customer_type');
     }
 
     public function level()
     {
         return $this->belongsTo(GlobalSetValueModel::class, 'customer_level');
+    }
+
+    protected $appends = ['customer_province_name', 'customer_amphur_name', 'customer_district_name'];
+
+    /* province */
+    public function getCustomerProvinceNameAttribute()
+    {
+        return provincesModel::where('province_code', $this->customer_province)->value('province_name');
+    }
+
+    /* amphur */
+    public function getCustomerAmphurNameAttribute()
+    {
+        return amphuresModel::where('amphur_code', $this->customer_amphur)->value('amphur_name');
+    }
+
+    /* district */
+    public function getCustomerDistrictNameAttribute()
+    {
+        return districtsModel::where('district_code', $this->customer_district)->value('district_name');
     }
 }

@@ -16,6 +16,8 @@ use App\Livewire\Customers\CustomerCreate;
 use App\Http\Controllers\RoutingController;
 use App\Livewire\Globalsets\GlobalSetManager;
 use App\Http\Controllers\customers\CustomerController;
+use App\Livewire\Quotations\QuotationsForm;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -53,8 +55,8 @@ Route::get('/customers/edit/{customerId}', CustomerEdit::class)->name('customers
 Route::get('/customers/create', CustomerCreate::class)->name('customers.create');
 Route::get('/customers', CustomerIndex::class)->name('customers.index');
 
-
-
+//Quotations
+Route::get('/quotations/create',QuotationsForm::class)->name('quotations.create');
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', [RoutingController::class, 'index'])->name('root');

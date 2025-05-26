@@ -21,7 +21,7 @@ class deliveryAddressModel extends Model
         'delivery_district', 
         'delivery_amphur',
         'delivery_zipcode',
-         'delivery_contact_name',
+        'delivery_contact_name',
         'delivery_phone',
     ];
 
