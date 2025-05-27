@@ -77,7 +77,7 @@
                                     {{ $selectedCustomer->customer_zipcode }}<br>
                                     <b> เลขประจำตัวผู้เสียภาษี :</b> {{ $selectedCustomer->customer_taxid }}
                                     @if ($customer_id)
-                                        <a href="#"
+                                        <a href="javascript: void(0);"
                                             onclick="Livewire.dispatch('edit-customer', { id: {{ $customer_id }} })">
                                             แก้ไข
                                         </a>
@@ -93,22 +93,36 @@
                         <div class="col-6">
                             <h6 class="fs-14">ข้อมูลจัดส่ง / Shipping Address</h6>
                             <div>
-                                <a href="#" wire:click="$emit('openDeliveryModal', {{ $customer_id }})">+
-                                    เพิ่มที่อยู่จัดส่ง</a>
+                                @if ($selectedCustomer)
+                                    <a href="#" wire:click.prevent="openDeliveryModal({{ $customer_id }})">+
+                                        เพิ่มที่อยู่จัดส่ง</a>
+                                @else
+                                    <span class="text-danger">กรุณาเลือกลูกค้า</span>
+                                @endif
                             </div>
 
-                            <select wire:model.live="selected_delivery_id" class="form-select">
+                            {{-- <select wire:model.live="selected_delivery_id" class="form-select">
                                 <option value="">-- ใช้ที่อยู่หลัก --</option>
                                 @foreach ($customerDelivery as $item)
                                     <option value="{{ $item->id }}">{{ $item->delivery_number }}
                                         ({{ $item->delivery_contact_name }})
                                     </option>
                                 @endforeach
+                            </select> --}}
+
+                            <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
+                                class="form-select">
+                                <option value="">-- เลือกที่อยู่จัดส่ง --</option>
+                                @foreach ($customerDelivery as $delivery)
+                                    <option value="{{ $delivery->id }}">
+                                        {{ $delivery->delivery_contact_name }} - {{ $delivery->delivery_phone }}
+                                    </option>
+                                @endforeach
                             </select>
 
 
 
-                            <address class="">
+                            <address class="mt-2">
                                 @if ($selectedDelivery)
                                     <b>ชื่อผู้ติดต่อ</b> {{ $selectedDelivery->delivery_contact_name }}
                                     ({{ $selectedDelivery->delivery_phone }}) </br>
@@ -116,10 +130,15 @@
                                     {{ $selectedDelivery->delivery_district_name }}
                                     {{ $selectedDelivery->delivery_amphur_name }}
                                     {{ $selectedDelivery->delivery_province_name }}
-                                    {{ $selectedDelivery->delivery_zipcode }}<br>
+                                    {{ $selectedDelivery->delivery_zipcode }}
+
+                                    <a href="javascript: void(0);"
+                                        onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: {{ $delivery->id }} })">
+                                        แก้ไข
+                                    </a>
                                 @else
                                     @if ($selectedCustomer)
-                                        <b> ชื่อร้านค้า/ชื่อลูกค้า :</b>
+                                        <b> ชื่อร้านค้า/ชื่อลูกค้า : </b>
                                         {{ $selectedCustomer->customer_contract_name }}
                                         ({{ $selectedCustomer->customer_phone }})<br>
                                         <b> ที่อยู่ :</b> {{ $selectedCustomer->customer_address }}
@@ -128,8 +147,6 @@
                                         {{ $selectedCustomer->customer_province_name }}
                                         {{ $selectedCustomer->customer_zipcode }}<br>
                                         <b> เลขประจำตัวผู้เสียภาษี :</b> {{ $selectedCustomer->customer_taxid }}
-                                        {{-- <a href="#"
-                                            wire:click="$emit('editDeliveryModal', {{ $selected_delivery_id }})">แก้ไข</a> --}}
                                     @endif
                                 @endif
                             </address>
@@ -144,72 +161,145 @@
                                     <thead class="border-top border-bottom bg-light-subtle border-light">
                                         <tr>
                                             <th>#</th>
-                                            <th>Item</th>
-                                            <th>Quantity</th>
-                                            <th>Unit Cost</th>
-                                            <th class="text-end">Total</th>
+                                            <th>รายการสินค้า</th>
+                                            <th>รายละเอียดสินค้า</th>
+                                            <th>ความยาว</th>
+                                            <th>น้ำหนัก</th>
+                                            <th>จำนวน</th>
+                                            <th>หน่วยนับ</th>
+                                            <th>ราคา/หน่วย</th>
+                                            <th class="text-end">รวมทั้งสิ้น</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td class="">1</td>
-                                            <td>
-                                                <b>Laptop</b> <br />
-                                                Brand Model VGN-TXN27N/B
-                                                11.1" Notebook PC
-                                            </td>
-                                            <td>1</td>
-                                            <td>$1799.00</td>
-                                            <td class="text-end">$1799.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td>
-                                                <b>Warranty</b> <br />
-                                                Two Year Extended Warranty -
-                                                Parts and Labor
-                                            </td>
-                                            <td class="">3</td>
-                                            <td>$499.00</td>
-                                            <td class="text-end">$1497.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td>
-                                                <b>LED</b> <br />
-                                                80cm (32) HD Ready LED TV
-                                            </td>
-                                            <td class="">2</td>
-                                            <td>$412.00</td>
-                                            <td class="text-end">$824.00</td>
-                                        </tr>
 
+                                        @foreach ($items as $i => $item)
+                                            <tr class="align-top">
+                                                <td class="align-top">{{ $i + 1 }}</td>
+                                                <td style="min-width: 350px;">
+                                                    <select class="form-select form-select-sm"
+                                                        wire:model.live="items.{{ $i }}.product_id">
+                                                        <option value="">-- เลือกสินค้า --</option>
+                                                        @foreach ($products as $product)
+                                                            <option value="{{ $product->product_id }}">
+                                                                {{ $product->product_name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+
+
+                                                </td>
+                                                <td style="min-width: 200px;"> {!! $item['product_detail'] ?? '' !!} </td>
+
+
+                                                <td style="width: 110px">
+                                                    <input type="text"
+                                                        wire:model.live="items.{{ $i }}.product_length"
+                                                        class="form-control form-control-sm">
+                                                </td>
+                                                <td style="width: 110px">
+                                                    <input type="number" min="1"
+                                                        wire:model.live="items.{{ $i }}.product_weight"
+                                                        class="form-control form-control-sm" />
+                                                </td>
+
+
+                                                <td style="width: 110px">
+                                                    <input type="number" min="1"
+                                                        wire:model.live="items.{{ $i }}.quantity"
+                                                        class="form-control form-control-sm" />
+                                                </td>
+
+                                                <td style="width: 100px">
+                                                    <input type="text"
+                                                        wire:model.live="items.{{ $i }}.product_unit"
+                                                        class="form-control form-control-sm"
+                                                        style="background-color: aliceblue" readonly>
+                                                </td>
+                                                <td style="width: 200px" class="text-end">
+                                                    <input type="number" min="0" step="0.01"
+                                                        wire:model.live="items.{{ $i }}.unit_price"
+                                                        class="form-control form-control-sm text-end" />
+                                                </td>
+
+                                                <td class="text-end">
+                                                    {{ number_format($item['total'], 2) }}
+                                                </td>
+                                                <td>
+                                                    <a href="#" wire:click="removeItem({{ $i }})"><i
+                                                            class="mdi mdi-trash-can text-danger"
+                                                            style="font-size: 25px"></i></button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                       
                                     </tbody>
                                 </table>
+                                  <button type="button" class="btn btn-outline-success btn-sm mt-2"
+                                                wire:click="addEmptyItem">
+                                                ➕ เพิ่มรายการสินค้า
+                                            </button>
                             </div> <!-- end table-responsive-->
                         </div> <!-- end col -->
                     </div>
                     <!-- end row -->
+
+
+
+                    <hr>
+
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" wire:model.live="enable_vat"
+                            id="enableVatCheck">
+                        <label class="form-check-label" for="enableVatCheck">
+                            ✅ คำนวณ VAT 7%
+                        </label>
+                    </div>
+
+                    @if ($enable_vat)
+                        <div class="form-check mt-2 ms-3">
+                            <input class="form-check-input" type="checkbox" wire:model.live="vat_included"
+                                id="vatIncludedCheck">
+                            <label class="form-check-label" for="vatIncludedCheck">
+                                💡 คิดรวม VAT ในราคารวม (VAT-In)
+                            </label>
+                        </div>
+                    @endif
 
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="clearfix pt-3">
                                 <h6 class="text-muted fs-14">Notes:</h6>
                                 <small>
-                                    All accounts are to be paid within 7 days from receipt of
-                                    invoice. To be paid by cheque or credit card or direct payment
-                                    online. If account is not paid within 7 days the credits details
-                                    supplied as confirmation of work undertaken will be charged the
-                                    agreed quoted fee noted above.
+                                    <textarea wire:model="quote_note" class="form-control" cols="3" rows="3"></textarea>
                                 </small>
+
                             </div>
                         </div> <!-- end col -->
                         <div class="col-sm-6">
-                            <div class="float-end mt-3 mt-sm-0">
-                                <p><b>Sub-total:</b> <span class="float-end">$4120.00</span></p>
-                                <p><b>VAT (12.5):</b> <span class="float-end">$515.00</span></p>
-                                <h3>$4635.00 USD</h3>
+                            <div class="row">
+
+                                <div class="col-md-10">
+                                    <p><b class="float-end">จำนวนเงินรวม:</b></p>
+                                </div>
+                                <div class="col-md-2">
+                                   <span class="float-end">{{ number_format($subtotal, 2) }}</span>
+                                </div>
+                                 <div class="col-md-10">
+                                    <p><b class="float-end">ภาษีมูลค่าเพิ่ม:</b></p>
+                                </div>
+                                <div class="col-md-2">
+                                   <span class="float-end">{{ number_format($vat, 2) }}</span>
+                                </div>
+                                 <div class="col-md-10">
+                                    <p><b class="float-end">จำนวนเงินทั้งสิ้น:</b></p>
+                                </div>
+                                <div class="col-md-2">
+                                   <span class="float-end">{{ number_format($grand_total, 2) }}</span>
+                                </div>
+
                             </div>
+                         
                             <div class="clearfix"></div>
                         </div> <!-- end col -->
                     </div>
@@ -217,7 +307,8 @@
 
                     <div class="d-print-none mt-4">
                         <div class="text-center">
-                            <a href="javascript:window.print()" class="btn btn-primary"><i class="ri-printer-line"></i>
+                            <a href="javascript:window.print()" class="btn btn-primary"><i
+                                    class="ri-printer-line"></i>
                                 Print</a>
                             <a href="javascript: void(0);" class="btn btn-info">Submit</a>
                         </div>
@@ -230,15 +321,61 @@
     </div>
 
     <livewire:quotations.customer-modal />
+    <livewire:quotations.delivery-address-modal />
 
     <div>
     </div>
+
+
+    <script>
+        document.addEventListener('open-delivery-modal', () => {
+            const modal = new bootstrap.Modal(document.getElementById('bs-example-modal-lg'));
+            modal.show();
+        });
+        document.addEventListener('close-delivery-modal', () => {
+            const modalEl = document.getElementById('bs-example-modal-lg');
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.hide();
+
+            // เคลียร์ backdrop และ class ที่ค้าง
+            setTimeout(() => {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style = '';
+            }, 300); // รอ animation จบก่อนค่อยเคลียร์
+        });
+    </script>
 
     <script>
         document.addEventListener('livewire:update', () => {
             $('#customerSelect').select2();
         });
     </script>
+
+
+    <script>
+        document.addEventListener('delivery-created-success', function(e) {
+            const detail = e.detail?.[0] ?? {};
+            const deliveryId = parseInt(detail.deliveryId);
+
+            const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+
+            setTimeout(() => {
+                const $dropdown = $("select[name='selected_delivery_id']");
+                const found = $dropdown.find(`option[value='${deliveryId}']`).length > 0;
+
+                console.log('🔍 Looking for delivery ID:', deliveryId, 'Found:', found);
+
+                if (found) {
+                    console.log('✅ Selecting delivery...');
+                    $dropdown.val(deliveryId).trigger('change'); // or .trigger('change.select2') if Select2
+
+                } else {
+                    console.warn('❌ deliveryId not found in dropdown yet');
+                }
+            }, 500);
+        });
+    </script>>
 
     <script>
         document.addEventListener('customer-created-success', function(e) {

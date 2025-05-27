@@ -33,6 +33,45 @@ class CustomerModal extends Component
         $amphures = [],
         $districts = [];
 
+    public bool $isDuplicateCustomer = false;
+    public string $duplicateMessage = '';
+
+    public function checkDuplicateCustomer()
+    {
+        if (!$this->customer_name || !$this->customer_taxid) {
+            $this->isDuplicateCustomer = false;
+            $this->duplicateMessage = '';
+            return;
+        }
+
+        $query = CustomerModel::query()->where('customer_name', $this->customer_name)->where('customer_taxid', $this->customer_taxid);
+
+        if (isset($this->customerId)) {
+            $query->where('id', '!=', $this->customerId);
+        }
+
+        $this->isDuplicateCustomer = $query->exists();
+
+        if ($this->isDuplicateCustomer) {
+            $this->duplicateMessage = '❌ พบข้อมูลลูกค้าชื่อนี้และเลขภาษีนี้ในระบบแล้ว';
+        } else {
+            $this->duplicateMessage = '';
+        }
+    }
+
+
+    public function updatedCustomerTaxid()
+    {
+        $this->checkDuplicateCustomer();
+    }
+
+    public function updatedCustomerName()
+    {
+        $this->checkDuplicateCustomer();
+    }
+
+
+
     public function mount(?int $customer_id = null)
     {
         $this->provinces = provincesModel::orderBy('province_name')->pluck('province_name', 'province_code')->toArray();

@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-               <form wire:submit.prevent="update" id="CustomerUpdate">
+                <form wire:submit.prevent="update" id="CustomerUpdate">
                     <div class="row">
                         <div class="col-md-6  mb-2">
                             <label for="">รหัสลูกค้า </label>
@@ -38,12 +38,21 @@
                         </div>
                         <div class="col-md-6 mb-2">
                             <label for="">ชื่อลูกค้า <span class="text-danger">*</span></label>
-                            <input type="text" wire:model="customer_name"  class="form-control"
-                                required>
+                            @if ($isDuplicateCustomer)
+                                <div class="col-12 mb-2">
+                                    <span class="text-danger">{{ $duplicateMessage }}</span>
+                                </div>
+                            @endif
+                            <input type="text" wire:model.live="customer_name" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label for="">เลขประจำตัวผู้เสียภาษี</label>
-                            <input type="text" wire:model="customer_taxid" id="" class="form-control">
+                            @if ($isDuplicateCustomer)
+                                <div class="col-12 mb-2">
+                                    <span class="text-danger">{{ $duplicateMessage }}</span>
+                                </div>
+                            @endif
+                            <input type="text" wire:model.live="customer_taxid" id="" class="form-control">
                         </div>
 
                         <div class="col-md-6 mb-2">
@@ -91,8 +100,8 @@
                                 required>
                                 <option value="">-- เลือกอำเภอ --</option>
                                 @foreach ($amphures as $code => $name)
-                                    <option  value="{{ $code }}"
-                                       @if ($customer_amphur == $code) selected @endif>
+                                    <option value="{{ $code }}"
+                                        @if ($customer_amphur == $code) selected @endif>
                                         {{ $name }}
                                     </option>
                                 @endforeach
@@ -101,13 +110,13 @@
 
                         <div class="col-md-6 mb-2">
                             <label for="">ตำบล/แขวง</label>
-                            <select class="form-select" wire:model.live="customer_district" @disabled(!$districts)
-                                required>
+                            <select class="form-select" wire:model.live="customer_district"
+                                @disabled(!$districts) required>
                                 <option value="">-- เลือกตำบล --</option>
                                 @foreach ($districts as $code => $name)
                                     <option value="{{ $code }}"
-                                     @if ($customer_district == $code) selected @endif>
-                                     {{ $name }}
+                                        @if ($customer_district == $code) selected @endif>
+                                        {{ $name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -125,8 +134,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary" form="CustomerUpdate">Save changes</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
+                <button type="submit" class="btn btn-primary" {{ $isDuplicateCustomer ? 'disabled' : '' }} form="CustomerUpdate">บันทึกข้อมูล</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
