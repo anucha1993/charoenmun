@@ -97,16 +97,17 @@ class CustomerModal extends Component
     public function createCustomer()
     {
         $this->reset(['customer_id', 'customer_code', 'customer_name', 'customer_type', 'customer_level', 'customer_taxid', 'customer_contract_name', 'customer_phone', 'customer_email', 'customer_idline', 'customer_address', 'customer_province', 'customer_amphur', 'customer_district', 'customer_zipcode', 'amphures', 'districts']);
-
         // ต้องโหลด select ตัวเลือกอีกครั้ง
         $this->provinces = provincesModel::orderBy('province_name')->pluck('province_name', 'province_code')->toArray();
         $set = GlobalSetModel::with('values')->find(1); // ประเภทลูกค้า
         $setLevel = GlobalSetModel::with('values')->find(2); // ระดับลูกค้า
         $this->customerType = $set?->values->where('status', 'Enable')->values() ?? collect();
         $this->customerLevel = $setLevel?->values->where('status', 'Enable')->values() ?? collect();
-
         $this->dispatch('open-customer-modal');
     }
+    
+
+
 
     public function loadCustomer(int $id)
     {
