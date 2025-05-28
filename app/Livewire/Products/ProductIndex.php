@@ -14,7 +14,7 @@ class ProductIndex extends Component
    use WithPagination;
 
     // --- ฟิลด์สำหรับฟอร์ม ---
-    public $product_id ,$product_code,$product_name,$product_weight,
+    public $product_id ,$product_code,$product_name,$product_weight,$product_calculation,
            $product_price,$product_type,$product_unit,$product_note,
            $product_wire_type,$product_side_steel_type,$product_size,
            $product_length,$product_status = 1;
@@ -55,7 +55,7 @@ class ProductIndex extends Component
     public function resetForm()
     {
         $this->reset([
-            'product_id','product_code','product_name','product_weight','product_size','product_length',
+            'product_id','product_code','product_name','product_weight','product_size','product_length','product_calculation',
             'product_price','product_type','product_unit','product_note','product_wire_type','product_side_steel_type',
             'product_status','isEdit'
         ]);
@@ -68,7 +68,7 @@ class ProductIndex extends Component
         $this->validate();
 
         ProductModel::create($this->only([
-            'product_code','product_name','product_weight','product_price','product_length',
+            'product_code','product_name','product_weight','product_price','product_length','product_calculation',
             'product_type','product_unit','product_note','product_status','product_wire_type','product_side_steel_type','product_size'
         ]));
 
@@ -95,7 +95,7 @@ class ProductIndex extends Component
 
         $product = ProductModel::findOrFail($this->product_id);
         $product->update($this->only([
-            'product_code','product_name','product_weight','product_price','product_wire_type','product_side_steel_type','product_size',
+            'product_code','product_name','product_weight','product_price','product_wire_type','product_side_steel_type','product_size','product_calculation',
             'product_type','product_unit','product_note','product_status','product_length'
         ]));
 

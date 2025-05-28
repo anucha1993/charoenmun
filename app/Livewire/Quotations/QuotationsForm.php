@@ -30,6 +30,7 @@ class QuotationsForm extends Component
 
     public bool $vat_included = false;
     public bool $enable_vat = false;
+    public int|string|null $selected_product_id = null;
 
     public function mount()
     {
@@ -143,6 +144,7 @@ class QuotationsForm extends Component
 
     public function addEmptyItem()
     {
+  
         $this->items[] = [
             'product_id' => null,
             'product_unit' => null,
@@ -156,31 +158,44 @@ class QuotationsForm extends Component
         ];
     }
 
-    public function updatedItems($value, $key)
-    {
-        // ดึง index และ field ที่ถูกอัปเดต เช่น items.0.product_id
-        [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
+   public function updatedItems($value, $key)
+{
+    [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
 
-        if ($field === 'product_id') {
-            $product = ProductModel::find($value);
-            if ($product) {
-                $this->items[$index]['product_detail'] = $product->productType->value . ' ขนาด : ' . $product->product_size;
-                $this->items[$index]['product_type'] = $product->productType->value;
-                $this->items[$index]['product_name'] = $product->product_name;
-                $this->items[$index]['unit_price'] = $product->product_price;
-                $this->items[$index]['product_weight'] = $product->product_weight;
-                $this->items[$index]['product_unit'] = $product->productUnit->value;
-                $this->items[$index]['product_length'] = $product->product_length;
+    if ($field === 'product_id') {
+        $product = ProductModel::find($value);
+        if (!$product) return;
+
+        // ✅ เช็กว่ามีรายการอื่นที่ใช้ product_id เดียวกันอยู่แล้วไหม (ยกเว้น index ปัจจุบัน)
+        foreach ($this->items as $i => $item) {
+            if ($i != $index && $item['product_id'] == $value) {
+                // ถ้ามี → เพิ่มจำนวนที่ index นั้น แล้วลบรายการปัจจุบัน
+                $this->items[$i]['quantity'] += $this->items[$index]['quantity'] ?? 1;
+                unset($this->items[$index]);
+                $this->items = array_values($this->items);
+                $this->calculateTotals();
+                return;
             }
         }
 
-        // คำนวณยอดรวมใหม่
-        foreach ($this->items as &$item) {
-            $item['total'] = $item['quantity'] * $item['unit_price'];
-        }
-
-        $this->calculateTotals();
+        // ✅ ไม่มีซ้ำ → อัปเดตรายละเอียดสินค้า
+        $this->items[$index]['product_detail'] = $product->productType->value . ' ขนาด : ' . $product->product_size;
+        $this->items[$index]['product_type'] = $product->productType->value;
+        $this->items[$index]['product_name'] = $product->product_name;
+        $this->items[$index]['unit_price'] = $product->product_price;
+        $this->items[$index]['product_weight'] = $product->product_weight;
+        $this->items[$index]['product_unit'] = $product->productUnit->value;
+        $this->items[$index]['product_length'] = $product->product_length ?? null;
     }
+
+    // ✅ คำนวณใหม่
+    foreach ($this->items as &$item) {
+        $item['total'] = $item['quantity'] * $item['unit_price'];
+    }
+
+    $this->calculateTotals();
+}
+
 
     public function removeItem($index)
     {

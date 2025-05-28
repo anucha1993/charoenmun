@@ -177,7 +177,7 @@
                                             <tr class="align-top">
                                                 <td class="align-top">{{ $i + 1 }}</td>
                                                 <td style="min-width: 350px;">
-                                                    <select class="form-select form-select-sm"
+                                                     <select class="form-select form-select-sm"
                                                         wire:model.live="items.{{ $i }}.product_id">
                                                         <option value="">-- เลือกสินค้า --</option>
                                                         @foreach ($products as $product)

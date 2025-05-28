@@ -142,7 +142,7 @@
                                             {{-- product_code --}}
                                             <div class="col-md-6">
                                                 <label class="form-label">รหัสสินค้า *</label>
-                                                <input type="text" wire:model.defer="product_code"
+                                                <input type="text" wire:model.defer="product_code" readonly style="background-color: aliceblue"
                                                     placeholder="รหัสสินค้า"
                                                     class="form-control @error('product_code') is-invalid @enderror">
                                                 @error('product_code')
@@ -257,6 +257,15 @@
 
                                                
                                                 @error('product_unit')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                                <label class="form-label">ความหนา (ระบุหากต้องการใช้คำนวน)</label>
+                                                <input type="number" step="0.01" wire:model.defer="product_calculation" placeholder="ระบุหากต้องการใช้คำนวน"
+                                                    class="form-control @error('product_calculation') is-invalid @enderror">
+                                                @error('product_calculation')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
