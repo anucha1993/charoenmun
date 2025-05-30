@@ -480,7 +480,7 @@
         });
     </script>
 
-    <script>
+    {{-- <script>
         document.addEventListener('livewire:init', () => {
             Livewire.on('notify', ({
                 message,
@@ -504,4 +504,4 @@
                 }
             });
         });
-    </script>
+    </script> --}}

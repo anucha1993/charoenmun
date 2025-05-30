@@ -47,11 +47,11 @@
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid">
+                
 
 
                     {{ $slot }}
-                </div>
+               
             </div>
 
             @include('layouts.shared.footer')
@@ -86,7 +86,31 @@
  
     @livewireScripts
 
+<script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('notify', ({
+                message,
+                type = 'success'
+            }) => {
+                toastr.options = {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "timeOut": "3000"
+                };
 
+                if (type === 'error') {
+                    toastr.error(message);
+                } else if (type === 'warning') {
+                    toastr.warning(message);
+                } else if (type === 'info') {
+                    toastr.info(message);
+                } else {
+                    toastr.success(message);
+                }
+            });
+        });
+    </script>
     
 </body>
 </html>
