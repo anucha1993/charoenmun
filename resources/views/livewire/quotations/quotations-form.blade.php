@@ -178,6 +178,7 @@
                                                 <th>รายการสินค้า</th>
                                                 <th>รายละเอียดสินค้า</th>
                                                 <th>ความยาว</th>
+                                                {{-- <th>หนา</th> --}}
                                                 <th>น้ำหนัก</th>
                                                 <th>จำนวน</th>
                                                 <th>หน่วยนับ</th>
@@ -187,40 +188,75 @@
                                         </thead>
                                         <tbody>
 
+
+
                                             @foreach ($items as $i => $item)
-                                                <tr class="align-top">
+                                                <tr class="align-top" wire:key="row-{{ $i }}">
                                                     <td class="align-top">{{ $i + 1 }}</td>
                                                     <td style="min-width: 350px;">
-                                                        <select class="form-select form-select-sm"
-                                                            wire:model.live="items.{{ $i }}.product_id">
+
+                                                        <div class="position-relative" wire:ignore.self>
+                                                            <input type="text" class="form-control form-control-sm"
+                                                                placeholder="ค้นหาสินค้า..."
+                                                                wire:model.live="items.{{ $i }}.product_search"
+                                                                wire:keydown.escape="$set('items.{{ $i }}.product_results', [])"
+                                                                wire:focus="$set('items.{{ $i }}.product_results_visible', true)" />
+
+                                                            @if (!empty($item['product_results_visible']) && !empty($item['product_results']))
+                                                                <ul class="list-group position-absolute w-100 z-3 shadow"
+                                                                    style="max-height: 200px; overflow-y: auto;">
+                                                                    @foreach ($item['product_results'] as $result)
+                                                                        <li class="list-group-item list-group-item-action"
+                                                                            wire:click="selectProduct({{ $i }}, {{ $result['product_id'] }}, '{{ $result['product_name'] }}')">
+                                                                            {{ $result['product_name'] }}
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @endif
+                                                        </div>
+
+
+                                                        {{-- <select class="form-select form-select-sm product-select" data-toggle="select2"
+                                                            data-index="{{ $i }}">
                                                             <option value="">-- เลือกสินค้า --</option>
                                                             @foreach ($products as $product)
-                                                                <option value="{{ $product->product_id }}">
+                                                                <option value="{{ $product->product_id }}"
+                                                                    @selected($product->product_id == $item['product_id'])>
                                                                     {{ $product->product_name }}
                                                                 </option>
                                                             @endforeach
-                                                        </select>
+                                                        </select> --}}
+
 
 
                                                     </td>
+
                                                     <td style="min-width: 200px;"> {!! $item['product_detail'] ?? '' !!} </td>
 
 
                                                     <td style="width: 110px">
                                                         <input type="text"
-                                                            wire:model.live="items.{{ $i }}.product_length"
+                                                            wire:model.live.debounce.300ms="items.{{ $i }}.product_length"
                                                             class="form-control form-control-sm">
                                                     </td>
-                                                    <td style="width: 110px">
+                                                    <td style="display: none">
+
                                                         <input type="number" min="1"
-                                                            wire:model.live="items.{{ $i }}.product_weight"
+                                                            wire:model.live.debounce.300ms="items.{{ $i }}.product_calculation"
+                                                            class="form-control form-control-sm" />
+                                                    </td>
+
+                                                    <td style="width: 110px">
+
+                                                        <input type="number" min="1"
+                                                            wire:model.live.debounce.300ms="items.{{ $i }}.product_weight"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
 
                                                     <td style="width: 110px">
                                                         <input type="number" min="1"
-                                                            wire:model.live="items.{{ $i }}.quantity"
+                                                            wire:model.live.debounce.300ms="items.{{ $i }}.quantity"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
@@ -231,9 +267,11 @@
                                                             style="background-color: aliceblue" readonly>
                                                     </td>
                                                     <td style="width: 200px" class="text-end">
+
                                                         <input type="number" min="0" step="0.01"
-                                                            wire:model.live="items.{{ $i }}.unit_price"
+                                                            wire:model.live.debounce.300ms="items.{{ $i }}.unit_price"
                                                             class="form-control form-control-sm text-end" />
+
                                                     </td>
 
                                                     <td class="text-end">
@@ -323,17 +361,15 @@
                         <div class="d-print-none mt-4">
                             <div class="text-center">
                                 @if (!$this->isCreate)
-                                    <a  href="{{ route('quotations.print', $quotation_id) }}"
-                                        class="btn btn-primary">
+                                    <a href="{{ route('quotations.print', $quotation_id) }}" class="btn btn-danger">
                                         <i class="ri-printer-line"></i> Print
-                                    </a>
-                                    
+                                    </a> &nbsp; &nbsp;
                                 @endif
 
 
                                 @if (!$this->isCreate)
-                                    <button type="submit" class="btn btn-info">
-                                        แก้ไขใบเสนอราคา
+                                    <button type="submit" class="btn btn-primary">
+                                        บันทึก
                                     </button>
                                 @else
                                     <button type="submit" class="btn btn-info">
@@ -362,6 +398,22 @@
 </div>
 
 
+<script>
+    document.addEventListener('livewire:load', () => {
+        window.addEventListener('js-init', () => {
+            console.log('📦 JS Init called from Livewire');
+
+            // 🔄 เรียกใช้งาน Select2 หรืออะไรที่ต้อง init ใหม่
+            $('.product-search').each(function () {
+                // ตัวอย่าง: init select2
+                if (!$(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2();
+                }
+            });
+        });
+    });
+</script>
+
 
 <script>
     document.addEventListener('open-delivery-modal', () => {
@@ -382,9 +434,19 @@
     });
 </script>
 
+
+
+
+
+
+
+
+
 <script>
     document.addEventListener('livewire:update', () => {
         $('#customerSelect').select2();
+        $('.select2').select2();
+
     });
 </script>
 

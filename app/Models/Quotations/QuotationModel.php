@@ -2,6 +2,7 @@
 
 namespace App\Models\Quotations;
 
+use App\Models\User;
 use App\Enums\QuotationStatus;
 use App\Models\customers\CustomerModel;
 use Illuminate\Database\Eloquent\Model;
@@ -26,6 +27,10 @@ class QuotationModel extends Model
     public function customer()
     {
         return $this->belongsTo(CustomerModel::class, 'customer_id');
+    }
+     public function sale()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
     public function deliveryAddress()
     {

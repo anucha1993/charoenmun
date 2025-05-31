@@ -32,6 +32,7 @@ class QuotationsForm extends Component
     public float $subtotal = 0;
     public float $vat = 0;
     public float $grand_total = 0;
+    public array $searchResults = [];
 
     public bool $enable_vat = false;
     public bool $vat_included = false;
@@ -42,22 +43,18 @@ class QuotationsForm extends Component
     public string $quote_date; // default = วันนี้
     public string $note = '';
     public string $status = 'wait';
-    
 
     /* ตัวแปรเก็บโมเดล (ถ้ามี) */
     public ?QuotationModel $quotation = null;
 
-    /* ─────────────────── mount ─────────────────── */
     public function mount(?int $id = null): void
     {
         /* default: วันนี้ */
         $this->quote_date = now()->toDateString();
-
         /* 1) โหมดแก้ไข --------------------------------------------------- */
         if ($id) {
             $this->quotation = QuotationModel::with('items')->find($id);
         }
-
         if ($this->quotation) {
             $this->fillFromModel($this->quotation);
         }
@@ -65,7 +62,6 @@ class QuotationsForm extends Component
         if (empty($this->items)) {
             $this->addEmptyItem(); //อย่างน้อย 1 แถวเปล่า
         }
-
         /* โหลด dropdown */
         $this->customers = CustomerModel::all();
         $this->customerDelivery = $this->customer_id ? deliveryAddressModel::where('customer_id', $this->customer_id)->get() : collect();
@@ -96,16 +92,22 @@ class QuotationsForm extends Component
                     'product_name' => $i->product_name,
                     'product_type' => $i->product_type,
                     'product_unit' => $i->product_unit,
-                    'product_detail' =>
-                     $i->product_detail ?? ($product ? $product->productType->value . ' ขนาด : ' . $product->product_size : ''), // (ถ้าเก็บใน DB)
+                    'product_detail' => $i->product_detail ?? ($product ? $product->productType->value . ' ขนาด : ' . $product->product_size : ''), // (ถ้าเก็บใน DB)
                     'product_length' => $i->product_length,
                     'product_weight' => $i->product_weight,
+                    'product_calculation' => $i->product_calculation,
                     'quantity' => $i->quantity,
                     'unit_price' => $i->unit_price,
                     'total' => $i->total ?? $i->quantity * $i->unit_price,
+
+                    // ✅ เพิ่มบรรทัดนี้:
+                    'product_search' => $i->product_name, // แสดงชื่อใน input
+                    'product_results' => [],
+                    'product_results_visible' => false,
                 ];
             })
-        ->toArray();
+            ->toArray();
+
         $this->calculateTotals();
     }
 
@@ -120,6 +122,30 @@ class QuotationsForm extends Component
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|regex:/^\d+(\.\d{1,2})?$/',
         ];
+    }
+
+    public function updated($name, $value)
+    {
+        // ตรวจสอบ field ว่าเป็น product_search
+        if (preg_match('/items\.(\d+)\.product_search/', $name, $matches)) {
+            $index = $matches[1];
+
+            $this->items[$index]['product_results'] = ProductModel::where('product_name', 'like', "%{$value}%")
+                ->take(10)
+                ->get(['product_id', 'product_name'])
+                ->toArray();
+
+            $this->items[$index]['product_results_visible'] = true;
+        }
+    }
+
+    public function selectProduct($index, $productId, $productName)
+    {
+        $this->items[$index]['product_id'] = $productId;
+        $this->items[$index]['product_search'] = $productName;
+        $this->items[$index]['product_results'] = [];
+        $this->items[$index]['product_results_visible'] = false;
+        $this->updatedItems($productId, "items.{$index}.product_id");
     }
 
     /* ─────────────────── CRUD : SAVE ─────────────────── */
@@ -173,6 +199,8 @@ class QuotationsForm extends Component
                         'product_unit' => $row['product_unit'],
                         'product_length' => $row['product_length'],
                         'product_weight' => $row['product_weight'],
+                        'product_calculation' => $row['product_calculation'],
+                        'product_detail' => $row['product_detail'],
                         'quantity' => $row['quantity'],
                         'unit_price' => $row['unit_price'],
                         'total' => $row['quantity'] * $row['unit_price'],
@@ -213,6 +241,7 @@ class QuotationsForm extends Component
             'product_unit' => '',
             'product_length' => null,
             'product_weight' => null,
+            'product_detail' => null,
             'quantity' => 1,
             'unit_price' => 0,
             'total' => 0,
@@ -242,8 +271,9 @@ class QuotationsForm extends Component
             }
 
             // ✅ ไม่มีซ้ำ → อัปเดตรายละเอียดสินค้า
-            $this->items[$index]['product_detail'] = $product->productType->value . ' ขนาด : ' . $product->product_size;
+            $this->items[$index]['product_detail'] = $product->productType->value . ' ขนาด : ' . $product->product_size . ' หนา :' . $product->product_calculation;
             $this->items[$index]['product_type'] = $product->productType->value;
+            $this->items[$index]['product_calculation'] = $product->product_calculation;
             $this->items[$index]['product_name'] = $product->product_name;
             $this->items[$index]['unit_price'] = $product->product_price;
             $this->items[$index]['product_weight'] = $product->product_weight;
@@ -253,7 +283,19 @@ class QuotationsForm extends Component
 
         // ✅ คำนวณใหม่
         foreach ($this->items as &$item) {
-            $item['total'] = $item['quantity'] * $item['unit_price'];
+            $quantity = (float) ($item['quantity'] ?? 0);
+            $unitPrice = (float) ($item['unit_price'] ?? 0);
+            $length = (float) ($item['product_length'] ?? 1);
+            $thickness = (float) ($item['product_calculation'] ?? 1);
+
+            if ($length <= 0) {
+                $length = 1;
+            }
+            if ($thickness <= 0) {
+                $thickness = 1;
+            }
+
+            $item['total'] = $quantity * $unitPrice * $length * $thickness;
         }
 
         $this->calculateTotals();
@@ -273,9 +315,47 @@ class QuotationsForm extends Component
     }
 
     /* ─────────── VAT & ยอดรวม ─────────── */
+    // public function calculateTotals(): void
+    // {
+    //     $this->subtotal = collect($this->items)->sum(fn($i) => $i['quantity'] * $i['unit_price']);
+
+    //     if (!$this->enable_vat) {
+    //         $this->vat = 0;
+    //         $this->grand_total = $this->subtotal;
+    //         return;
+    //     }
+
+    //     if ($this->vat_included) {
+    //         /* VAT-In */
+    //         $net = round($this->subtotal / 1.07, 2);
+    //         $this->vat = round($net * 0.07, 2);
+    //         $this->subtotal = $net;
+    //         $this->grand_total = $net + $this->vat;
+    //     } else {
+    //         /* VAT-Out */
+    //         $this->vat = round($this->subtotal * 0.07, 2);
+    //         $this->grand_total = $this->subtotal + $this->vat;
+    //     }
+    // }
+
     public function calculateTotals(): void
     {
-        $this->subtotal = collect($this->items)->sum(fn($i) => $i['quantity'] * $i['unit_price']);
+        $this->subtotal = collect($this->items)->sum(function ($i) {
+            $quantity = (float) ($i['quantity'] ?? 0);
+            $unitPrice = (float) ($i['unit_price'] ?? 0);
+            $length = (float) ($i['product_length'] ?? 1); // ✅ ใช้ชื่อที่ถูก
+            $thickness = (float) ($i['product_calculation'] ?? 1); // ✅ ความหนา
+
+            // ถ้าค่าเป็น 0 หรือไม่ได้กรอก ให้ถือว่าเป็น 1
+            if ($length <= 0) {
+                $length = 1;
+            }
+            if ($thickness <= 0) {
+                $thickness = 1;
+            }
+
+            return $quantity * $unitPrice * $length * $thickness;
+        });
 
         if (!$this->enable_vat) {
             $this->vat = 0;
@@ -284,13 +364,11 @@ class QuotationsForm extends Component
         }
 
         if ($this->vat_included) {
-            /* VAT-In */
             $net = round($this->subtotal / 1.07, 2);
             $this->vat = round($net * 0.07, 2);
             $this->subtotal = $net;
             $this->grand_total = $net + $this->vat;
         } else {
-            /* VAT-Out */
             $this->vat = round($this->subtotal * 0.07, 2);
             $this->grand_total = $this->subtotal + $this->vat;
         }
@@ -333,6 +411,12 @@ class QuotationsForm extends Component
         $this->selectedDelivery = deliveryAddressModel::find($id);
     }
 
+    #[On('delivery-updated-success')]
+    public function handleDeliveryUpdatedSuccess(array $payload)
+    {
+        $this->selected_delivery_id = $payload['deliveryId'] ?? null;
+    }
+
     public function refreshCustomers(): void
     {
         $this->customers = CustomerModel::all();
@@ -340,6 +424,7 @@ class QuotationsForm extends Component
             $this->customerDelivery = deliveryAddressModel::where('customer_id', $this->customer_id)->get();
             $this->updatedCustomerId($this->customer_id);
         }
+
         $this->dispatch('$refresh');
     }
 

@@ -69,14 +69,15 @@ Route::middleware(['auth'])->group(function () {
 // Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
 // Route::get('/quotations/{quotation_model}/edit', QuotationsForm::class)
 //      ->name('quotations.edit');
-
-Route::prefix('quotations')
-    ->name('quotations.')
-    ->group(function () {
-        Route::get('/', QuotationIndex::class)->name('index');
-        Route::get('/create', QuotationsForm::class)->name('create');
-        Route::get('/{quotation}/edit', QuotationsForm::class)->name('edit');
-    });
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::prefix('quotations')
+        ->name('quotations.')
+        ->group(function () {
+            Route::get('/', QuotationIndex::class)->name('index');
+            Route::get('/create', QuotationsForm::class)->name('create');
+            Route::get('/{quotation}/edit', QuotationsForm::class)->name('edit');
+        });
+});
 
 Route::get('/quotations/{quotation}/print', QuotationPrint::class)->middleware('auth')->name('quotations.print');
 
@@ -88,6 +89,7 @@ Route::get('/customers', CustomerIndex::class)->name('customers.index');
 //Quotations
 Route::get('/quotations/create', QuotationsForm::class)->name('quotations.create');
 
+require __DIR__ . '/auth.php';
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', [RoutingController::class, 'index'])->name('root');
     Route::get('/home', fn() => view('index'))->name('home');

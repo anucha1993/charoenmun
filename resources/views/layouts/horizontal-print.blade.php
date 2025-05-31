@@ -16,6 +16,7 @@
 <head>
     {{-- title / meta --}}
     @include('layouts.shared.title-meta', ['title' => $title])
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     {{-- <<<  เปลี่ยนจาก @yield เป็น @stack  >>> --}}
     @stack('css')
@@ -39,27 +40,24 @@
 
 <body>
 
-   <div class="wrapper">
+    <div class="wrapper">
 
-        @include('layouts.shared/topbar')
-        @include('layouts.shared/left-sidebar')
 
-        <div class="content-page">
+
+         <div class="content-page">
             <div class="content">
 
                 <!-- Start Content-->
                 <div class="container-fluid">
                     <br>
-                   {{ $slot }}
+                    {{ $slot }}
                 </div>
                 <!-- container -->
 
             </div>
             <!-- content -->
 
-            @include('layouts.shared/footer')
         </div>
-
     </div>
 
     {{-- modal area --}}
@@ -72,9 +70,13 @@
 
     {{-- ตรงนี้ยังใช้ @stack('scripts') ได้ --}}
 {{-- ★ เพิ่มสองบรรทัดนี้ ★ --}}
+
+
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+
 <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+
 
 
 
@@ -86,7 +88,31 @@
  
     @livewireScripts
 
+<script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('notify', ({
+                message,
+                type = 'success'
+            }) => {
+                toastr.options = {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "timeOut": "3000"
+                };
 
+                if (type === 'error') {
+                    toastr.error(message);
+                } else if (type === 'warning') {
+                    toastr.warning(message);
+                } else if (type === 'info') {
+                    toastr.info(message);
+                } else {
+                    toastr.success(message);
+                }
+            });
+        });
+    </script>
     
 </body>
 </html>

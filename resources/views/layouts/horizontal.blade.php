@@ -45,16 +45,19 @@
         @include('layouts.shared.topbar')
         @include('layouts.shared.horizontal-nav')
 
-        <div class="content-page">
+         <div class="content-page">
             <div class="content">
-                
 
-
+                <!-- Start Content-->
+                <div class="container-fluid">
                     {{ $slot }}
-               
-            </div>
+                </div>
+                <!-- container -->
 
-            @include('layouts.shared.footer')
+            </div>
+            <!-- content -->
+
+            @include('layouts.shared/footer')
         </div>
     </div>
 
@@ -74,6 +77,8 @@
 
 <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+
+
 
 
 

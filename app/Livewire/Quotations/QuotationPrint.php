@@ -18,6 +18,6 @@ class QuotationPrint extends Component
     public function render()
     {
         return view('livewire.quotations.print')
-               ->layout('layouts.horizontal', ['title' => 'Print Quotation']);
+               ->layout('layouts.horizontal-print', ['title' => 'Print Quotation']);
     }
 }
