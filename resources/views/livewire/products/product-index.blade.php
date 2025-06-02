@@ -19,11 +19,8 @@
                     </div>
                 </div>
 
-
                 <div>
-                    {{-- ─────────────────────────────────────
-         JS : Toast + ควบคุม Bootstrap Modal
-    ───────────────────────────────────── --}}
+
                     <script>
                         document.addEventListener('DOMContentLoaded', () => {
                             const modal = new bootstrap.Modal(document.getElementById('product-modal'));
@@ -82,7 +79,7 @@
                                         <tr wire:key="row-{{ $p->product_id }}">
                                             <td>{{ $products->firstItem() + $i }}</td>
                                             <td>{{ $p->product_code }}</td>
-                                            <td>{{ $p->product_name."-".$p->product_size }}</td>
+                                            <td>{{ $p->product_name."(".$p->product_size.")" }}</td>
                                             <td class="text-end">{{ number_format($p->product_weight, 2) }}</td>
                                             <td class="text-end">{{ number_format($p->product_price, 2) }}</td>
                                             <td>{{ $p->productType->value?? 'ไม่ระบุ' }}</td>
@@ -142,7 +139,7 @@
                                             {{-- product_code --}}
                                             <div class="col-md-6">
                                                 <label class="form-label">รหัสสินค้า *</label>
-                                                <input type="text" wire:model.defer="product_code" readonly style="background-color: aliceblue"
+                                                <input type="text" wire:model.defer="product_code"  style="background-color: aliceblue"
                                                     placeholder="รหัสสินค้า"
                                                     class="form-control @error('product_code') is-invalid @enderror">
                                                 @error('product_code')

@@ -14,11 +14,11 @@ class QuotationModel extends Model
     use HasFactory;
     protected $table = 'quotations';
     protected $primaryKey = 'id';
-    protected $fillable = ['quotation_number', 'customer_id', 'delivery_address_id', 'quote_date', 'note', 'subtotal', 'vat', 'grand_total', 'enable_vat', 'vat_included', 'status', 'created_by', 'updated_by'];
+    protected $fillable = ['quote_number', 'customer_id', 'delivery_address_id', 'quote_date', 'quote_note', 'quote_discount', 'quote_subtotal', 'quote_vat', 'quote_grand_total', 'quote_enable_vat', 'quote_vat_included', 'status', 'created_by', 'updated_by'];
 
     protected $casts = [
-        'enable_vat' => 'boolean',
-        'vat_included' => 'boolean',
+        'quote_enable_vat' => 'boolean',
+        'quote_vat_included' => 'boolean',
         'quote_date' => 'date',
         'status' => QuotationStatus::class,
     ];

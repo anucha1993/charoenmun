@@ -36,7 +36,7 @@ use App\Http\Controllers\customers\CustomerController;
 
 //QR Code for Quotation
 Route::get('/qr/quotation/{id}', function (int $id) {
-    $number = QuotationModel::whereKey($id)->value('quotation_number') ?? abort(404);
+    $number = QuotationModel::whereKey($id)->value('quote_number') ?? abort(404);
 
     $svg = QrCode::format('svg')->size(300)->margin(1)->generate($number);
 

@@ -14,7 +14,7 @@ class QuotationItemModel extends Model
      protected $fillable = [
         'quotation_id','product_id','product_name','product_type',
         'product_unit','product_length','product_weight',
-        'quantity','unit_price','total','product_detail'
+        'quantity','unit_price','total','product_detail','product_calculation'
     ];
 
 

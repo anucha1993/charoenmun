@@ -16,12 +16,14 @@
 <head>
     {{-- title / meta --}}
     @include('layouts.shared.title-meta', ['title' => $title])
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     {{-- <<<  เปลี่ยนจาก @yield เป็น @stack  >>> --}}
     @stack('css')
-   <script>
-      // แบบกำหนดเองถาวร:
+
+    <script>
+      // กำหนดค่า config ถาวร
       sessionStorage.setItem('__CONFIG__', JSON.stringify({
           theme:'light',
           nav:'topnav',
@@ -30,11 +32,12 @@
           menu:{color:'light'},
           sidenav:{size:'default',user:false}
       }));
-      // หรือจะใช้ removeItem('__CONFIG__') ถ้าอยากให้ยึดค่าจาก Blade
-    </script> 
+    </script>
 
     {{-- head-css --}}
     @include('layouts.shared.head-css', ['mode' => $mode, 'demo' => $demo])
+
+    {{-- Livewire Styles --}}
     @livewireStyles
 </head>
 
@@ -69,34 +72,22 @@
     @include('layouts.shared.right-sidebar')
     @include('layouts.shared.footer-scripts')
 
-    {{-- ตรงนี้ยังใช้ @stack('scripts') ได้ --}}
-{{-- ★ เพิ่มสองบรรทัดนี้ ★ --}}
-
-
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-
-<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
-
-
-
-
-
-
+    {{-- ตรงนี้แก้ไขให้ @livewireScripts มาก่อน @stack('scripts') --}}
+    @livewireScripts
     @stack('scripts')
 
-    
-
+    {{-- Vite / Mix JS --}}
     @vite(['resources/js/layout.js', 'resources/js/main.js'])
- 
-    @livewireScripts
 
-<script>
+    {{-- Toastr + jQuery (ถ้าจำเป็น) --}}
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+
+    {{-- Livewire Notify Event --}}
+    <script>
         document.addEventListener('livewire:init', () => {
-            Livewire.on('notify', ({
-                message,
-                type = 'success'
-            }) => {
+            Livewire.on('notify', ({ message, type = 'success' }) => {
                 toastr.options = {
                     "closeButton": true,
                     "progressBar": true,
@@ -116,6 +107,5 @@
             });
         });
     </script>
-    
 </body>
 </html>

@@ -1,7 +1,10 @@
+
 <div>
     <br>
     <br>
     <!-- end page title -->
+
+
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -22,8 +25,8 @@
                                         <img src="{{ route('qr.quotation', $quotation->id) }}" alt="QR"
                                             style="height:100px;">
 
-                                        <h4 class="m-0 d-print-none">{{ $quotation->quotation_number }}</h4>
-                                        {!! quote_status_badge($quotation->status) !!}
+                                        <h4 class="m-0 d-print-none">{{ $quotation->quote_number }}</h4>
+                                        {!! quote_status_badge($quotation->quote_status) !!}
                                     @endif
 
 
@@ -170,7 +173,7 @@
 
                         <div class="row">
                             <div class="col-12">
-                                <div class="table-responsive">
+                                <div class="table">
                                     <table class="table table-sm table-centered table-hover table-borderless mb-0 mt-3">
                                         <thead class="border-top border-bottom bg-light-subtle border-light">
                                             <tr>
@@ -198,17 +201,19 @@
                                                         <div class="position-relative" wire:ignore.self>
                                                             <input type="text" class="form-control form-control-sm"
                                                                 placeholder="ค้นหาสินค้า..."
-                                                                wire:model.live="items.{{ $i }}.product_search"
+                                                                wire:model.live.debounce.500ms="items.{{ $i }}.product_search"
                                                                 wire:keydown.escape="$set('items.{{ $i }}.product_results', [])"
-                                                                wire:focus="$set('items.{{ $i }}.product_results_visible', true)" />
+                                                                wire:focus="$set('items.{{ $i }}.product_results_visible', true)"
+                                                                wire:key="search-{{ $i }}"
+                                                                {{-- เพิ่ม wire:key ให้ Livewire รู้ว่า input แต่ละแถวไม่ใช่ element เดิม --}} />
 
                                                             @if (!empty($item['product_results_visible']) && !empty($item['product_results']))
-                                                                <ul class="list-group position-absolute w-100 z-3 shadow"
-                                                                    style="max-height: 200px; overflow-y: auto;">
+                                                                <ul class="list-group position-absolute shadow"
+                                                                    style="max-height: 400px; overflow-y: auto; z-index: 9999999999;">
                                                                     @foreach ($item['product_results'] as $result)
                                                                         <li class="list-group-item list-group-item-action"
                                                                             wire:click="selectProduct({{ $i }}, {{ $result['product_id'] }}, '{{ $result['product_name'] }}')">
-                                                                            {{ $result['product_name'] }}
+                                                                            {{ $result['product_name']}} ({{$result['product_size']}})
                                                                         </li>
                                                                     @endforeach
                                                                 </ul>
@@ -278,7 +283,7 @@
                                                         {{ number_format($item['total'], 2) }}
                                                     </td>
                                                     <td>
-                                                        <a href="#"
+                                                        <a href="javascript: void(0);"
                                                             wire:click="removeItem({{ $i }})"><i
                                                                 class="mdi mdi-trash-can text-danger"
                                                                 style="font-size: 25px"></i></button>
@@ -301,17 +306,17 @@
 
                         <hr>
 
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" wire:model.live="enable_vat"
+                        <div class="form-check mt-2" style="z-index: -9999999999; ">
+                            <input class="form-check-input" type="checkbox" wire:model.live="quote_enable_vat"
                                 id="enableVatCheck">
                             <label class="form-check-label" for="enableVatCheck">
                                 ✅ คำนวณ VAT 7%
                             </label>
                         </div>
 
-                        @if ($enable_vat)
+                        @if ($quote_enable_vat)
                             <div class="form-check mt-2 ms-3">
-                                <input class="form-check-input" type="checkbox" wire:model.live="vat_included"
+                                <input class="form-check-input" type="checkbox" wire:model.live="quote_vat_included"
                                     id="vatIncludedCheck">
                                 <label class="form-check-label" for="vatIncludedCheck">
                                     💡 คิดรวม VAT ในราคารวม (VAT-In)
@@ -324,7 +329,7 @@
                                 <div class="clearfix pt-3">
                                     <h6 class="text-muted fs-14">Notes:</h6>
                                     <small>
-                                        <textarea wire:model="note" class="form-control" cols="3" rows="3"></textarea>
+                                        <textarea wire:model="quote_note" class="form-control" cols="3" rows="3"></textarea>
                                     </small>
 
                                 </div>
@@ -336,19 +341,29 @@
                                         <p><b class="float-end">จำนวนเงินรวม:</b></p>
                                     </div>
                                     <div class="col-md-2">
-                                        <span class="float-end">{{ number_format($subtotal, 2) }}</span>
+                                        <span class="float-end">{{ number_format($quote_subtotal, 2) }}</span>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <p><b class="float-end">ส่วนลด:</b></p>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span class="float-end">
+                                            <input type="number" wire:model.live.debounce.300ms="quote_discount"
+                                                class="form-control text-end form-control-sm" min="0"
+                                                step="0.01">
+                                        </span>
                                     </div>
                                     <div class="col-md-10">
                                         <p><b class="float-end">ภาษีมูลค่าเพิ่ม:</b></p>
                                     </div>
                                     <div class="col-md-2">
-                                        <span class="float-end">{{ number_format($vat, 2) }}</span>
+                                        <span class="float-end">{{ number_format($quote_vat, 2) }}</span>
                                     </div>
                                     <div class="col-md-10">
                                         <p><b class="float-end">จำนวนเงินทั้งสิ้น:</b></p>
                                     </div>
                                     <div class="col-md-2">
-                                        <span class="float-end">{{ number_format($grand_total, 2) }}</span>
+                                        <span class="float-end">{{ number_format($quote_grand_total, 2) }}</span>
                                     </div>
 
                                 </div>
@@ -398,21 +413,7 @@
 </div>
 
 
-<script>
-    document.addEventListener('livewire:load', () => {
-        window.addEventListener('js-init', () => {
-            console.log('📦 JS Init called from Livewire');
 
-            // 🔄 เรียกใช้งาน Select2 หรืออะไรที่ต้อง init ใหม่
-            $('.product-search').each(function () {
-                // ตัวอย่าง: init select2
-                if (!$(this).hasClass('select2-hidden-accessible')) {
-                    $(this).select2();
-                }
-            });
-        });
-    });
-</script>
 
 
 <script>

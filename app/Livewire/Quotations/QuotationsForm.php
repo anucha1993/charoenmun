@@ -29,20 +29,22 @@ class QuotationsForm extends Component
 
     public array $items = [];
 
-    public float $subtotal = 0;
-    public float $vat = 0;
-    public float $grand_total = 0;
+    public float $quote_subtotal = 0;
+    public float $quote_vat = 0;
+    public float $quote_discount = 0;
+    public float $quote_grand_total = 0;
     public array $searchResults = [];
+    public float $netSubtotal = 0;
 
-    public bool $enable_vat = false;
-    public bool $vat_included = false;
+    public bool $quote_enable_vat = false;
+    public bool $quote_vat_included = false;
 
     /* ─── ฟิลด์ใบเสนอราคา ─── */
     public ?int $quotation_id = null;
     public string $quote_number = ''; // รันอัตโนมัติเมื่อ create
     public string $quote_date; // default = วันนี้
-    public string $note = '';
-    public string $status = 'wait';
+    public string $quote_note = '';
+    public string $quote_status = 'wait';
 
     /* ตัวแปรเก็บโมเดล (ถ้ามี) */
     public ?QuotationModel $quotation = null;
@@ -71,14 +73,15 @@ class QuotationsForm extends Component
     private function fillFromModel(QuotationModel $q): void
     {
         $this->quotation_id = $q->id;
-        $this->quote_number = $q->quotation_number;
+        $this->quote_number = $q->quote_number;
         $this->customer_id = $q->customer_id;
         $this->selected_delivery_id = $q->delivery_address_id;
         $this->quote_date = $q->quote_date?->toDateString() ?? now()->toDateString();
-        $this->note = $q->note ?? '';
-        $this->enable_vat = $q->enable_vat;
-        $this->vat_included = $q->vat_included;
-        $this->status = $q->status?->value ?? 'wait';
+        $this->quote_note = $q->quote_note ?? '';
+        $this->quote_enable_vat = $q->quote_enable_vat;
+        $this->quote_vat_included = $q->quote_vat_included;
+        $this->quote_discount = $q->quote_discount;
+        $this->quote_status = $q->quote_status?->value ?? 'wait';
         $this->selectedCustomer = CustomerModel::find($q->customer_id);
         $this->selectedDelivery = deliveryAddressModel::find($q->delivery_address_id);
 
@@ -92,10 +95,10 @@ class QuotationsForm extends Component
                     'product_name' => $i->product_name,
                     'product_type' => $i->product_type,
                     'product_unit' => $i->product_unit,
-                    'product_detail' => $i->product_detail ?? ($product ? $product->productType->value . ' ขนาด : ' . $product->product_size : ''), // (ถ้าเก็บใน DB)
+                    'product_detail' => $i->product_detail ?? ($product ? $product->product_size : ''), // (ถ้าเก็บใน DB)
                     'product_length' => $i->product_length,
                     'product_weight' => $i->product_weight,
-                    'product_calculation' => $i->product_calculation,
+                    'product_calculation' => $i->product_calculation ?? 1,
                     'quantity' => $i->quantity,
                     'unit_price' => $i->unit_price,
                     'total' => $i->total ?? $i->quantity * $i->unit_price,
@@ -112,17 +115,19 @@ class QuotationsForm extends Component
     }
 
     /* ─────────────────── Validation ─────────────────── */
-    protected function rules(): array
-    {
-        return [
-            'customer_id' => 'required|exists:customers,id',
-            'quote_date' => 'required|date',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,product_id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-        ];
-    }
+   protected function rules(): array
+{
+    return [
+        'customer_id'               => 'required|exists:customers,id',
+        'quote_date'                => 'required|date',
+        // อนุญาตให้ items เป็น array ว่างได้
+        'items'                     => 'nullable|array',  
+        // แต่ถ้า items ไม่ว่าง (มีอย่างน้อยหนึ่งแถว) จะเช็คต่อที่ product_id/quantity/price
+        'items.*.product_id'        => 'required_with:items|exists:products,product_id',
+        'items.*.quantity'          => 'required_with:items|integer|min:1',
+        'items.*.unit_price'        => 'required_with:items|numeric|min:0',
+    ];
+}
 
     public function updated($name, $value)
     {
@@ -132,7 +137,7 @@ class QuotationsForm extends Component
 
             $this->items[$index]['product_results'] = ProductModel::where('product_name', 'like', "%{$value}%")
                 ->take(10)
-                ->get(['product_id', 'product_name'])
+                ->get(['product_id', 'product_name','product_size'])
                 ->toArray();
 
             $this->items[$index]['product_results_visible'] = true;
@@ -144,86 +149,102 @@ class QuotationsForm extends Component
         $this->items[$index]['product_id'] = $productId;
         $this->items[$index]['product_search'] = $productName;
         $this->items[$index]['product_results'] = [];
+        $this->items[$index]['product_size'] = [];
         $this->items[$index]['product_results_visible'] = false;
         $this->updatedItems($productId, "items.{$index}.product_id");
     }
 
-    /* ─────────────────── CRUD : SAVE ─────────────────── */
-    public function save()
-    {
-        $this->calculateTotals(); // ปรับยอดล่าสุด
-        $this->validate(); // ตรวจสอบข้อมูล
+   public function save()
+{
+    $this->calculateTotals();
+    $this->validate(); // กรณีลบ items ทั้งหมด จะไม่ error แล้ว (ตามข้อ 1)
 
-        DB::transaction(function () {
-            $isCreate = !$this->quotation_id;
+    DB::transaction(function () {
+        $isCreate = !$this->quotation_id;
 
-            /* 1) Running number (เฉพาะ create) */
-            if ($isCreate) {
-                $this->quote_number = $this->generateRunningNumber();
+        // 1) Running number ถ้า create
+        if ($isCreate) {
+            $this->quote_number = $this->generateRunningNumber();
+        }
+
+        // 2) Upsert Quotation
+        $q = QuotationModel::updateOrCreate(
+            ['id' => $this->quotation_id],
+            [
+                'quote_number'        => $this->quote_number,
+                'customer_id'         => $this->customer_id,
+                'delivery_address_id' => $this->selected_delivery_id,
+                'quote_date'          => $this->quote_date,
+                'quote_note'          => $this->quote_note,
+                'quote_subtotal'      => $this->quote_subtotal,
+                'quote_vat'           => $this->quote_vat,
+                'quote_grand_total'   => $this->quote_grand_total,
+                'quote_enable_vat'    => $this->quote_enable_vat,
+                'quote_discount'      => $this->quote_discount,
+                // 'product_calculation'  => $this->product_calculation,
+                'quote_vat_included'  => $this->quote_vat_included,
+                'quote_status'        => $this->quote_status,
+                'created_by'          => $isCreate
+                                           ? Auth::id()
+                                           : ($this->quotation->created_by ?? Auth::id()),
+                'updated_by'          => Auth::id(),
+            ]
+        );
+
+        // 3) Sync Items
+        $existingIds = [];
+        foreach ($this->items as $row) {
+            // ข้ามแถวที่ไม่มี product_id (กรณี user ลบ items หรือเหลือแค่แถวว่าง)
+            if (empty($row['product_id'])) {
+                continue;
             }
 
-            /* 2) Upsert Quotation */
-            $q = QuotationModel::updateOrCreate(
-                ['id' => $this->quotation_id],
+            // updateOrCreate ตาม ID (ถ้ามี) หรือสร้างใหม่
+            $item = $q->items()->updateOrCreate(
+                ['id' => $row['id'] ?? null],
                 [
-                    'quotation_number' => $this->quote_number,
-                    'customer_id' => $this->customer_id,
-                    'delivery_address_id' => $this->selected_delivery_id,
-                    'quote_date' => $this->quote_date,
-                    'note' => $this->note,
-                    'subtotal' => $this->subtotal,
-                    'vat' => $this->vat,
-                    'grand_total' => $this->grand_total,
-                    'enable_vat' => $this->enable_vat,
-                    'vat_included' => $this->vat_included,
-                    'status' => $this->status,
-                    'created_by' => $isCreate ? Auth::id() : $this->quotation->created_by ?? Auth::id(),
-                    'updated_by' => Auth::id(),
-                ],
+                    'product_id'       => $row['product_id'],
+                    'product_name'     => $row['product_name'],
+                    'product_type'     => $row['product_type'],
+                    'product_unit'     => $row['product_unit'],
+                    'product_detail'   => $row['product_detail'] ?? null,
+                    'product_length'   => $row['product_length'],
+                    'product_weight'   => $row['product_weight'],
+                    'product_calculation' => $row['product_calculation'],
+                    'quantity'         => $row['quantity'],
+                    'unit_price'       => $row['unit_price'],
+                    'total'            => $row['quantity'] * $row['unit_price'],
+                ]
             );
+            $existingIds[] = $item->id;
+        }
 
-            /* 3) Sync Items */
-            $existingIds = [];
-            foreach ($this->items as $row) {
-                /* ข้ามแถวเปล่า */
-                if (!$row['product_id']) {
-                    continue;
-                }
+        // ถ้า user “ลบทิ้งหมด” $existingIds จะว่างเปล่า → whereNotIn จะเป็น true ทั้งหมด → ลบ items ทั้งหมดใน DB
+        $q->items()->whereNotIn('id', $existingIds)->delete();
 
-                $item = $q->items()->updateOrCreate(
-                    ['id' => $row['id'] ?? null],
-                    [
-                        'product_id' => $row['product_id'],
-                        'product_name' => $row['product_name'],
-                        'product_type' => $row['product_type'],
-                        'product_unit' => $row['product_unit'],
-                        'product_length' => $row['product_length'],
-                        'product_weight' => $row['product_weight'],
-                        'product_calculation' => $row['product_calculation'],
-                        'product_detail' => $row['product_detail'],
-                        'quantity' => $row['quantity'],
-                        'unit_price' => $row['unit_price'],
-                        'total' => $row['quantity'] * $row['unit_price'],
-                    ],
-                );
-                $existingIds[] = $item->id;
-            }
-            /* ลบรายการที่ผู้ใช้ลบออก */
-            $q->items()->whereNotIn('id', $existingIds)->delete();
+        $this->quotation_id = $q->id;
+    });
 
-            $this->quotation_id = $q->id; // เผื่อสร้าง → แก้ต่อได้
-        });
+    $this->dispatch('notify',
+        type: 'success',
+        message: $this->quotation_id
+            ? 'อัปเดตใบเสนอราคาเรียบร้อย'
+            : 'สร้างใบเสนอราคาเรียบร้อย'
+    );
 
-        $this->dispatch('notify', type: 'success', message: $this->quotation_id ? 'อัปเดตใบเสนอราคาเรียบร้อย' : 'สร้างใบเสนอราคาเรียบร้อย');
-
-        return redirect()->route('quotations.index');
+    // redirect หลัง save
+    if (!$this->isCreate) {
+        return redirect()->route('quotations.edit', $this->quotation_id);
     }
+
+    return redirect()->route('quotations.index');
+}
 
     /* ─────────── Running Number : QTyyMM#### ─────────── */
     private function generateRunningNumber(): string
     {
         $prefix = 'QT' . now()->format('ym');
-        $last = QuotationModel::where('quotation_number', 'like', $prefix . '%')->max('quotation_number');
+        $last = QuotationModel::where('quote_number', 'like', $prefix . '%')->max('quote_number');
         $next = $last ? (int) substr($last, -4) + 1 : 1;
 
         return $prefix . str_pad($next, 4, '0', STR_PAD_LEFT);
@@ -239,6 +260,7 @@ class QuotationsForm extends Component
             'product_name' => '',
             'product_type' => '',
             'product_unit' => '',
+            'product_calculation' => 1,
             'product_length' => null,
             'product_weight' => null,
             'product_detail' => null,
@@ -248,58 +270,71 @@ class QuotationsForm extends Component
         ];
     }
 
-    public function updatedItems($value, $key)
-    {
-        [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
+    public function updatedItems($value, $key): void
+{
+    [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
 
-        if ($field === 'product_id') {
-            $product = ProductModel::find($value);
-            if (!$product) {
+    if ($field === 'product_id') {
+        $product = ProductModel::find($value);
+        if (!$product) {
+            return;
+        }
+
+        // ─── ถ้าแถวนี้มี id เก่า (คือแถวแก้ไขจาก DB) ให้ bypass merge
+        $currentId = $this->items[$index]['id'] ?? null;
+
+        // ใช้ลูปเฉพาะแถวที่ "มี id เดิม" หรือ "เป็นแถวใหม่ที่ไม่มี id"
+        foreach ($this->items as $i => $item) {
+
+            // ข้ามแถวเดียวกัน และข้ามแถวที่เพิ่งมี id เดิม
+            if ($i == $index) {
+                continue;
+            }
+
+            // ข้ามแถวที่มาจาก DB แล้ว (ถ้าเราต้องการ merge เฉพาะแถวใหม่กับแถวใหม่)
+            // หรือ เลือกเงื่อนไขที่เหมาะกับกรณีของคุณ
+            $otherId = $item['id'] ?? null;
+
+            // ถ้าเราต้องการให้ "merge เฉพาะแถวใหม่กับแถวใหม่"
+            // ให้เขียนแบบนี้:
+            if (is_null($currentId) && is_null($otherId) && $item['product_id'] == $value) {
+                // merge แถวใหม่ทั้งสอง (quantity) แล้ว unset แถวนี้
+                $this->items[$i]['quantity'] += $this->items[$index]['quantity'] ?? 1;
+                unset($this->items[$index]);
+                $this->items = array_values($this->items);
+                $this->calculateTotals();
                 return;
             }
 
-            // ✅ เช็กว่ามีรายการอื่นที่ใช้ product_id เดียวกันอยู่แล้วไหม (ยกเว้น index ปัจจุบัน)
-            foreach ($this->items as $i => $item) {
-                if ($i != $index && $item['product_id'] == $value) {
-                    // ถ้ามี → เพิ่มจำนวนที่ index นั้น แล้วลบรายการปัจจุบัน
-                    $this->items[$i]['quantity'] += $this->items[$index]['quantity'] ?? 1;
-                    unset($this->items[$index]);
-                    $this->items = array_values($this->items);
-                    $this->calculateTotals();
-                    return;
-                }
+    
+               //หากสินค้าซ้ำให้เพิ่มจำนวน
+              if ($item['product_id'] == $value) {
+                $this->items[$i]['quantity'] += $this->items[$index]['quantity'] ?? 1;
+                unset($this->items[$index]);
+                $this->items = array_values($this->items);
+                $this->calculateTotals();
+                return;
             }
-
-            // ✅ ไม่มีซ้ำ → อัปเดตรายละเอียดสินค้า
-            $this->items[$index]['product_detail'] = $product->productType->value . ' ขนาด : ' . $product->product_size . ' หนา :' . $product->product_calculation;
-            $this->items[$index]['product_type'] = $product->productType->value;
-            $this->items[$index]['product_calculation'] = $product->product_calculation;
-            $this->items[$index]['product_name'] = $product->product_name;
-            $this->items[$index]['unit_price'] = $product->product_price;
-            $this->items[$index]['product_weight'] = $product->product_weight;
-            $this->items[$index]['product_unit'] = $product->productUnit->value;
-            $this->items[$index]['product_length'] = $product->product_length ?? null;
         }
 
-        // ✅ คำนวณใหม่
-        foreach ($this->items as &$item) {
-            $quantity = (float) ($item['quantity'] ?? 0);
-            $unitPrice = (float) ($item['unit_price'] ?? 0);
-            $length = (float) ($item['product_length'] ?? 1);
-            $thickness = (float) ($item['product_calculation'] ?? 1);
-
-            if ($length <= 0) {
-                $length = 1;
-            }
-            if ($thickness <= 0) {
-                $thickness = 1;
-            }
-
-            $item['total'] = $quantity * $unitPrice * $length * $thickness;
-        }
-
-        $this->calculateTotals();
+        // ถ้าถึงตรงนี้ → ไม่มีแถวไหนซ้ำ ให้อัปเดตข้อมูลสินค้า
+        $this->items[$index]['product_detail']   = $product->product_size;
+        $this->items[$index]['product_type']     = $product->productType->value;
+        $this->items[$index]['product_name']     = $product->product_name;
+        $this->items[$index]['unit_price']       = $product->product_price;
+        $this->items[$index]['product_weight']   = $product->product_weight;
+        $this->items[$index]['product_unit']     = $product->productUnit->value;
+        $this->items[$index]['product_length']   = $product->product_length ?? null;
     }
+
+    // ─── คำนวณยอดรวมใหม่ทุกครั้ง
+    foreach ($this->items as &$item) {
+        $item['total'] = $item['quantity'] * $item['unit_price'];
+    }
+
+    $this->calculateTotals();
+}
+
 
     public function openDeliveryModal(int $customer_id)
     {
@@ -315,64 +350,46 @@ class QuotationsForm extends Component
     }
 
     /* ─────────── VAT & ยอดรวม ─────────── */
-    // public function calculateTotals(): void
-    // {
-    //     $this->subtotal = collect($this->items)->sum(fn($i) => $i['quantity'] * $i['unit_price']);
-
-    //     if (!$this->enable_vat) {
-    //         $this->vat = 0;
-    //         $this->grand_total = $this->subtotal;
-    //         return;
-    //     }
-
-    //     if ($this->vat_included) {
-    //         /* VAT-In */
-    //         $net = round($this->subtotal / 1.07, 2);
-    //         $this->vat = round($net * 0.07, 2);
-    //         $this->subtotal = $net;
-    //         $this->grand_total = $net + $this->vat;
-    //     } else {
-    //         /* VAT-Out */
-    //         $this->vat = round($this->subtotal * 0.07, 2);
-    //         $this->grand_total = $this->subtotal + $this->vat;
-    //     }
-    // }
 
     public function calculateTotals(): void
-    {
-        $this->subtotal = collect($this->items)->sum(function ($i) {
-            $quantity = (float) ($i['quantity'] ?? 0);
-            $unitPrice = (float) ($i['unit_price'] ?? 0);
-            $length = (float) ($i['product_length'] ?? 1); // ✅ ใช้ชื่อที่ถูก
-            $thickness = (float) ($i['product_calculation'] ?? 1); // ✅ ความหนา
+{
+    $this->quote_subtotal = collect($this->items)->sum(function ($i) {
+        $quantity = (float) ($i['quantity'] ?? 0);
+        $unitPrice = (float) ($i['unit_price'] ?? 0);
+        $length = (float) ($i['product_length'] ?? 1);
+        $thickness = (float) ($i['product_calculation'] ?? 1);
 
-            // ถ้าค่าเป็น 0 หรือไม่ได้กรอก ให้ถือว่าเป็น 1
-            if ($length <= 0) {
-                $length = 1;
-            }
-            if ($thickness <= 0) {
-                $thickness = 1;
-            }
+        if ($length <= 0) $length = 1;
+        if ($thickness <= 0) $thickness = 1;
 
-            return $quantity * $unitPrice * $length * $thickness;
-        });
+        return $quantity * $unitPrice * $length * $thickness;
+    });
 
-        if (!$this->enable_vat) {
-            $this->vat = 0;
-            $this->grand_total = $this->subtotal;
-            return;
-        }
+    // ✅ ใช้ quote_subtotal ในการคำนวณ
+    $netSubtotal = max(0, $this->quote_subtotal - $this->quote_discount);
 
-        if ($this->vat_included) {
-            $net = round($this->subtotal / 1.07, 2);
-            $this->vat = round($net * 0.07, 2);
-            $this->subtotal = $net;
-            $this->grand_total = $net + $this->vat;
-        } else {
-            $this->vat = round($this->subtotal * 0.07, 2);
-            $this->grand_total = $this->subtotal + $this->vat;
-        }
+    if (!$this->quote_enable_vat) {
+        $this->quote_vat = 0;
+        $this->quote_grand_total = $netSubtotal;
+        return;
     }
+
+    if ($this->quote_vat_included) {
+        $net = round($netSubtotal / 1.07, 2);
+        $this->quote_vat = round($net * 0.07, 2);
+        $this->quote_subtotal = $net;
+        $this->quote_grand_total = $net + $this->quote_vat;
+    } else {
+        $this->quote_vat = round($netSubtotal * 0.07, 2);
+        $this->quote_grand_total = $netSubtotal + $this->quote_vat;
+    }
+}
+
+public function updatedQuoteDiscount()
+{
+    $this->calculateTotals();
+}
+
 
     public function updatedEnableVat(): void
     {
