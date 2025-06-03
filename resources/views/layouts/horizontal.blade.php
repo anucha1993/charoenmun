@@ -39,7 +39,7 @@
 </head>
 
 <body>
-
+    <script src="//unpkg.com/alpinejs" defer></script>
     <div class="wrapper">
 
         @include('layouts.shared.topbar')

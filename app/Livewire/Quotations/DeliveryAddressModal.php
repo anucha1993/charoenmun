@@ -4,55 +4,80 @@ namespace App\Livewire\Quotations;
 
 use Livewire\Component;
 use App\Models\customers\deliveryAddressModel;
+use App\Models\addressList\provincesModel;
+use App\Models\addressList\amphuresModel;
+use App\Models\addressList\districtsModel;
+use Livewire\Attributes\On;
 
 class DeliveryAddressModal extends Component
 {
-    public ?int $delivery_id = null;
     public ?int $customer_id = null;
 
-    public string $delivery_contact_name = '';
-    public string $delivery_phone = '';
-    public string $delivery_number = '';
-    public string $delivery_province = '';
-    public string $delivery_amphur = '';
-    public string $delivery_district = '';
-    public string $delivery_zipcode = '';
+    public string $delivery_contact_name = '',
+        $delivery_phone = '',
+        $delivery_number = '',
+        $delivery_province = '',
+        $delivery_amphur = '',
+        $delivery_district = '',
+        $delivery_zipcode = '';
 
-    public function mount($customer_id, $delivery_id = null)
+    public array $provinces = [], $amphures = [], $districts = [];
+
+    #[On('open-delivery-modal')]
+    public function open(array $params)
     {
-        $this->customer_id = $customer_id;
+        $this->reset();
+        $this->customer_id = $params['customerId'] ?? null;
+        $this->provinces = provincesModel::orderBy('province_name')->pluck('province_name', 'province_code')->toArray();
+        $this->dispatch('open-delivery-modal');
+    }
 
-        if ($delivery_id) {
-            $delivery = deliveryAddressModel::findOrFail($delivery_id);
-            $this->delivery_id = $delivery->id;
-            $this->delivery_contact_name = $delivery->delivery_contact_name;
-            $this->delivery_phone = $delivery->delivery_phone;
-            $this->delivery_number = $delivery->delivery_number;
-            $this->delivery_province = $delivery->delivery_province;
-            $this->delivery_amphur = $delivery->delivery_amphur;
-            $this->delivery_district = $delivery->delivery_district;
-            $this->delivery_zipcode = $delivery->delivery_zipcode;
-        }
+    public function updatedDeliveryProvince()
+    {
+        $this->amphures = amphuresModel::where('province_code', $this->delivery_province)
+            ->pluck('amphur_name', 'amphur_code')
+            ->toArray();
+
+        $this->delivery_amphur = '';
+        $this->delivery_district = '';
+        $this->districts = [];
+    }
+
+    public function updatedDeliveryAmphur()
+    {
+        $this->districts = districtsModel::where('amphur_code', $this->delivery_amphur)
+            ->pluck('district_name', 'district_code')
+            ->toArray();
+
+        $this->delivery_district = '';
+    }
+
+    public function updatedDeliveryDistrict()
+    {
+        $this->delivery_zipcode = districtsModel::where('district_code', $this->delivery_district)->value('zipcode') ?? '';
     }
 
     public function save()
     {
-        $data = $this->validate([
-            'delivery_contact_name' => 'required',
-            'delivery_phone' => 'required',
-            'delivery_number' => 'required',
-            'delivery_province' => 'required',
-            'delivery_amphur' => 'required',
-            'delivery_district' => 'required',
-            'delivery_zipcode' => 'required',
+        $this->validate([
+            'delivery_contact_name' => 'required|string|max:255',
+            'delivery_phone' => 'required|string|max:20',
+            'delivery_number' => 'required|string|max:255',
         ]);
 
-        $data['customer_id'] = $this->customer_id;
+        deliveryAddressModel::create([
+            'customer_id' => $this->customer_id,
+            'delivery_contact_name' => $this->delivery_contact_name,
+            'delivery_phone' => $this->delivery_phone,
+            'delivery_number' => $this->delivery_number,
+            'delivery_province' => $this->delivery_province,
+            'delivery_amphur' => $this->delivery_amphur,
+            'delivery_district' => $this->delivery_district,
+            'delivery_zipcode' => $this->delivery_zipcode,
+        ]);
 
-        deliveryAddressModel::updateOrCreate(['id' => $this->delivery_id], $data);
-
-        $this->dispatch('notify', ['message' => 'บันทึกที่อยู่เรียบร้อยแล้ว']);
-        $this->dispatch('closeModal');
+        $this->dispatch('close-delivery-modal');
+        $this->dispatch('delivery-saved', customerId: $this->customer_id);
     }
 
     public function render()
