@@ -1,11 +1,16 @@
 
-<div >
-    <div class="card row text-black" style="margin-top: -20px">
+@php
+    $totalPages = ceil($quotation->items->count() / 8);
+    $loopIndex = 1;
+@endphp
+<div>
+@foreach ($quotation->items->chunk(8) as $chunkIndex => $chunk)
+    <div class="card row text-black">
         <div class="card-body">
             <!-- Invoice Detail-->
             <div class="clearfix">
                 <div class="float-start">
-                    <img src="/images/logo-cmc.png" class="mb-1" alt="dark logo" height="60">
+                    <img src="/images/logo-cmc.png" class="mb-0" alt="dark logo" height="60">
                       <h4 class="m-0 mb-3">Quotation / ใบเสนอราคา</h4>
                 </div>
 
@@ -17,7 +22,8 @@
 
                      <div class="float-end">
 
-                        <img src="{{ route('qr.quotation', $quotation->id) }}" alt="QR" style="height:100px;">
+                        <img src="{{ route('qr.quotation', $quotation->id) }}" alt="QR" style="height:100px;"><br>
+                        <small class="float-end">หน้า {{ $chunkIndex + 1 }}/{{ $totalPages }}</small>
                     </div>
                    
                 </div>
@@ -104,21 +110,16 @@
                                     <td class="text-end">$1799.00</td>
                                 </tr>
                                  --}}
-                                @forelse ($quotation->items as $key => $item)
-                                  <tr>
-                                    <td>{{$key+1}}</td>
-                                    <td >{{$item->quantity}}</td>
-                                     <td >{{$item->product_unit}}</td>
-                                    <td>
-                                        <b>{{$item->product_name}}</b> ({{$item->product_detail}})
-                                        
-                                    </td>
-                                    <td >{{number_format($item->unit_price,2)}}</td>
-                                    <td  class="text-end">{{number_format($item->total,2)}}</td>
-                                </tr>
-                                @empty
-                                    
-                                @endforelse
+                                 @foreach ($chunk as $item)
+                                 <tr>
+                                     <td>{{ $loopIndex++ }}</td>
+                                     <td>{{ $item->quantity }}</td>
+                                     <td>{{ $item->product_unit }}</td>
+                                     <td><b>{{ $item->product_name }}</b> ({{ $item->product_detail }})</td>
+                                     <td>{{ number_format($item->unit_price, 2) }}</td>
+                                     <td class="text-end">{{ number_format($item->total, 2) }}</td>
+                                 </tr>
+                             @endforeach
                               
 
                             </tbody>
@@ -150,6 +151,26 @@
                 </div> <!-- end col -->
             </div>
             <!-- end row-->
+<hr>
+            <div class="row ">
+                <div class="col-sm-6 text-center">
+                    <div class="clearfix ">
+                        <span class="text-center">ผู้เสนอราคา</span><br>
+                        <span>{{$quotation->sale->name}}</span>
+                        
+                    </div>
+                </div> <!-- end col -->
+                <div class="col-sm-6">
+                    <div class="float-end mt-sm-0">
+                        <span>หมายเหตุ :เงื่อนไขการชำระเงิน</span><br>
+                        <span>1. โอนก่อนจัดส่งสินค้</span><br>
+                        <span>2. ชำระเป็นเงินสด เมื่อตรวจรับสินค้าเรียบร้อย</span><br>
+                    </div>
+                    <div class="clearfix"></div>
+                </div> <!-- end col -->
+            </div>
+            <!-- end row-->
+
 
             <div class="d-print-none mt-4">
                 <div class="text-center">
@@ -162,8 +183,8 @@
 
         </div> <!-- end card-body-->
     </div> <!-- end card -->
-</div> <!-- end col-->
-</div>
+
+@endforeach
 <!-- end row -->
 </div>
 
