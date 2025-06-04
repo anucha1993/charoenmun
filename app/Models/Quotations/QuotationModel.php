@@ -14,13 +14,13 @@ class QuotationModel extends Model
     use HasFactory;
     protected $table = 'quotations';
     protected $primaryKey = 'id';
-    protected $fillable = ['quote_number', 'customer_id', 'delivery_address_id', 'quote_date', 'quote_note', 'quote_discount', 'quote_subtotal', 'quote_vat', 'quote_grand_total', 'quote_enable_vat', 'quote_vat_included', 'status', 'created_by', 'updated_by'];
+    protected $fillable = ['quote_number', 'customer_id', 'delivery_address_id', 'quote_date', 'quote_note', 'quote_discount', 'quote_subtotal', 'quote_vat', 'quote_grand_total', 'quote_enable_vat', 'quote_vat_included', 'quote_status', 'created_by', 'updated_by'];
 
     protected $casts = [
         'quote_enable_vat' => 'boolean',
         'quote_vat_included' => 'boolean',
         'quote_date' => 'date',
-        'status' => QuotationStatus::class,
+        'quote_status' => QuotationStatus::class,
     ];
 
     // ความสัมพันธ์
@@ -43,8 +43,8 @@ class QuotationModel extends Model
     public function getStatusBadgeAttribute(): string
     {
         /** @var QuotationStatus $status */
-        $status = $this->status ?? QuotationStatus::Wait;
+        $quote_status = $this->quote_status ?? QuotationStatus::Wait;
 
-        return sprintf('<span class="badge %s">%s</span>', $status->badgeClass(), $status->label());
+        return sprintf('<span class="badge %s">%s</span>', $quote_status->badgeClass(), $quote_status->label());
     }
 }

@@ -39,7 +39,7 @@ class DeliveryAddressModal extends Component
     public function editDelivery($deliveryId)
     {
         $delivery = deliveryAddressModel::find($deliveryId);
-         $customer = CustomerModel::find($delivery->customer_id);
+        $customer = CustomerModel::find($delivery->customer_id);
 
         if ($delivery) {
             $this->editing = true;
@@ -64,39 +64,38 @@ class DeliveryAddressModal extends Component
         }
     }
 
-
     public function updateDelivery()
-{
-    $this->validate([
-        'deliveryForm.delivery_contact_name' => 'required',
-        'deliveryForm.delivery_phone' => 'required',
-        'deliveryForm.delivery_number' => 'required',
-        'deliveryForm.delivery_province' => 'required',
-        'deliveryForm.delivery_amphur' => 'required',
-        'deliveryForm.delivery_district' => 'required',
-        'deliveryForm.delivery_zipcode' => 'required',
-    ]);
-
-    if ($this->editing && $this->editing_delivery_id) {
-        deliveryAddressModel::where('id', $this->editing_delivery_id)->update([
-            'delivery_contact_name' => $this->deliveryForm['delivery_contact_name'],
-            'delivery_phone' => $this->deliveryForm['delivery_phone'],
-            'delivery_number' => $this->deliveryForm['delivery_number'],
-            'delivery_province' => $this->deliveryForm['delivery_province'],
-            'delivery_amphur' => $this->deliveryForm['delivery_amphur'],
-            'delivery_district' => $this->deliveryForm['delivery_district'],
-            'delivery_zipcode' => $this->deliveryForm['delivery_zipcode'],
+    {
+        $this->validate([
+            'deliveryForm.delivery_contact_name' => 'required',
+            'deliveryForm.delivery_phone' => 'required',
+            'deliveryForm.delivery_number' => 'required',
+            'deliveryForm.delivery_province' => 'required',
+            'deliveryForm.delivery_amphur' => 'required',
+            'deliveryForm.delivery_district' => 'required',
+            'deliveryForm.delivery_zipcode' => 'required',
         ]);
 
-        $this->dispatch('delivery-updated-success', [
-            'customerId' => $this->customer_id,
-            'deliveryId' => $this->editing_delivery_id,
-        ]);
+        if ($this->editing && $this->editing_delivery_id) {
+            deliveryAddressModel::where('id', $this->editing_delivery_id)->update([
+                'delivery_contact_name' => $this->deliveryForm['delivery_contact_name'],
+                'delivery_phone' => $this->deliveryForm['delivery_phone'],
+                'delivery_number' => $this->deliveryForm['delivery_number'],
+                'delivery_province' => $this->deliveryForm['delivery_province'],
+                'delivery_amphur' => $this->deliveryForm['delivery_amphur'],
+                'delivery_district' => $this->deliveryForm['delivery_district'],
+                'delivery_zipcode' => $this->deliveryForm['delivery_zipcode'],
+            ]);
 
-        $this->resetInput();
-        $this->dispatch('close-delivery-modal');
+            $this->dispatch('delivery-updated-success', [
+                'customerId' => $this->customer_id,
+                'deliveryId' => $this->editing_delivery_id,
+            ]);
+
+            $this->resetInput();
+            $this->dispatch('close-delivery-modal');
+        }
     }
-}
 
     public function mount()
     {
@@ -209,11 +208,7 @@ class DeliveryAddressModal extends Component
             'customerId' => $this->delivery_customer_id,
             'deliveryId' => $delivery->id,
         ]);
-
-        logger('🔥 Dispatched delivery-created-success', [
-            'customerId' => $this->customer_id,
-            'deliveryId' => $delivery->id,
-        ]);
+        $this->dispatch('delivery-created-success',['deliveryId' => $delivery->id])->to(\App\Livewire\Orders\OrderDelivery::class);
 
         $this->resetInput();
         $this->dispatch('close-delivery-modal');
