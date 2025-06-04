@@ -29,9 +29,20 @@ class OrderDelivery extends Component
     public ?int $customer_id = null;
     public array $items = [];
     public array $stocks = [];
+    public array $stocksLeft = [];
+
+    public float $order_delivery_subtotal = 0;
+    public float $order_delivery_vat = 0;
+    public float $order_delivery_discount = 0;
+    public float $order_delivery_grand_total = 0;
+    public float $netSubtotal = 0;
+    public bool $order_delivery_enable_vat = false;
+    public bool $order_delivery_vat_included = false;
+
 
     public function mount(OrderModel $order): void
     {
+        
         $this->orderModel = $order->load('items', 'customer');
         $this->order_id = $order->id;
         $this->orderItems = $this->orderModel->items;
@@ -45,6 +56,7 @@ class OrderDelivery extends Component
         foreach ($this->orderItems as $oi) {
             $this->stocks[$oi->product_id] = $oi->quantity;
         }
+        $this->stocksLeft = $this->stocks;
         $this->addEmptyItem();
     }
 
@@ -109,53 +121,6 @@ class OrderDelivery extends Component
         ];
     }
 
-    // public function updatedItems($value, $key): void
-    // {
-    //     [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
-
-    //     /* เมื่อเลือกสินค้า */
-    //     if ($field === 'product_id') {
-    //         // หา order_item ของสินค้านั้น
-    //         $oi = $this->orderItems->firstWhere('product_id', $value);
-    //         if (!$oi) {
-    //             return;
-    //         }
-    //         // ─── ถ้าแถวนี้มี id เก่า (คือแถวแก้ไขจาก DB) ให้ bypass merge
-    //         $currentId = $this->items[$index]['id'] ?? null;
-
-    //         // เติมรายละเอียดต่าง ๆ
-    //         $this->items[$index]['product_name'] = $oi->product->product_name;
-    //         $this->items[$index]['product_detail'] = $oi->product->product_size;
-    //         $this->items[$index]['product_type'] = $oi->product->productType->value;
-    //         $this->items[$index]['product_length'] = $oi->product->product_length;
-    //         $this->items[$index]['product_weight'] = $oi->product->product_weight;
-    //         $this->items[$index]['product_unit'] = $oi->product->productUnit->value;
-    //         $this->items[$index]['unit_price'] = $oi->product->product_price;
-
-    //         // ⭐ ใส่จำนวนคงเหลือจาก order_item
-    //         $this->items[$index]['quantity'] = $oi->quantity;
-    //     }
-
-    //     /* เมื่อแก้จำนวนให้ตรวจว่าเกินสต็อกหรือไม่ */
-    //     if ($field === 'quantity') {
-    //         $productId = $this->items[$index]['product_id'] ?? null;
-    //         if ($productId) {
-    //             $max = $this->stocks[$productId] ?? 0;
-    //             if ($value > $max) {
-    //                 // ปรับกลับเป็นคงเหลือสูงสุด
-    //                 $this->items[$index]['quantity'] = $max;
-    //                 // แจ้งเตือนฝั่งเบราว์เซอร์ (รูปแบบใหม่ v3)
-    //                 $this->dispatch('qty-over', max: $max, name: $this->items[$index]['product_name']);
-    //             }
-    //         }
-    //     }
-
-    //     /* คำนวณยอดรวมใหม่ทุกครั้ง */
-    //     foreach ($this->items as &$line) {
-    //         $line['total'] = $line['quantity'] * $line['unit_price'];
-    //     }
-    // }
-
     public function updatedItems($value, $key): void
     {
         [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
@@ -173,18 +138,18 @@ class OrderDelivery extends Component
                     continue;
                 }
                 if ($row['product_id'] === $productId) {
-                    /* จำนวนใหม่หลังรวม */
-                    $max = $this->stocks[$productId] ?? 0;
-                    $new = $row['quantity'] + ($this->items[$index]['quantity'] ?? 1);
-                    /* ถ้าเกินสต็อกให้ตัดเหลือ max และเตือน */
-                    if ($new > $max) {
-                        $new = $max;
-                        $this->dispatch('qty-over', max: $max, name: $this->items[$i]['product_name']);
+                    $max   = $this->stocks[$productId] ?? 0;
+                    $new   = min($max, $row['quantity'] + ($this->items[$index]['quantity'] ?? 1));
+                
+                    if ($new == $row['quantity']) {            // เต็มสต๊อกแล้ว
+                        $this->dispatch('qty-full', name: $row['product_name']);
                     }
+                
                     $this->items[$i]['quantity'] = $new;
-                    unset($this->items[$index]);
-                    $this->items = array_values($this->items);
+                    unset($this->items[$index]);                // ลบแถวปัจจุบัน
+                    $this->items = array_values($this->items);  // re-index
                     $this->recalculateTotals();
+                    $this->refreshStocksLeft();
                     return;
                 }
             }
@@ -200,6 +165,7 @@ class OrderDelivery extends Component
                 'product_detail' => $p->product_size,
                 'product_type' => $p->productType->value,
                 'product_length' => $p->product_length,
+                'product_calculation' => $p->product_calculation,
                 'product_weight' => $p->product_weight,
                 'product_unit' => $p->productUnit->value,
                 'unit_price' => $p->product_price,
@@ -211,9 +177,17 @@ class OrderDelivery extends Component
             $productId = $this->items[$index]['product_id'] ?? null;
             if ($productId) {
                 $max = $this->stocks[$productId] ?? 0;
-                if ($value > $max) {
-                    $this->items[$index]['quantity'] = $max;
-                    $this->dispatch('qty-over', max: $max, name: $this->items[$index]['product_name']);
+                /* หักจำนวนของแถวอื่น ๆ ออกก่อนบวกตัวเอง */
+                $used = collect($this->items)->where('product_id', $productId)
+                                             ->sum('quantity') - $value;
+                $allow = max(0, $max - $used);
+        
+                if ($value > $allow) {
+                    $this->items[$index]['quantity'] = $allow;
+                    $this->dispatch('qty-over',
+                        max: $allow,
+                        name: $this->items[$index]['product_name']
+                    );
                 }
             }
         }
@@ -221,6 +195,9 @@ class OrderDelivery extends Component
             $this->items[$index]['total'] = $this->items[$index]['quantity'] * $this->items[$index]['unit_price'];
         }
         $this->recalculateTotals(); // รวมทุกแถวอีกครั้ง
+       
+        $this->refreshStocksLeft();
+     
     }
 
     private function recalculateTotals(): void
@@ -228,9 +205,68 @@ class OrderDelivery extends Component
         foreach ($this->items as &$row) {
             $row['total'] = $row['quantity'] * $row['unit_price'];
         }
+        $this->calculateTotals();
+       
     }
 
-    
+    private function refreshStocksLeft(): void
+    {
+        // เริ่มจาก stock ดิบ
+        $left = $this->stocks;
+
+        // หักจำนวนที่ถูกเลือกในทุกแถว (ที่ยังไม่ blank)
+        foreach ($this->items as $row) {
+            if ($row['product_id']) {
+                $left[$row['product_id']] -= $row['quantity'];
+            }
+        }
+
+        // ห้ามติดลบ
+        foreach ($left as &$v) {
+            $v = max(0, $v);
+        }
+
+        $this->stocksLeft = $left;
+    }
+
+    public function calculateTotals(): void
+    {
+        $this->order_delivery_subtotal = collect($this->items)->sum(function ($i) {
+            $quantity = (float) ($i['quantity'] ?? 0);
+            $unitPrice = (float) ($i['unit_price'] ?? 0);
+            $length = (float) ($i['product_length'] ?? 1);
+            $thickness = (float) ($i['product_calculation'] ?? 1);
+
+            if ($length <= 0) {
+                $length = 1;
+            }
+            if ($thickness <= 0) {
+                $thickness = 1;
+            }
+
+            // return $quantity * $unitPrice * $length * $thickness;
+            return ($length * $thickness)* $unitPrice * $quantity ;
+        });
+
+        // ✅ ใช้ quote_subtotal ในการคำนวณ
+        $netSubtotal = max(0, $this->order_delivery_subtotal - $this->order_delivery_discount);
+
+        if (!$this->order_delivery_enable_vat) {
+            $this->order_delivery_vat = 0;
+            $this->order_delivery_grand_total = $netSubtotal;
+            return;
+        }
+
+        if ($this->quote_vat_included) {
+            $net = round($netSubtotal / 1.07, 2);
+            $this->order_delivery_vat = round($net * 0.07, 2);
+            $this->order_delivery_subtotal = $net;
+            $this->order_delivery_grand_total = $net + $this->quote_vat;
+        } else {
+            $this->order_delivery_vat = round($netSubtotal * 0.07, 2);
+            $this->order_delivery_grand_total = $netSubtotal + $this->order_deliverie_vat;
+        }
+    }
 
     public function render()
     {

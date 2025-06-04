@@ -324,6 +324,7 @@ class QuotationsForm extends Component
             $this->items[$index]['product_name'] = $product->product_name;
             $this->items[$index]['unit_price'] = $product->product_price;
             $this->items[$index]['product_weight'] = $product->product_weight;
+            $this->items[$index]['product_calculation'] = $product->product_calculation;
             $this->items[$index]['product_unit'] = $product->productUnit->value;
             $this->items[$index]['product_length'] = $product->product_length ?? null;
         }

@@ -200,10 +200,11 @@
                                                         <select class="form-select form-select-sm"
                                                             wire:model.live="items.{{ $i }}.product_id">
                                                             <option value="">-- เลือกสินค้า --</option>
-                                                            @foreach ($orderItems as $oi)
-                                                                <option value="{{ $oi->product_id }}">
-                                                                    {{ $oi->product->product_name }}
-                                                                    (คงเหลือ: {{ $oi->quantity }})
+                                                            @foreach ($orderItems as $oi )
+                                                            @php $left = $stocksLeft[$oi->product_id] ?? 0; @endphp
+                                                                <option value="{{ $oi->product_id }}" @disabled($left === 0)>
+                                                                    {{ $oi->product->product_name }}ขนาด{{ $oi->product->product_length}} เมตร 
+                                                                    ( {{ $left }})
                                                                 </option>
                                                             @endforeach
                                                         </select>
@@ -214,27 +215,27 @@
 
                                                     <td style="width: 110px">
                                                         <input type="text"
-                                                            wire:model.live.debounce.300ms="items.{{ $i }}.product_length"
+                                                            wire:model.live.debounce.500ms="items.{{ $i }}.product_length"
                                                             class="form-control form-control-sm">
                                                     </td>
                                                     <td style="display: none">
 
                                                         <input type="number" min="1"
-                                                            wire:model.live.debounce.300ms="items.{{ $i }}.product_calculation"
+                                                            wire:model.live.debounce.500ms="items.{{ $i }}.product_calculation"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
                                                     <td style="width: 110px">
 
                                                         <input type="number" min="1"
-                                                            wire:model.live.debounce.300ms="items.{{ $i }}.product_weight"
+                                                            wire:model.live.debounce.500ms="items.{{ $i }}.product_weight"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
 
                                                     <td style="width: 110px">
                                                         <input type="number" min="1"
-                                                            wire:model.live.debounce.300ms="items.{{ $i }}.quantity"
+                                                            wire:model.live.debounce.500ms="items.{{ $i }}.quantity"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
@@ -247,7 +248,7 @@
                                                     <td style="width: 200px" class="text-end">
 
                                                         <input type="number" min="0" step="0.01"
-                                                            wire:model.live.debounce.300ms="items.{{ $i }}.unit_price"
+                                                            wire:model.live.debounce.500ms="items.{{ $i }}.unit_price"
                                                             class="form-control form-control-sm text-end" />
 
                                                     </td>
@@ -283,22 +284,22 @@
                         <hr>
 
                         <div class="form-check mt-2" style="z-index: -9999999999; ">
-                            <input class="form-check-input" type="checkbox" wire:model.live="quote_enable_vat"
+                            <input class="form-check-input" type="checkbox" wire:model.live="order_delivery__enable_vat"
                                 id="enableVatCheck">
                             <label class="form-check-label" for="enableVatCheck">
                                 คำนวณ VAT 7%
                             </label>
                         </div>
 
-                        {{-- @if ($quote_enable_vat)
+                        @if ($order_delivery_enable_vat)
                             <div class="form-check mt-2 ms-3">
-                                <input class="form-check-input" type="checkbox" wire:model.live="quote_vat_included"  
+                                <input class="form-check-input" type="checkbox" wire:model.live="order_delivery__vat_included"  
                                     id="vatIncludedCheck">
                                 <label class="form-check-label" for="vatIncludedCheck">
                                     💡 คิดรวม VAT ในราคารวม (VAT-In)
                                 </label>
                             </div>
-                        @endif --}}
+                        @endif
 
                         <div class="row">
                             <div class="col-sm-6">
@@ -317,7 +318,7 @@
                                         <p><b class="float-end">จำนวนเงินรวม:</b></p>
                                     </div>
                                     <div class="col-md-2">
-                                        {{-- <span class="float-end">{{ number_format($quote_subtotal, 2) }}</span> --}}
+                                        <span class="float-end">{{ number_format($order_delivery_subtotal, 2) }}</span>
                                     </div>
                                     <div class="col-md-10">
                                         <p><b class="float-end">ส่วนลด:</b></p>
@@ -333,13 +334,13 @@
                                         <p><b class="float-end">ภาษีมูลค่าเพิ่ม:</b></p>
                                     </div>
                                     <div class="col-md-2">
-                                        {{-- <span class="float-end">{{ number_format($quote_vat, 2) }}</span> --}}
+                                        <span class="float-end">{{ number_format($order_delivery_vat, 2) }}</span>
                                     </div>
                                     <div class="col-md-10">
                                         <p><b class="float-end">จำนวนเงินทั้งสิ้น:</b></p>
                                     </div>
                                     <div class="col-md-2">
-                                        {{-- <span class="float-end">{{ number_format($quote_grand_total, 2) }}</span> --}}
+                                        <span class="float-end">{{ number_format($order_delivery_grand_total, 2) }}</span>
                                     </div>
 
                                 </div>

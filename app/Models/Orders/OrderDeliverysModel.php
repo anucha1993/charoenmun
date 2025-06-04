@@ -21,7 +21,14 @@ class OrderDeliverysModel extends Model
         'note',
         'created_by',
         'updated_by',
+        'order_delivery_subtotal',
+        'order_delivery_vat',
+        'order_delivery_discount',
+        'order_delivery_grand_total',
+        'order_delivery_enable_vat',
+        'order_delivery_vat_included',
     ];
+
 
     protected $casts = [
         'delivery_date' => 'date',
