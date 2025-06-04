@@ -193,51 +193,60 @@
 
 
 
-                                            {{-- @foreach ($items as $i => $item)
-                                                <tr class="align-top" wire:key="row-{{ $i }}" >
+                                            @foreach ($items as $i => $item)
+                                                <tr class="align-top" wire:key="row-{{ $i }}">
                                                     <td class="align-top">{{ $i + 1 }}</td>
                                                     <td style="min-width: 350px;">
-
+                                                        <select class="form-select form-select-sm"
+                                                            wire:model.live="items.{{ $i }}.product_id">
+                                                            <option value="">-- เลือกสินค้า --</option>
+                                                            @foreach ($orderItems as $oi)
+                                                                <option value="{{ $oi->product_id }}">
+                                                                    {{ $oi->product->product_name }}
+                                                                    (คงเหลือ: {{ $oi->quantity }})
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
                                                     </td>
 
                                                     <td style="min-width: 200px;"> {!! $item['product_detail'] ?? '' !!} </td>
 
 
                                                     <td style="width: 110px">
-                                                        <input type="text"  
+                                                        <input type="text"
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_length"
                                                             class="form-control form-control-sm">
                                                     </td>
                                                     <td style="display: none">
 
-                                                        <input type="number" min="1"  
+                                                        <input type="number" min="1"
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_calculation"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
                                                     <td style="width: 110px">
 
-                                                        <input type="number" min="1"  
+                                                        <input type="number" min="1"
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_weight"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
 
                                                     <td style="width: 110px">
-                                                        <input type="number" min="1"  
+                                                        <input type="number" min="1"
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.quantity"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
                                                     <td style="width: 100px">
-                                                        <input type="text"  
+                                                        <input type="text"
                                                             wire:model.live="items.{{ $i }}.product_unit"
                                                             class="form-control form-control-sm"
                                                             style="background-color: aliceblue" readonly>
                                                     </td>
                                                     <td style="width: 200px" class="text-end">
 
-                                                        <input type="number" min="0" step="0.01"  
+                                                        <input type="number" min="0" step="0.01"
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.unit_price"
                                                             class="form-control form-control-sm text-end" />
 
@@ -247,16 +256,16 @@
                                                         {{ number_format($item['total'], 2) }}
                                                     </td>
                                                     <td>
-                                                        @if (!$quotation?->quote_status === QuotationStatus::Success)
-                                                              <a href="javascript: void(0);" 
+
+                                                        <a href="javascript: void(0);"
                                                             wire:click="removeItem({{ $i }})"><i
                                                                 class="mdi mdi-trash-can text-danger"
                                                                 style="font-size: 25px"></i></a>
-                                                        @endif
-                                                      
+
+
                                                     </td>
                                                 </tr>
-                                            @endforeach --}}
+                                            @endforeach
 
                                         </tbody>
                                     </table>
@@ -382,6 +391,11 @@
 </div>
 
 
+<script>
+window.addEventListener('qty-over', e => {
+    alert(`จำนวนของ ${e.detail.name} เกินคงเหลือ (สูงสุด ${e.detail.max})`);
+});
+</script>
 
 
 
@@ -422,8 +436,6 @@
 
 
 <script>
-
-
     document.addEventListener('delivery-created-success', function(e) {
         const detail = e.detail?.[0] ?? {};
         const deliveryId = parseInt(detail.deliveryId);

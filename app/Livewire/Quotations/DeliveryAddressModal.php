@@ -14,7 +14,7 @@ class DeliveryAddressModal extends Component
 {
     public ?int $delivery_id = null;
     public ?int $customer_id = null;
-
+    public array $items = [];
     public string $delivery_customer_id = '';
     public string $customer_name = '';
 
