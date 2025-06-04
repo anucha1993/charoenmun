@@ -3,7 +3,6 @@
 namespace App\Livewire\Quotations;
 
 use Livewire\Component;
-<<<<<<< HEAD
 use Livewire\Attributes\On;
 use App\Models\Orders\OrderModel;
 use Illuminate\Support\Collection;
@@ -11,15 +10,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\products\ProductModel;
 use App\Models\Orders\OrderItemsModel;
-=======
-use Illuminate\Support\Collection;
->>>>>>> 6007f9832596d98b7c0b77242e4c01e44199da09
 use App\Models\customers\CustomerModel;
+use App\Models\Quotations\QuotationModel;
 use App\Models\customers\deliveryAddressModel;
-use Livewire\Attributes\On;
 
+/**
+ * Livewire Component : สร้าง / แก้ไข ใบเสนอราคา
+ */
 class QuotationsForm extends Component
 {
+    /* ──────────────── State หลัก ──────────────── */
     public Collection $customers;
     public Collection $customerDelivery;
 
@@ -29,11 +29,7 @@ class QuotationsForm extends Component
 
     public ?CustomerModel $selectedCustomer = null;
     public ?deliveryAddressModel $selectedDelivery = null;
-    public array $customer = [];
-    // protected $listeners = ['customer-saved' => 'refreshCustomerFromModal'];
-    public ?int $selectedCustomerId = null;
 
-<<<<<<< HEAD
     public array $items = [];
 
     public float $quote_subtotal = 0;
@@ -80,15 +76,10 @@ class QuotationsForm extends Component
         }
 
         /* โหลด dropdown */
-=======
-    public function mount()
-    {
->>>>>>> 6007f9832596d98b7c0b77242e4c01e44199da09
         $this->customers = CustomerModel::all();
-        $this->customerDelivery = collect();
+        $this->customerDelivery = $this->customer_id ? deliveryAddressModel::where('customer_id', $this->customer_id)->get() : collect();
     }
 
-<<<<<<< HEAD
     /* เติม state จากโมเดล (ใช้ได้ทั้ง mount & refresh) */
     private function fillFromModel(QuotationModel $q): void
     {
@@ -428,57 +419,45 @@ class QuotationsForm extends Component
     }
 
     public function updatedCustomerId($value): void
-=======
-#[On('customer-created-success')]
-public function handleCustomerCreatedSuccess(array $payload)
-{
-    $this->customer_id = (int) ($payload['customerId'] ?? 0);
-    $this->refreshCustomers(); // ✅ reuse method ที่โหลดข้อมูลใหม่จริง
-}
-
-public function reloadCustomerListAndSelect($customerId)
-{
-    $this->customers = CustomerModel::all();
-    $this->customer_id = (int) $customerId;
-    $this->updatedCustomerId($this->customer_id);
-}
-
-    public function updatedCustomerId($value)
->>>>>>> 6007f9832596d98b7c0b77242e4c01e44199da09
     {
         $this->selectedCustomer = CustomerModel::find($value);
         $this->customerDelivery = deliveryAddressModel::where('customer_id', $value)->get();
-
         $this->selected_delivery_id = null;
         $this->selectedDelivery = null;
     }
 
-    public function updatedSelectedDeliveryId($id)
+    public function updatedSelectedDeliveryId($id): void
     {
         $this->selectedDelivery = deliveryAddressModel::find($id);
     }
 
-    public function setCustomerId($id)
+    #[On('delivery-updated-success')]
+    public function handleDeliveryUpdatedSuccess(array $payload)
     {
-        $this->customer_id = $id;
-        $this->updatedCustomerId($id); // เรียกใช้ logic เดิม
+        $this->selected_delivery_id = $payload['deliveryId'] ?? null;
     }
 
-   public function refreshCustomers()
-{
-    $this->customers = CustomerModel::all();
+    public function refreshCustomers(): void
+    {
+        $this->customers = CustomerModel::all();
+        if ($this->customer_id) {
+            $this->customerDelivery = deliveryAddressModel::where('customer_id', $this->customer_id)->get();
+            $this->updatedCustomerId($this->customer_id);
+        }
 
-    if ($this->customer_id) {
-        $this->customerDelivery = deliveryAddressModel::where('customer_id', $this->customer_id)->get();
-        $this->updatedCustomerId($this->customer_id);
+        $this->dispatch('$refresh');
     }
 
-    $this->dispatch('$refresh'); // ✅ บอก Livewire render ใหม่
-}
+    public function getIsCreateProperty(): bool
+    {
+        return $this->quotation_id === null; // true = โหมดสร้าง
+    }
 
+    /* ─────────── Livewire Render ─────────── */
     public function render()
     {
-        return view('livewire.quotations.quotations-form')->layout('layouts.horizontal', ['title' => 'Quotations']);
+        $products = ProductModel::all();
+        return view('livewire.quotations.quotations-form', compact('products'))->layout('layouts.horizontal', ['title' => 'Quotations']);
     }
 
     /// convert Quotations To orers

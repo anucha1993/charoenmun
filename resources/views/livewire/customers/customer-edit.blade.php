@@ -96,7 +96,6 @@
                                         style="background-color: aliceblue" readonly>
                                 </div>
                             </div>
-
                             <div class="row">
                                 <div class="col-md-6 mb-2">
                                     <label for="">ประเภทลูกค้า <span class="text-danger">*</span></label>
@@ -431,7 +430,7 @@
 
 
                         <div class="mb-3 text-center">
-                            <button ะ class="btn btn-primary" type="submit">บันทึก</button>
+                            <button  class="btn btn-primary" type="submit">บันทึก</button>
                         </div>
 
                     </form>
@@ -481,7 +480,7 @@
         });
     </script>
 
-    <script>
+    {{-- <script>
         document.addEventListener('livewire:init', () => {
             Livewire.on('notify', ({
                 message,
@@ -505,4 +504,4 @@
                 }
             });
         });
-    </script>
+    </script> --}}
