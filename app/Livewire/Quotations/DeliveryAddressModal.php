@@ -3,21 +3,25 @@
 namespace App\Livewire\Quotations;
 
 use Livewire\Component;
-use Livewire\Attributes\On;
-use App\Models\customers\CustomerModel;
 use App\Models\customers\deliveryAddressModel;
 use App\Models\addressList\provincesModel;
 use App\Models\addressList\amphuresModel;
 use App\Models\addressList\districtsModel;
+use Livewire\Attributes\On;
 
 class DeliveryAddressModal extends Component
 {
-    public ?int $delivery_id = null;
     public ?int $customer_id = null;
 
-    public string $delivery_customer_id = '';
-    public string $customer_name = '';
+    public string $delivery_contact_name = '',
+        $delivery_phone = '',
+        $delivery_number = '',
+        $delivery_province = '',
+        $delivery_amphur = '',
+        $delivery_district = '',
+        $delivery_zipcode = '';
 
+<<<<<<< HEAD
     public array $deliveryForm = [
         'delivery_customer_id' => '',
         'delivery_contact_name' => '',
@@ -101,108 +105,64 @@ class DeliveryAddressModal extends Component
     {
         $this->deliveryProvinces = provincesModel::orderBy('province_name')->pluck('province_name', 'province_code')->toArray();
     }
+=======
+    public array $provinces = [], $amphures = [], $districts = [];
+>>>>>>> 6007f9832596d98b7c0b77242e4c01e44199da09
 
     #[On('open-delivery-modal')]
-    public function openDeliveryModal($customerId = null)
+    public function open(array $params)
     {
-        if (!$customerId) {
-            return;
-        }
-
-        $customer = CustomerModel::find($customerId);
-
-        if ($customer) {
-            $this->delivery_customer_id = $customerId;
-            $this->customer_name = $customer->customer_name;
-            $this->dispatch('open-delivery-modal'); // เปิด modal ผ่าน JS
-        }
+        $this->reset();
+        $this->customer_id = $params['customerId'] ?? null;
+        $this->provinces = provincesModel::orderBy('province_name')->pluck('province_name', 'province_code')->toArray();
+        $this->dispatch('open-delivery-modal');
     }
 
-    public function updatedDeliveryFormDeliveryProvince()
+    public function updatedDeliveryProvince()
     {
-        $province = $this->deliveryForm['delivery_province'] ?? '';
-        $this->deliveryAmphures = amphuresModel::where('province_code', $province)->orderBy('amphur_name')->pluck('amphur_name', 'amphur_code')->toArray();
+        $this->amphures = amphuresModel::where('province_code', $this->delivery_province)
+            ->pluck('amphur_name', 'amphur_code')
+            ->toArray();
 
-        $this->deliveryForm['delivery_amphur'] = '';
-        $this->deliveryForm['delivery_district'] = '';
-        $this->deliveryDistricts = [];
+        $this->delivery_amphur = '';
+        $this->delivery_district = '';
+        $this->districts = [];
     }
 
-    public function updatedDeliveryFormDeliveryAmphur()
+    public function updatedDeliveryAmphur()
     {
-        $amphur = $this->deliveryForm['delivery_amphur'] ?? '';
-        $this->deliveryDistricts = districtsModel::where('amphur_code', $amphur)->orderBy('district_name')->pluck('district_name', 'district_code')->toArray();
-        $this->deliveryForm['delivery_district'] = '';
+        $this->districts = districtsModel::where('amphur_code', $this->delivery_amphur)
+            ->pluck('district_name', 'district_code')
+            ->toArray();
+
+        $this->delivery_district = '';
     }
 
-    public function updatedDeliveryFormDeliveryDistrict()
+    public function updatedDeliveryDistrict()
     {
-        $districtCode = $this->deliveryForm['delivery_district'] ?? '';
-        $zipcode = districtsModel::where('district_code', $districtCode)->value('zipcode');
-        $this->deliveryForm['delivery_zipcode'] = $zipcode ?? '';
+        $this->delivery_zipcode = districtsModel::where('district_code', $this->delivery_district)->value('zipcode') ?? '';
     }
 
-    public function updatedDeliveryFormDeliveryZipcode($zip)
-    {
-        if (strlen($zip) !== 5) {
-            return;
-        }
-
-        $districts = districtsModel::where('zipcode', $zip)->get();
-        if ($districts->isEmpty()) {
-            return;
-        }
-
-        // ✅ Step 1: set จังหวัด
-        $provinceCode = $districts->first()->province_code;
-        $this->deliveryForm['delivery_province'] = $provinceCode;
-
-        // ✅ Step 2: หาอำเภอจาก district (ไม่โหลดทั้งหมด)
-        $amphurCodes = $districts->pluck('amphur_code')->unique();
-
-        // ✅ โหลดเฉพาะอำเภอที่เกี่ยวข้องกับ zip นี้
-        $this->deliveryAmphures = amphuresModel::whereIn('amphur_code', $amphurCodes)->orderBy('amphur_name')->pluck('amphur_name', 'amphur_code')->toArray();
-
-        if ($amphurCodes->count() === 1) {
-            $this->deliveryForm['delivery_amphur'] = $amphurCodes->first();
-
-            // ✅ โหลดตำบลของอำเภอนั้นเท่านั้น
-            $this->deliveryDistricts = districtsModel::where('amphur_code', $this->deliveryForm['delivery_amphur'])->orderBy('district_name')->pluck('district_name', 'district_code')->toArray();
-
-            $districtsInAmphur = $districts->where('amphur_code', $this->deliveryForm['delivery_amphur']);
-            if ($districtsInAmphur->count() === 1) {
-                $this->deliveryForm['delivery_district'] = $districtsInAmphur->first()->district_code;
-            }
-        } else {
-            $this->deliveryForm['delivery_amphur'] = '';
-            $this->deliveryForm['delivery_district'] = '';
-            $this->deliveryDistricts = [];
-        }
-    }
-
-    public function saveDelivery()
+    public function save()
     {
         $this->validate([
-            'deliveryForm.delivery_contact_name' => 'required|string|max:255',
-            'deliveryForm.delivery_phone' => 'required|string|max:50',
-            'deliveryForm.delivery_number' => 'required|string|max:255',
-            'deliveryForm.delivery_province' => 'required|string',
-            'deliveryForm.delivery_amphur' => 'required|string',
-            'deliveryForm.delivery_district' => 'required|string',
-            'deliveryForm.delivery_zipcode' => 'required|string|size:5',
+            'delivery_contact_name' => 'required|string|max:255',
+            'delivery_phone' => 'required|string|max:20',
+            'delivery_number' => 'required|string|max:255',
         ]);
 
-        $delivery = deliveryAddressModel::create([
-            'customer_id' => $this->delivery_customer_id,
-            'delivery_contact_name' => $this->deliveryForm['delivery_contact_name'],
-            'delivery_phone' => $this->deliveryForm['delivery_phone'],
-            'delivery_number' => $this->deliveryForm['delivery_number'],
-            'delivery_province' => $this->deliveryForm['delivery_province'],
-            'delivery_amphur' => $this->deliveryForm['delivery_amphur'],
-            'delivery_district' => $this->deliveryForm['delivery_district'],
-            'delivery_zipcode' => $this->deliveryForm['delivery_zipcode'],
+        deliveryAddressModel::create([
+            'customer_id' => $this->customer_id,
+            'delivery_contact_name' => $this->delivery_contact_name,
+            'delivery_phone' => $this->delivery_phone,
+            'delivery_number' => $this->delivery_number,
+            'delivery_province' => $this->delivery_province,
+            'delivery_amphur' => $this->delivery_amphur,
+            'delivery_district' => $this->delivery_district,
+            'delivery_zipcode' => $this->delivery_zipcode,
         ]);
 
+<<<<<<< HEAD
         // แจ้ง parent ว่ามีการเพิ่มข้อมูลใหม่
         $this->dispatch('delivery-created-success', [
             'customerId' => $this->delivery_customer_id,
@@ -211,28 +171,10 @@ class DeliveryAddressModal extends Component
         $this->dispatch('delivery-created-success',['deliveryId' => $delivery->id])->to(\App\Livewire\Orders\OrderDelivery::class);
 
         $this->resetInput();
+=======
+>>>>>>> 6007f9832596d98b7c0b77242e4c01e44199da09
         $this->dispatch('close-delivery-modal');
-    }
-
-    public function closeModal()
-    {
-        $this->resetInput();
-        $this->dispatch('close-delivery-modal');
-    }
-
-    public function resetInput()
-    {
-        $this->deliveryForm = [
-            'delivery_contact_name' => '',
-            'delivery_phone' => '',
-            'delivery_number' => '',
-            'delivery_province' => '',
-            'delivery_amphur' => '',
-            'delivery_district' => '',
-            'delivery_zipcode' => '',
-        ];
-        $this->deliveryAmphures = [];
-        $this->deliveryDistricts = [];
+        $this->dispatch('delivery-saved', customerId: $this->customer_id);
     }
 
     public function render()

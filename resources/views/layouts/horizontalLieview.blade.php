@@ -39,27 +39,22 @@
 
 <body>
 
-   <div class="wrapper">
+    <div class="wrapper">
 
-        @include('layouts.shared/topbar')
-        @include('layouts.shared/left-sidebar')
+        @include('layouts.shared.topbar')
+        @include('layouts.shared.horizontal-nav')
 
         <div class="content-page">
             <div class="content">
-
-                <!-- Start Content-->
                 <div class="container-fluid">
-                    <br>
-                   {{ $slot }}
+
+
+                    {{ $slot }}
                 </div>
-                <!-- container -->
-
             </div>
-            <!-- content -->
 
-            @include('layouts.shared/footer')
+            @include('layouts.shared.footer')
         </div>
-
     </div>
 
     {{-- modal area --}}

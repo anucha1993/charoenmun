@@ -49,14 +49,6 @@
                             <a href="{{ route('second', ['pages', 'maintenance']) }}" class="dropdown-item">Maintenance</a>
                         </div>
                     </li>
-
-                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="{{route('quotations.index')}}" id="topnav-apps" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="ri-pages-line"></i>ใบเสนอราคา
-                        </a>
-                     </li>
-                    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="{{route('customers.index')}}">
                             <i class="ri-briefcase-line"></i>ข้อมูลลูกค้า 

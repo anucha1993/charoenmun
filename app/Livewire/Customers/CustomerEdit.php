@@ -17,7 +17,8 @@ class CustomerEdit extends Component
     public $customerId;
 
     // Fields สำหรับลูกค้า
-    public string $customer_code = '',
+    public string 
+        $customer_code = '',
         $customer_name = '',
         $customer_type = '',
         $customer_level = '',
@@ -54,6 +55,8 @@ class CustomerEdit extends Component
 
     public function mount()
     {
+      
+
         $this->provinces = provincesModel::orderBy('province_name')->pluck('province_name', 'province_code')->toArray();
         $this->deliveryProvinces = provincesModel::orderBy('province_name')->pluck('province_name', 'province_code')->toArray();
 
@@ -83,38 +86,42 @@ class CustomerEdit extends Component
         $this->customer_district = $customer->customer_district;
         $this->updatedCustomerDistrict();
         $this->customer_zipcode = $customer->customer_zipcode;
-
+         
         // โหลดที่อยู่จัดส่
+    
+          $this->deliveryAddresses = $customer->deliveryAddresses->toArray();
+           
+          
 
-        $this->deliveryAddresses = $customer->deliveryAddresses->toArray();
+
     }
 
     public function savePocketMoney()
-    {
-        $this->validate([
-            'customer_pocket_money' => 'required|numeric|min:0',
-            'confirm_password' => 'required',
-        ]);
+{
+    $this->validate([
+        'customer_pocket_money' => 'required|numeric|min:0',
+        'confirm_password' => 'required',
+    ]);
 
-        // ตรวจสอบรหัสผ่าน
-        if ($this->confirm_password !== env('PASSWORD_POCKET_MONEY')) {
-            // ✅ โหลดค่าจริงจาก DB กลับมา แทนค่าใหม่
-            $this->customer_pocket_money = CustomerModel::find($this->customerId)->customer_pocket_money;
+    // ตรวจสอบรหัสผ่าน
+    if ($this->confirm_password !== env('PASSWORD_POCKET_MONEY')) {
+        // ✅ โหลดค่าจริงจาก DB กลับมา แทนค่าใหม่
+        $this->customer_pocket_money = CustomerModel::find($this->customerId)->customer_pocket_money;
 
-            $this->dispatch('notify', message: 'รหัสไม่ถูกต้อง', type: 'error');
-            return;
-        }
-
-        // ✅ บันทึกเมื่อรหัสถูกต้อง
-        CustomerModel::where('id', $this->customerId)->update([
-            'customer_pocket_money' => $this->customer_pocket_money,
-        ]);
-
-        $this->dispatch('notify', message: 'บันทึกเรียบร้อยแล้ว', type: 'success');
-        $this->dispatch('closePocketMoneyModal');
-
-        $this->confirm_password = ''; // clear input
+        $this->dispatch('notify', message: 'รหัสไม่ถูกต้อง', type: 'error');
+        return;
     }
+
+    // ✅ บันทึกเมื่อรหัสถูกต้อง
+    CustomerModel::where('id', $this->customerId)->update([
+        'customer_pocket_money' => $this->customer_pocket_money,
+    ]);
+
+    $this->dispatch('notify', message: 'บันทึกเรียบร้อยแล้ว', type: 'success');
+    $this->dispatch('closePocketMoneyModal');
+
+    $this->confirm_password = ''; // clear input
+}
 
     public function updatedCustomerProvince()
     {
@@ -183,6 +190,8 @@ class CustomerEdit extends Component
 
     public function updatedDeliveryFormDeliveryAmphur()
     {
+
+        
         $amphur = $this->deliveryForm['delivery_amphur'] ?? '';
 
         $this->deliveryDistricts = districtsModel::where('amphur_code', $amphur)->orderBy('district_name')->pluck('district_name', 'district_code')->toArray();
@@ -209,21 +218,16 @@ class CustomerEdit extends Component
             return;
         }
 
-        // ✅ Step 1: set จังหวัด
+        // set province
         $provinceCode = $districts->first()->province_code;
         $this->deliveryForm['delivery_province'] = $provinceCode;
+        $this->updatedDeliveryFormDeliveryProvince();
 
-        // ✅ Step 2: หาอำเภอจาก district (ไม่โหลดทั้งหมด)
+        // set amphur
         $amphurCodes = $districts->pluck('amphur_code')->unique();
-
-        // ✅ โหลดเฉพาะอำเภอที่เกี่ยวข้องกับ zip นี้
-        $this->deliveryAmphures = amphuresModel::whereIn('amphur_code', $amphurCodes)->orderBy('amphur_name')->pluck('amphur_name', 'amphur_code')->toArray();
-
         if ($amphurCodes->count() === 1) {
             $this->deliveryForm['delivery_amphur'] = $amphurCodes->first();
-
-            // ✅ โหลดตำบลของอำเภอนั้นเท่านั้น
-            $this->deliveryDistricts = districtsModel::where('amphur_code', $this->deliveryForm['delivery_amphur'])->orderBy('district_name')->pluck('district_name', 'district_code')->toArray();
+            $this->updatedDeliveryFormDeliveryAmphur();
 
             $districtsInAmphur = $districts->where('amphur_code', $this->deliveryForm['delivery_amphur']);
             if ($districtsInAmphur->count() === 1) {
@@ -235,51 +239,54 @@ class CustomerEdit extends Component
             $this->deliveryDistricts = [];
         }
     }
-
     public function render()
     {
         return view('livewire.customers.customer-edit')->layout('layouts.horizontal', ['title' => 'Customers-Create']);
     }
 
-    public function openDeliveryModal($index = null)
-    {
-        $this->deliveryEditIndex = $index;
+  public function openDeliveryModal($index = null)
+{
+    $this->deliveryEditIndex = $index;
 
-        if ($index !== null && isset($this->deliveryAddresses[$index])) {
-            // STEP 1: set ค่าแบบ manual เพื่อไม่ให้ reset
-            $data = $this->deliveryAddresses[$index];
+    if ($index !== null && isset($this->deliveryAddresses[$index])) {
 
-            $this->deliveryForm = [
-                'delivery_number' => $data['delivery_number'] ?? '',
-                'delivery_province' => $data['delivery_province'] ?? '',
-                'delivery_amphur' => $data['delivery_amphur'] ?? '',
-                'delivery_district' => $data['delivery_district'] ?? '',
-                'delivery_zipcode' => $data['delivery_zipcode'] ?? '',
-                'delivery_contact_name' => $data['delivery_contact_name'] ?? '',
-                'delivery_phone' => $data['delivery_phone'] ?? '',
-            ];
+        // STEP 1: set ค่าแบบ manual เพื่อไม่ให้ reset
+        $data = $this->deliveryAddresses[$index];
 
-            // STEP 2: โหลด dropdown
-            $this->deliveryAmphures = amphuresModel::where('province_code', $this->deliveryForm['delivery_province'])->orderBy('amphur_name')->pluck('amphur_name', 'amphur_code')->toArray();
+        $this->deliveryForm = [
+            'delivery_number' => $data['delivery_number'] ?? '',
+            'delivery_province' => $data['delivery_province'] ?? '',
+            'delivery_amphur' => $data['delivery_amphur'] ?? '',
+            'delivery_district' => $data['delivery_district'] ?? '',
+            'delivery_zipcode' => $data['delivery_zipcode'] ?? '',
+            'delivery_contact_name' => $data['delivery_contact_name'] ?? '',
+            'delivery_phone' => $data['delivery_phone'] ?? '',
+        ];
 
-            $this->deliveryDistricts = districtsModel::where('amphur_code', $this->deliveryForm['delivery_amphur'])->orderBy('district_name')->pluck('district_name', 'district_code')->toArray();
-        } else {
-            $this->deliveryForm = [
-                'delivery_number' => '',
-                'delivery_province' => '',
-                'delivery_amphur' => '',
-                'delivery_district' => '',
-                'delivery_zipcode' => '',
-                'delivery_contact_name' => '',
-                'delivery_phone' => '',
-            ];
+        // STEP 2: โหลด dropdown
+        $this->deliveryAmphures = amphuresModel::where('province_code', $this->deliveryForm['delivery_province'])
+            ->orderBy('amphur_name')->pluck('amphur_name', 'amphur_code')->toArray();
 
-            $this->deliveryAmphures = [];
-            $this->deliveryDistricts = [];
-        }
+        $this->deliveryDistricts = districtsModel::where('amphur_code', $this->deliveryForm['delivery_amphur'])
+            ->orderBy('district_name')->pluck('district_name', 'district_code')->toArray();
+    } else {
+        $this->deliveryForm = [
+            'delivery_number' => '',
+            'delivery_province' => '',
+            'delivery_amphur' => '',
+            'delivery_district' => '',
+            'delivery_zipcode' => '',
+            'delivery_contact_name' => '',
+            'delivery_phone' => '',
+        ];
 
-        $this->dispatch('openModal');
+        $this->deliveryAmphures = [];
+        $this->deliveryDistricts = [];
     }
+
+    $this->dispatch('openModal');
+}
+
 
     public function saveDelivery()
     {

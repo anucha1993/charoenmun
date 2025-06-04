@@ -14,12 +14,11 @@ use App\Livewire\Orders\OrderIndex;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Products\ProductIndex;
 use App\Livewire\Customers\CustomerEdit;
-use Illuminate\Support\Facades\Response;
 use App\Livewire\Customers\CustomerIndex;
-use App\Models\Quotations\QuotationModel;
 use App\Livewire\Customers\CustomerCreate;
 use App\Livewire\Orders\OrderDeliveryEdit;
 use App\Http\Controllers\RoutingController;
+<<<<<<< HEAD
 use App\Livewire\Quotations\QuotationIndex;
 use App\Livewire\Quotations\QuotationPrint;
 use App\Livewire\Quotations\QuotationsForm;
@@ -28,6 +27,11 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Livewire\Orders\OrderDelivery;
 use App\Livewire\Globalsets\GlobalSetManager;
 
+=======
+use App\Livewire\Globalsets\GlobalSetManager;
+use App\Http\Controllers\customers\CustomerController;
+use App\Livewire\Quotations\QuotationsForm;
+>>>>>>> 6007f9832596d98b7c0b77242e4c01e44199da09
 
 /*
 |--------------------------------------------------------------------------
@@ -40,20 +44,7 @@ use App\Livewire\Globalsets\GlobalSetManager;
 |
 */
 
-//QR Code for Quotation
-Route::get('/qr/quotation/{id}', function (int $id) {
-    $number = QuotationModel::whereKey($id)->value('quote_number') ?? abort(404);
-
-    $svg = QrCode::format('svg')->size(300)->margin(1)->generate($number);
-
-    return Response::make($svg, 200, [
-        'Content-Type' => 'image/svg+xml',
-        'Cache-Control' => 'public,max-age=604800',
-        'ETag' => md5($svg),
-    ]);
-})
-    ->whereNumber('id')
-    ->name('qr.quotation');
+require __DIR__ . '/auth.php';
 
 // ✅ ประกาศให้ชัดก่อน
 Route::get('/dashboards', \App\Livewire\Dashboards::class)->middleware('auth')->name('dashboards');
@@ -67,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+<<<<<<< HEAD
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('quotations')
@@ -94,6 +86,9 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/quotations/{quotation}/print', QuotationPrint::class)->middleware('auth')->name('quotations.print');
+=======
+// Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
+>>>>>>> 6007f9832596d98b7c0b77242e4c01e44199da09
 
 // routes/web.php
 Route::get('/customers/edit/{customerId}', CustomerEdit::class)->name('customers.edit');
@@ -101,10 +96,13 @@ Route::get('/customers/create', CustomerCreate::class)->name('customers.create')
 Route::get('/customers', CustomerIndex::class)->name('customers.index');
 
 //Quotations
-Route::get('/quotations/create', QuotationsForm::class)->name('quotations.create');
+Route::get('/quotations/create',QuotationsForm::class)->name('quotations.create');
 
+<<<<<<< HEAD
 
 require __DIR__ . '/auth.php';
+=======
+>>>>>>> 6007f9832596d98b7c0b77242e4c01e44199da09
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', [RoutingController::class, 'index'])->name('root');
     Route::get('/home', fn() => view('index'))->name('home');

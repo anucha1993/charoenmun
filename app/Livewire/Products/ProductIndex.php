@@ -2,61 +2,41 @@
 
 namespace App\Livewire\Products;
 
-use Livewire\Component;
-use Livewire\WithPagination;
-use Illuminate\Support\Collection;
 use App\Models\products\ProductModel;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\globalsets\GlobalSetModel;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class ProductIndex extends Component
 {
    use WithPagination;
 
     // --- ฟิลด์สำหรับฟอร์ม ---
-    public $product_id ,$product_code,$product_name,$product_weight,$product_calculation,
+    public $product_id ,$product_code,$product_name,$product_weight,
            $product_price,$product_type,$product_unit,$product_note,
-           $product_wire_type,$product_side_steel_type,$product_size,
-           $product_length,$product_status = 1;
+           $product_status = 1;
 
     public $search = '';
     public $perPage = 10;
     public $isEdit = false;
-     public Collection $productType;
-     public Collection $productWireType;
-     public Collection $productSideSteelType;
-     public Collection $productUnit;
 
     protected $rules = [
         'product_code'   => 'required|string|max:50|unique:products,product_code',
         'product_name'   => 'required|string|max:255',
-        'product_size'   => 'required|string|max:255',
         'product_weight' => 'required|numeric|min:0',
         'product_price'  => 'required|numeric|min:0',
-        'product_unit'   => 'required',
+        'product_type'   => 'required|string|max:100',
+        'product_unit'   => 'required|string|max:50',
         'product_note'   => 'nullable|string',
         'product_status' => 'boolean'
     ];
-
-      public function mount()
-    {
-
-        $setproductType = GlobalSetModel::with('values')->find(3); //ประเภทสินค้า ID=3
-        $setProductWireType = GlobalSetModel::with('values')->find(4); //ประเภทสินค้า ID=4
-        $setProductSideSteelType = GlobalSetModel::with('values')->find(5); //ประเภทสินค้า ID=5
-        $setProductUnit = GlobalSetModel::with('values')->find(6); //ประเภทสินค้า ID=5
-        $this->productType = $setproductType?->values->where('status', 'Enable')->values() ?? collect();
-        $this->productWireType = $setProductWireType?->values->where('status', 'Enable')->values() ?? collect();
-        $this->productSideSteelType = $setProductSideSteelType?->values->where('status', 'Enable')->values() ?? collect();
-        $this->productUnit = $setProductUnit?->values->where('status', 'Enable')->values() ?? collect();
-    }
 
     // -- รีเซ็ตค่าเมื่อปิด modal
     public function resetForm()
     {
         $this->reset([
-            'product_id','product_code','product_name','product_weight','product_size','product_length','product_calculation',
-            'product_price','product_type','product_unit','product_note','product_wire_type','product_side_steel_type',
+            'product_id','product_code','product_name','product_weight',
+            'product_price','product_type','product_unit','product_note',
             'product_status','isEdit'
         ]);
         $this->resetValidation();
@@ -68,8 +48,8 @@ class ProductIndex extends Component
         $this->validate();
 
         ProductModel::create($this->only([
-            'product_code','product_name','product_weight','product_price','product_length','product_calculation',
-            'product_type','product_unit','product_note','product_status','product_wire_type','product_side_steel_type','product_size'
+            'product_code','product_name','product_weight','product_price',
+            'product_type','product_unit','product_note','product_status'
         ]));
 
         $this->dispatch('close-modal');       // Alpine event
@@ -95,8 +75,8 @@ class ProductIndex extends Component
 
         $product = ProductModel::findOrFail($this->product_id);
         $product->update($this->only([
-            'product_code','product_name','product_weight','product_price','product_wire_type','product_side_steel_type','product_size','product_calculation',
-            'product_type','product_unit','product_note','product_status','product_length'
+            'product_code','product_name','product_weight','product_price',
+            'product_type','product_unit','product_note','product_status'
         ]));
 
         $this->dispatch('close-modal');

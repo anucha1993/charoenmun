@@ -1,6 +1,6 @@
 <div>
     <style>
-
+        
     </style>
 
     <div class="content-page">
@@ -19,9 +19,13 @@
                     </div>
                 </div>
 
-                <div>
 
+                <div>
+                    {{-- ─────────────────────────────────────
+         JS : Toast + ควบคุม Bootstrap Modal
+    ───────────────────────────────────── --}}
                     <script>
+                    
                         document.addEventListener('DOMContentLoaded', () => {
                             const modal = new bootstrap.Modal(document.getElementById('product-modal'));
 
@@ -40,7 +44,7 @@
 
 
                                 <input type="text" class="form-control" placeholder="ค้นหาด้วยชื่อหรือรหัสสินค้า…"
-                                    wire:model.live.debounce.500ms="search">
+                                   wire:model.live.debounce.500ms="search">
                             </div>
                         </div>
 
@@ -79,11 +83,11 @@
                                         <tr wire:key="row-{{ $p->product_id }}">
                                             <td>{{ $products->firstItem() + $i }}</td>
                                             <td>{{ $p->product_code }}</td>
-                                            <td>{{ $p->product_name."(".$p->product_size.")" }}</td>
+                                            <td>{{ $p->product_name }}</td>
                                             <td class="text-end">{{ number_format($p->product_weight, 2) }}</td>
                                             <td class="text-end">{{ number_format($p->product_price, 2) }}</td>
-                                            <td>{{ $p->productType->value?? 'ไม่ระบุ' }}</td>
-                                            <td>{{ $p->productUnit->value }}</td>
+                                            <td>{{ $p->product_type }}</td>
+                                            <td>{{ $p->product_unit }}</td>
                                             <td>
                                                 <span
                                                     class="badge bg-{{ $p->product_status ? 'success' : 'secondary' }}">
@@ -113,8 +117,8 @@
 
                         <div class="card-footer">
                             {{-- {{ $products->links() }} --}}
-                            {{ $products->links('pagination::bootstrap-5') }}
-
+                            {{ $products->links( "pagination::bootstrap-5") }}
+                            
                         </div>
                     </div>
 
@@ -139,8 +143,7 @@
                                             {{-- product_code --}}
                                             <div class="col-md-6">
                                                 <label class="form-label">รหัสสินค้า *</label>
-                                                <input type="text" wire:model.defer="product_code"  style="background-color: aliceblue"
-                                                    placeholder="รหัสสินค้า"
+                                                <input type="text" wire:model.defer="product_code"
                                                     class="form-control @error('product_code') is-invalid @enderror">
                                                 @error('product_code')
                                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -148,82 +151,21 @@
                                             </div>
 
                                             {{-- product_name --}}
-                                            <div class="col-md-12">
-                                                <label class="form-label">ชื่อสินค้า *</label>
-                                                <input type="text" wire:model.defer="product_name"required
-                                                    placeholder="ชื่อสินค้า" 
-                                                    class="form-control @error('product_name') is-invalid @enderror">
-                                                @error('product_name')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                             <div class="col-md-12">
-                                                <label class="form-label">ขนาดสินค้าสินค้า *</label>
-                                                <input type="text" wire:model.defer="product_size" placeholder="กว้าง x ยาว x สูง...." required
-                                                    placeholder="ชื่อสินค้า"
-                                                    class="form-control @error('product_name') is-invalid @enderror">
-                                                @error('product_name')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            {{-- product_type --}}
                                             <div class="col-md-6">
-                                                <label class="form-label">ประเภทสินค้า *</label>
-                                                <select wire:model.defer="product_type" class="form-select @error('product_type') is-invalid @enderror" required>
-                                                     <option value="" >---กรุณาเลือก---</option>
-                                                    @foreach ($productType as $option)
-                                                        <option value="{{ $option->id }}">{{ $option->value }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @error('product_type')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-
-                                            </div>
-
-                                             <div class="col-md-6">
-                                                <label class="form-label">ประเภท ลวด *</label>
-                                                <select wire:model.defer="product_wire_type" class="form-select @error('product_wire_type') is-invalid @enderror">
-                                                    <option value="0">ไม่เลือก</option>
-                                                    @foreach ($productWireType as $option)
-                                                        <option value="{{ $option->id }}">{{ $option->value }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @error('product_wire_type')
+                                                <label class="form-label">ชื่อสินค้า *</label>
+                                                <input type="text" wire:model.defer="product_name"
+                                                    class="form-control @error('product_name') is-invalid @enderror">
+                                                @error('product_name')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
-                                             <div class="col-md-6">
-                                                <label class="form-label">ประเภทเหล็กข้าง *</label>
-                                                <select wire:model.defer="product_side_steel_type" class="form-select @error('product_side_steel_type') is-invalid @enderror">
-                                                    <option value="0">ไม่เลือก</option>
-                                                    @foreach ($productSideSteelType as $option)
-                                                        <option value="{{ $option->id }}">{{ $option->value }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @error('product_side_steel_type')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            
 
                                             {{-- product_weight --}}
-                                            <div class="col-md-3">
+                                            <div class="col-md-6">
                                                 <label class="form-label">น้ำหนัก (kg)</label>
-                                                <input type="number" step="0.01" wire:model.defer="product_weight" placeholder=".Kg"
+                                                <input type="number" step="0.01" wire:model.defer="product_weight"
                                                     class="form-control @error('product_weight') is-invalid @enderror">
                                                 @error('product_weight')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                               <div class="col-md-3">
-                                                <label class="form-label">ความยาว (เมตร)</label>
-                                                <input type="number" step="0.01" wire:model.defer="product_length" placeholder="20"
-                                                    class="form-control @error('product_length') is-invalid @enderror">
-                                                @error('product_length')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
@@ -238,31 +180,22 @@
                                                 @enderror
                                             </div>
 
-
+                                            {{-- product_type --}}
+                                            <div class="col-md-6">
+                                                <label class="form-label">ประเภทสินค้า *</label>
+                                                <input type="text" wire:model.defer="product_type"
+                                                    class="form-control @error('product_type') is-invalid @enderror">
+                                                @error('product_type')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
 
                                             {{-- product_unit --}}
                                             <div class="col-md-6">
                                                 <label class="form-label">หน่วย *</label>
-
-                                                 <select wire:model.defer="product_unit" class="form-select @error('product_type') is-invalid @enderror">
-                                                     <option value="0">ไม่เลือก</option>
-                                                    @foreach ($productUnit as $option)
-                                                        <option value="{{ $option->id }}">{{ $option->value }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-
-                                               
+                                                <input type="text" wire:model.defer="product_unit"
+                                                    class="form-control @error('product_unit') is-invalid @enderror">
                                                 @error('product_unit')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            
-                                            <div class="col-md-6">
-                                                <label class="form-label">ความหนา (ระบุหากต้องการใช้คำนวน)</label>
-                                                <input type="number" step="0.01" wire:model.defer="product_calculation" placeholder="ระบุหากต้องการใช้คำนวน"
-                                                    class="form-control @error('product_calculation') is-invalid @enderror">
-                                                @error('product_calculation')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
@@ -306,19 +239,14 @@
 
             </div>
 
-            {{-- ✅  คงไว้เฉพาะ script ใน @push --}}
-            @push('scripts')
-                <script>
-                    window.addEventListener('notify', e => {
-                        const {
-                            type = 'success', text = ''
-                        } = e.detail;
-                        toastr.options = {
-                            timeOut: 3500,
-                            progressBar: true,
-                            positionClass: 'toast-top-right'
-                        };
-                        toastr[type](text);
-                    });
-                </script>
-            @endpush
+{{-- ✅  คงไว้เฉพาะ script ใน @push --}}
+@push('scripts')
+<script>
+  window.addEventListener('notify', e => {
+      const {type='success', text=''} = e.detail;
+      toastr.options = {timeOut: 3500, progressBar: true, positionClass:'toast-top-right'};
+      toastr[type](text);
+  });
+</script>
+@endpush
+            
