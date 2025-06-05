@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <form wire:submit.prevent="save">
+                <form wire:submit="saveDelivery" novalidate >
                     <div class="card-body">
 
                         <!-- Invoice Logo-->
@@ -62,16 +62,18 @@
                                     @endif --}}
 
                                     <div class="">
+
                                         <div class="input-group flex-nowrap  mb-2">
                                             <span class="input-group-text" id="basic-addon1">เลขที่บิลหลัก : </span>
                                             <input type="text" class="form-control col-form-label-lg"
-                                                value="{{ $orderModel->order_number }}" aria-describedby="basic-addon1"
+                                                value="{{ $orderModel->order_number }}"aria-describedby="basic-addon1"
                                                 disabled>
                                         </div>
+
                                         <div class="input-group flex-nowrap">
-                                            <span class="input-group-text" id="basic-addon1">วันที่ออกเอกสาร :</span>
-                                            <input type="date" class="form-control col-form-label-lg"
-                                                wire:model="quote_date" aria-describedby="basic-addon1">
+                                            <span class="input-group-text" id="basic-addon1">วันที่จัดส่ง :</span>
+                                            <input type="date" class="form-control col-form-label-lg" required
+                                                wire:model="order_delivery_date" aria-describedby="basic-addon1">
                                         </div>
 
                                     </div>
@@ -192,7 +194,7 @@
                                         <tbody>
 
 
-
+                                            {{-- @dd($orderItems); --}}
                                             @foreach ($items as $i => $item)
                                                 <tr class="align-top" wire:key="row-{{ $i }}">
                                                     <td class="align-top">{{ $i + 1 }}</td>
@@ -204,7 +206,7 @@
                                                             @php $left = $stocksLeft[$oi->product_id] ?? 0; @endphp
                                                                 <option value="{{ $oi->product_id }}" @disabled($left === 0)>
                                                                     {{ $oi->product->product_name }}ขนาด{{ $oi->product->product_length}} เมตร 
-                                                                    ( {{ $left }})
+                                                                    ( {{ $left }}) {{$oi->product_calculation}}
                                                                 </option>
                                                             @endforeach
                                                         </select>
@@ -218,9 +220,9 @@
                                                             wire:model.live.debounce.500ms="items.{{ $i }}.product_length"
                                                             class="form-control form-control-sm">
                                                     </td>
-                                                    <td style="display: none">
 
-                                                        <input type="number" min="1"
+                                                    <td style="display: none">
+                                                        <input type="number" 
                                                             wire:model.live.debounce.500ms="items.{{ $i }}.product_calculation"
                                                             class="form-control form-control-sm" />
                                                     </td>
@@ -232,8 +234,7 @@
                                                             class="form-control form-control-sm" />
                                                     </td>
 
-
-                                                    <td style="width: 110px">
+                              <td style="width: 110px">
                                                         <input type="number" min="1"
                                                             wire:model.live.debounce.500ms="items.{{ $i }}.quantity"
                                                             class="form-control form-control-sm" />
@@ -247,7 +248,7 @@
                                                     </td>
                                                     <td style="width: 200px" class="text-end">
 
-                                                        <input type="number" min="0" step="0.01"
+                                                        <input type="number" min="0" step="0.01" readonly style="background-color: aliceblue"
                                                             wire:model.live.debounce.500ms="items.{{ $i }}.unit_price"
                                                             class="form-control form-control-sm text-end" />
 
@@ -284,7 +285,7 @@
                         <hr>
 
                         <div class="form-check mt-2" style="z-index: -9999999999; ">
-                            <input class="form-check-input" type="checkbox" wire:model.live="order_delivery__enable_vat"
+                            <input class="form-check-input" type="checkbox" wire:model.live="order_delivery_enable_vat"
                                 id="enableVatCheck">
                             <label class="form-check-label" for="enableVatCheck">
                                 คำนวณ VAT 7%
@@ -293,7 +294,7 @@
 
                         @if ($order_delivery_enable_vat)
                             <div class="form-check mt-2 ms-3">
-                                <input class="form-check-input" type="checkbox" wire:model.live="order_delivery__vat_included"  
+                                <input class="form-check-input" type="checkbox" wire:model.live="order_delivery_vat_included"  
                                     id="vatIncludedCheck">
                                 <label class="form-check-label" for="vatIncludedCheck">
                                     💡 คิดรวม VAT ในราคารวม (VAT-In)
@@ -306,7 +307,7 @@
                                 <div class="clearfix pt-3">
                                     <h6 class="text-muted fs-14">Notes:</h6>
                                     <small>
-                                        <textarea wire:model="quote_note" class="form-control" cols="3" rows="3"></textarea>
+                                        <textarea wire:model="order_delivery_note" class="form-control" cols="3" rows="3"></textarea>
                                     </small>
 
                                 </div>
@@ -325,7 +326,7 @@
                                     </div>
                                     <div class="col-md-2">
                                         <span class="float-end">
-                                            <input type="number" wire:model.live.debounce.300ms="quote_discount"
+                                            <input type="number" wire:model.live.debounce.300ms="order_delivery_discount"
                                                 class="form-control text-end form-control-sm" min="0"
                                                 step="0.01">
                                         </span>
@@ -372,6 +373,7 @@
 
                             </div>
                         </div>
+                        <button type="submit" class="btn btn-primary float-end mb-2">สร้างใบส่งสินค้า</button>
                 </form>
                 <!-- end buttons -->
 
@@ -418,14 +420,6 @@ window.addEventListener('qty-over', e => {
         }, 300); // รอ animation จบก่อนค่อยเคลียร์
     });
 </script>
-
-
-
-
-
-
-
-
 
 <script>
     document.addEventListener('livewire:update', () => {

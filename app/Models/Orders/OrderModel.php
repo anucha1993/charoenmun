@@ -14,6 +14,7 @@ class OrderModel extends Model
    use HasFactory;
 
     protected $table = 'orders';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'quote_id',
         'order_number',

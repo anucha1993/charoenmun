@@ -12,13 +12,15 @@ class OrderDeliverysModel extends Model
     use HasFactory;
 
     protected $table = 'order_deliveries';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'order_id',
         'order_delivery_number',
-        'delivery_date',
-        'delivery_status',
-        'payment_status',
-        'note',
+        'order_delivery_date',
+        'order_delivery_status', // สถานะการจัดส่ง 0 = รอจัดส่ง , 1 = จัดส่งสำเร็จ , 2 =  ยกเลิกการจัดส่ง
+        'payment_status', // สถานะการชำระเงิน 0 = รอชำระ , 1 = ชำระเงินครบแล้ว , 2 = ชำระเงินมัดจำ
+        'order_delivery_status_order',//สถานะการส่งทั้งหมดของ order ว่าบิลไหนจัดส่งครบเป็นบิลสุดท้าย  1 = ส่งครบแล้ว , 0 = ''
+        'order_delivery_note',
         'created_by',
         'updated_by',
         'order_delivery_subtotal',
@@ -31,7 +33,7 @@ class OrderDeliverysModel extends Model
 
 
     protected $casts = [
-        'delivery_date' => 'date',
+        'order_delivery_date' => 'date',
     ];
 
     public function order()

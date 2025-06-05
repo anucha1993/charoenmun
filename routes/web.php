@@ -40,6 +40,9 @@ use App\Livewire\Globalsets\GlobalSetManager;
 |
 */
 
+
+
+
 //QR Code for Quotation
 Route::get('/qr/quotation/{id}', function (int $id) {
     $number = QuotationModel::whereKey($id)->value('quote_number') ?? abort(404);
@@ -84,14 +87,29 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/{order}',     OrderShow::class)->name('orders.show');
     Route::get('/orders/{order}/edit', OrderForm::class)->name('orders.edit');
 
+        Route::get('/orders/{order}/show', OrderShow::class)->name('order.show');
     // 2) สร้างรอบจัดส่งใหม่
-    Route::get('/orders/{order}/delivery/create', OrderDelivery::class)
-         ->name('order-delivery.create');
 
-    // 3) แก้ไขรอบจัดส่ง
-    // Route::get('/orders/{order}/delivery/{delivery}/edit', OrderDeliveryEdit::class)
-    //      ->name('order-delivery.edit');
+    // Route::get('/orders/{order}/deliveries/create', OrderDelivery::class)->name('order-delivery.create');
+
+    // // 3) แก้ไขรอบจัดส่ง
+    // Route::get('/orders/{order}/delivery/{delivery}/edit', OrderDelivery::class)
+    //      ->name('deliveries.edit');
 });
+
+// Route::prefix('orders/{order}/deliveries')->group(function () {
+
+//     /* สร้างใบจัดส่งใหม่ */
+//     Route::get('create', OrderDelivery::class)->name('deliveries.create');
+
+//     /* แก้ไขใบจัดส่ง  */
+//     Route::get('{delivery}/edit', OrderDelivery::class)
+//          ->whereNumber('delivery')        // {delivery} ต้องเป็นตัวเลข
+//          ->name('deliveries.edit');
+// });
+
+
+
 
 Route::get('/quotations/{quotation}/print', QuotationPrint::class)->middleware('auth')->name('quotations.print');
 
@@ -104,6 +122,23 @@ Route::get('/customers', CustomerIndex::class)->name('customers.index');
 Route::get('/quotations/create', QuotationsForm::class)->name('quotations.create');
 
 
+
+Route::get(
+    'orders/{order}/deliveries/create',
+    OrderDelivery::class
+)->name('deliveries.create')
+  ->whereNumber('order');    // บังคับ {order} เป็นตัวเลขเท่านั้น
+
+// 2) หน้า "แก้ไขใบจัดส่ง" → URL = /orders/{order}/deliveries/{delivery}/edit
+Route::get(
+    'orders/{order}/deliveries/{delivery}/edit',
+    OrderDelivery::class
+)->name('deliveries.edit')
+  ->whereNumber('order')
+  ->whereNumber('delivery');
+  
+
+
 require __DIR__ . '/auth.php';
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', [RoutingController::class, 'index'])->name('root');
@@ -114,3 +149,4 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
     Route::get('{any}', [RoutingController::class, 'root'])->name('any');
 });
+

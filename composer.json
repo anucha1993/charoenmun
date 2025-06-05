@@ -31,7 +31,8 @@
          "files": [
             "app/helpers/helperQuoteStatus.php",
             "app/helpers/helperPaymentStatus.php",
-            "app/helpers/helperOrderStatus.php"
+            "app/helpers/helperOrderStatus.php",
+            "app/helpers/helperDeliveryStatus.php"
         ]
     },
     "autoload-dev": {

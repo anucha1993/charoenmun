@@ -123,56 +123,62 @@
         </div>
 
         {{-- ตัวอย่าง Loop แสดง Order Deliveries --}}
-        @foreach ($order->deliveries as $delivery)
+ 
             <div class="col-12 mb-3">
                 <div class="card border-secondary">
-                    <div class="card-header bg-secondary text-white">
+                    {{-- <div class="card-header bg-secondary text-white">
                         <div class="d-flex justify-content-between">
                             <span>Delivery #: {{ $delivery->order_delivery_number }}</span>
-                            <span>วันที่: {{ $delivery->delivery_date->format('d/m/Y') }}</span>
+                            <span>วันที่: {{ $delivery->order_delivery_date->format('d/m/Y') }}</span>
                         </div>
                         <div class="d-flex justify-content-between mt-1">
-                            <span>สถานะจัดส่ง: {{ ucfirst($delivery->delivery_status) }}</span>
+                            <span>สถานะจัดส่ง: {{ ucfirst($delivery->order_delivery_status) }}</span>
                             <span>สถานะชำระเงิน: {{ ucfirst($delivery->payment_status) }}</span>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="card-body">
                         {{-- ตารางรายการสินค้าที่จัดส่งในรอบนี้ --}}
                         <div class="table-responsive">
                             <table class="table table-sm table-striped table-hover mb-0">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>สินค้า</th>
-                                        <th>จำนวนส่ง</th>
-                                        <th>ราคา/หน่วย</th>
-                                        <th class="text-end">ยอดส่งรอบนี้</th>
+                                        <th>ลำดับ</th>
+                                        <th>วันที่จัดส่ง</th>
+                                        <th>เลขที่บิลย่อย</th>
+                                        <th>จำนวนเงินทั้งสิ้น</th>
+                                        <th>สถานะจัดส่ง</th>
+                                        <th>สถานะชำระเงิน</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($delivery->deliveryItems as $i => $item)
+                                          @foreach ($order->deliveries as $key => $delivery)
                                         <tr>
-                                            <td>{{ $i + 1 }}</td>
-                                            <td>{{ $item->orderItem->product_name }}</td>
-                                            <td>{{ $item->quantity }}</td>
-                                            <td>{{ number_format($item->unit_price, 2) }}</td>
-                                            <td class="text-end">{{ number_format($item->total, 2) }}</td>
-                                        </tr>
-                                    @endforeach
+                                            <td>{{ $key + 1 }}</td>
+                                            <td>{{$delivery->order_delivery_date->format('d/m/Y')}}</td>
+                                            <td>{{$delivery->order_delivery_number}}</td>
+                                            <td>{{number_format($delivery->order_delivery_grand_total,2)}}</td>
+                                            <td>{!! order_delivery_status_badge($delivery->order_delivery_status) !!}</td>
+                                            <td>{!! payment_status_badge($delivery->payment_status) !!}</td>
+                                            <td>
+                                                <a href="{{route('deliveries.edit',[$delivery->order_id, $delivery->id])}}" target="_blank">แก้ไข</a>
+                                            </td>
+
+                                    @endforeach<
                                 </tbody>
                             </table>
                         </div>
                         {{-- ปุ่มจัดการรายการย่อยถัดไป (ถ้ายัง pending) --}}
-                        @if ($delivery->delivery_status === 'pending')
+                        {{-- @if ($delivery->delivery_status === 'pending')
                             <div class="mt-2 text-end">
                                 <button wire:click="markDeliveryAsDelivered({{ $delivery->id }})" 
                                         class="btn btn-success btn-sm">ยืนยันจัดส่งแล้ว</button>
                             </div>
-                        @endif
+                        @endif --}}
                     </div>
                 </div>
             </div>
-        @endforeach
+   
 
         {{-- ถ้ายังสามารถสร้าง Delivery รอบใหม่ได้ (ยังไม่ delivered ครบ) --}}
        @if ($order->order_status === 'open')
