@@ -174,113 +174,109 @@ class OrderDelivery extends Component
             'unit_price' => 0,
             'total' => 0,
         ];
+        $this->refreshStocksLeft();
     }
-public function updatedItems($value, $key): void
-{
-    [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
 
-    if ($field === 'product_id') {
-        $productId = (int) $value;
-        if (!$productId) {
-            return;
-        }
+    public function updatedItems($value, $key): void
+    {
+        [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
 
-        foreach ($this->items as $i => $row) {
-            if ($i === $index) {
-                continue;
-            }
-            if ($row['product_id'] === $productId) {
-                $maxLeft = $this->stocksLeft[$productId] ?? 0;
-                $already = $row['quantity'] ?? 0;
-                $newQty = min($maxLeft, $already + ($this->items[$index]['quantity'] ?? 1));
-                if ($newQty === $already) {
-                    $this->dispatch('qty-full', name: $row['product_name']);
-                }
-                $this->items[$i]['quantity'] = $newQty;
-
-                unset($this->items[$index]);
-                $this->items = array_values($this->items);
-
-                $this->recalculateTotals();
-                $this->refreshStocksLeft();
+        if ($field === 'product_id') {
+            $productId = (int) $value;
+            if (!$productId) {
                 return;
             }
-        }
 
-        $oi = $this->orderItems->firstWhere('product_id', $productId);
-        if (!$oi) {
+            foreach ($this->items as $i => $row) {
+                if ($i === $index) {
+                    continue;
+                }
+                if ($row['product_id'] === $productId) {
+                    $maxLeft = $this->stocksLeft[$productId] ?? 0;
+                    $already = $row['quantity'] ?? 0;
+                    $newQty = min($maxLeft, $already + ($this->items[$index]['quantity'] ?? 1));
+                    if ($newQty === $already) {
+                        $this->dispatch('qty-full', name: $row['product_name']);
+                    }
+                    $this->items[$i]['quantity'] = $newQty;
+
+                    unset($this->items[$index]);
+                    $this->items = array_values($this->items);
+
+                    $this->recalculateTotals();
+                    $this->refreshStocksLeft();
+                    return;
+                }
+            }
+
+            $oi = $this->orderItems->firstWhere('product_id', $productId);
+            if (!$oi) {
+                return;
+            }
+
+            $leftQty = $this->stocksLeft[$productId] ?? 0;
+            if ($leftQty <= 0) {
+                $this->dispatch('qty-over', max: 0, name: $oi->product_name);
+                return;
+            }
+
+            $this->items[$index] = [
+                'product_id' => $productId,
+                'product_name' => $oi->product_name,
+                'product_detail' => $oi->product_detail,
+                'product_type' => $oi->product_type,
+                'product_length' => $oi->product_length,
+                'product_calculation' => $oi->product_calculation,
+                'product_weight' => $oi->product_weight,
+                'product_unit' => $oi->product_unit,
+                'unit_price' => $oi->unit_price,
+                'quantity' => $leftQty,
+                'total' => 0,
+            ];
+
+            $this->recalculateTotals();
+            $this->refreshStocksLeft();
             return;
         }
 
-        $leftQty = $this->stocksLeft[$productId] ?? 0;
-        if ($leftQty <= 0) {
-            $this->dispatch('qty-over', max: 0, name: $oi->product_name);
-            return;
-        }
+        if ($field === 'quantity') {
+            $productId = $this->items[$index]['product_id'] ?? null;
+            if ($productId) {
+                $maxLeft = $this->stocksLeft[$productId] ?? 0;
 
-        $this->items[$index] = [
-            'product_id' => $productId,
-            'product_name' => $oi->product_name,
-            'product_detail' => $oi->product_detail,
-            'product_type' => $oi->product_type,
-            'product_length' => $oi->product_length,
-            'product_calculation' => $oi->product_calculation,
-            'product_weight' => $oi->product_weight,
-            'product_unit' => $oi->product_unit,
-            'unit_price' => $oi->unit_price,
-            'quantity' => $leftQty,
-            'total' => 0,
-        ];
+                if ($this->editing && $this->deliveryModel) {
+                    $originalQty = optional($this->deliveryModel->deliveryItems->firstWhere('orderItem.product_id', $productId))->quantity ?? 0;
+                } else {
+                    $originalQty = 0;
+                }
 
-        $this->recalculateTotals();
-        $this->refreshStocksLeft();
-        return;
-    }
+                $used = collect($this->items)->filter(fn($item, $i) => $i != $index && $item['product_id'] === $productId)->sum('quantity');
 
-    if ($field === 'quantity') {
-        $productId = $this->items[$index]['product_id'] ?? null;
-        if ($productId) {
-            $maxLeft = $this->stocksLeft[$productId] ?? 0;
+                $allow = max(0, $maxLeft + $originalQty - $used);
 
-            if ($this->editing && $this->deliveryModel) {
-                $originalQty = optional(
-                    $this->deliveryModel->deliveryItems
-                        ->firstWhere('orderItem.product_id', $productId)
-                )->quantity ?? 0;
-            } else {
-                $originalQty = 0;
-            }
+                if ($value > $allow) {
+                    $this->items[$index]['quantity'] = $allow;
+                    $this->dispatch('qty-over', max: $allow, name: $this->items[$index]['product_name']);
 
-            $used = collect($this->items)
-                ->filter(fn ($item, $i) => $i != $index && $item['product_id'] === $productId)
-                ->sum('quantity');
-
-            $allow = max(0, ($maxLeft + $originalQty) - $used);
-
-            if ($value > $allow) {
-                $this->items[$index]['quantity'] = $allow;
-                $this->dispatch('qty-over', max: $allow, name: $this->items[$index]['product_name']);
-
-                // เรียก refresh เฉพาะตอนคืนค่าสินค้าเท่านั้น
-                $this->recalculateTotals();
-                $this->refreshStocksLeft();
-                return; // ต้อง return ทันทีเพื่อไม่เรียกซ้ำด้านล่าง
+                    // เรียก refresh เฉพาะตอนคืนค่าสินค้าเท่านั้น
+                    $this->recalculateTotals();
+                    $this->refreshStocksLeft();
+                    return; // ต้อง return ทันทีเพื่อไม่เรียกซ้ำด้านล่าง
+                }
             }
         }
+
+        // กรณีเปลี่ยนเฉพาะราคา หรือรายละเอียดอื่น ไม่ต้องเรียก refreshStocksLeft()
+        if (in_array($field, ['quantity', 'unit_price', 'product_calculation', 'product_length'])) {
+            $qty = $this->items[$index]['quantity'] ?? 0;
+            $up = $this->items[$index]['unit_price'] ?? 0;
+            $calc = $this->items[$index]['product_calculation'] ?? 1;
+            $len = $this->items[$index]['product_length'] ?? 1;
+            $this->items[$index]['total'] = $qty * $up * $calc * $len;
+
+            $this->recalculateTotals();
+        }
     }
-
-    // กรณีเปลี่ยนเฉพาะราคา หรือรายละเอียดอื่น ไม่ต้องเรียก refreshStocksLeft()
-    if (in_array($field, ['quantity', 'unit_price', 'product_calculation', 'product_length'])) {
-        $qty = $this->items[$index]['quantity'] ?? 0;
-        $up = $this->items[$index]['unit_price'] ?? 0;
-        $calc = $this->items[$index]['product_calculation'] ?? 1;
-        $len = $this->items[$index]['product_length'] ?? 1;
-        $this->items[$index]['total'] = $qty * $up * $calc * $len;
-
-        $this->recalculateTotals();
-    }
-}
-
 
     private function recalculateTotals(): void
     {
