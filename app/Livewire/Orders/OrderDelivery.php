@@ -178,153 +178,157 @@ class OrderDelivery extends Component
     }
 
     public function updatedItems($value, $key): void
-    {
-        [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
-        $index = (int) $index;
+{
+    [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
+    $index = (int) $index;
 
-        if ($field === 'product_id') {
-            $productId = (int) $value;
+    if ($field === 'product_id') {
+        $productId = (int) $value;
 
-            if (!$productId) {
-                $this->items[$index] = [
-                    'product_id' => null,
-                    'product_name' => '',
-                    'product_type' => '',
-                    'product_unit' => '',
-                    'product_calculation' => 1,
-                    'product_length' => 1,
-                    'product_weight' => null,
-                    'product_detail' => null,
-                    'quantity' => 1,
-                    'unit_price' => 0,
-                    'total' => 0,
-                ];
-                $this->recalculateTotals();
-                $this->refreshStocksLeft();
-                return;
-            }
-
-            foreach ($this->items as $i => $row) {
-                if ($i === $index) {
-                    continue;
-                }
-
-                if (($row['product_id'] ?? null) === $productId) {
-                    $oi = $this->orderItems->firstWhere('product_id', $productId);
-                    if (!$oi) {
-                        $this->dispatch('error', message: 'ไม่พบสินค้าในรายการออเดอร์');
-                        $this->items[$index]['product_id'] = null;
-                        $this->recalculateTotals();
-                        $this->refreshStocksLeft();
-                        return;
-                    }
-
-                    $baseStock = $this->stocks[$productId] ?? 0;
-                    $delivered = $this->getDeliveredByOthers($productId);
-
-                    $usedInForm = collect($this->items)->filter(fn($r) => ($r['product_id'] ?? null) === $productId)->sum('quantity');
-
-                    $currentQty = (int) ($this->items[$index]['quantity'] ?? 0);
-                    $maxAllowed = max(0, $baseStock - $delivered - $usedInForm + $currentQty);
-
-                    $this->items[$i]['quantity'] = max(1, min($row['quantity'] + $maxAllowed, $baseStock));
-
-                    unset($this->items[$index]);
-                    $this->items = array_values($this->items);
-
-                    $this->recalculateTotals();
-                    $this->refreshStocksLeft();
-                    return;
-                }
-            }
-
-            $oi = $this->orderItems->firstWhere('product_id', $productId);
-            if (!$oi) {
-                $this->dispatch('error', message: 'ไม่พบสินค้าในรายการออเดอร์');
-                $this->items[$index]['product_id'] = null;
-                $this->recalculateTotals();
-                $this->refreshStocksLeft();
-                return;
-            }
-
-            $baseStock = $this->stocks[$productId] ?? 0;
-            $delivered = $this->getDeliveredByOthers($productId);
-
-            $usedInForm = collect($this->items)->filter(fn($r) => ($r['product_id'] ?? null) === $productId)->sum('quantity');
-
-            $currentQty = (int) ($this->items[$index]['quantity'] ?? 0);
-            $maxAllowed = max(0, $baseStock - $delivered - $usedInForm + $currentQty);
-
-            if ($maxAllowed <= 0) {
-                $actualStockLeft = max(0, $baseStock - $delivered);
-                $this->dispatch('qty-over', max: $actualStockLeft, name: $oi->product_name);
-                $this->items[$index]['product_id'] = null;
-                $this->recalculateTotals();
-                $this->refreshStocksLeft();
-                return;
-            }
-
+        if (!$productId) {
             $this->items[$index] = [
-                'product_id' => $productId,
-                'product_name' => $oi->product_name,
-                'product_detail' => $oi->product_detail,
-                'product_type' => $oi->product_type,
-                'product_length' => $oi->product_length ?? 1,
-                'product_calculation' => $oi->product_calculation ?? 1,
-                'product_weight' => $oi->product_weight,
-                'product_unit' => $oi->product_unit,
-                'unit_price' => $oi->unit_price,
-                'quantity' => max(1, $maxAllowed),
+                'product_id' => null,
+                'product_name' => '',
+                'product_type' => '',
+                'product_unit' => '',
+                'product_calculation' => 1,
+                'product_length' => 1,
+                'product_weight' => null,
+                'product_detail' => null,
+                'quantity' => 1,
+                'unit_price' => 0,
                 'total' => 0,
             ];
-
             $this->recalculateTotals();
             $this->refreshStocksLeft();
             return;
         }
 
-        if ($field === 'quantity') {
-            $productId = $this->items[$index]['product_id'] ?? null;
-            if ($productId) {
-                $qty = (int) $value;
+        foreach ($this->items as $i => $row) {
+            if ($i === $index) continue;
+
+            if (($row['product_id'] ?? null) === $productId) {
+                $oi = $this->orderItems->firstWhere('product_id', $productId);
+                if (!$oi) {
+                    $this->dispatch('error', message: 'ไม่พบสินค้าในรายการออเดอร์');
+                    $this->items[$index]['product_id'] = null;
+                    $this->recalculateTotals();
+                    $this->refreshStocksLeft();
+                    return;
+                }
 
                 $baseStock = $this->stocks[$productId] ?? 0;
                 $delivered = $this->getDeliveredByOthers($productId);
 
-                $usedInForm = collect($this->items)->filter(fn($r) => ($r['product_id'] ?? null) === $productId)->sum('quantity');
+                $usedInForm = collect($this->items)
+                    ->filter(fn($r) => ($r['product_id'] ?? null) === $productId)
+                    ->sum('quantity');
 
                 $currentQty = (int) ($this->items[$index]['quantity'] ?? 0);
+                $maxAllowed = $this->editing
+                    ? max(0, $baseStock - $delivered - $usedInForm + $currentQty)
+                    : max(0, $baseStock - $delivered - $usedInForm);
 
-                if ($this->editing) {
-                    // โหมดแก้ไข: คืนค่าของเดิม
-                    $maxAllowed = max(0, $baseStock - $delivered - $usedInForm + $currentQty);
-                } else {
-                    // โหมดสร้างใหม่: ห้ามคืนค่าเดิม (เพราะยังไม่มีของเดิม)
-                    $maxAllowed = max(0, $baseStock - $delivered - $usedInForm);
-                }
-                if ($qty > $maxAllowed) {
-                
-                    $actualStockLeft = max(0, $baseStock - $delivered);
-                     $this->items[$index]['quantity'] = $actualStockLeft;
-                    $this->dispatch('qty-over', max: $actualStockLeft, name: $this->items[$index]['product_name']);
-                } elseif ($qty < 1) {
-                    $this->items[$index]['quantity'] = 1;
-                }
+                $this->items[$i]['quantity'] = max(1, min($row['quantity'] + $maxAllowed, $baseStock));
+
+                unset($this->items[$index]);
+                $this->items = array_values($this->items);
+
+                $this->recalculateTotals();
+                $this->refreshStocksLeft();
+                return;
             }
         }
 
-        if (in_array($field, ['quantity', 'unit_price', 'product_calculation', 'product_length'])) {
-            $qty = (float) ($this->items[$index]['quantity'] ?? 0);
-            $up = (float) ($this->items[$index]['unit_price'] ?? 0);
-            $calc = (float) ($this->items[$index]['product_calculation'] ?? 1);
-            $len = (float) ($this->items[$index]['product_length'] ?? 1);
-
-            $this->items[$index]['total'] = $qty * $up * max(1, $calc) * max(1, $len);
+        $oi = $this->orderItems->firstWhere('product_id', $productId);
+        if (!$oi) {
+            $this->dispatch('error', message: 'ไม่พบสินค้าในรายการออเดอร์');
+            $this->items[$index]['product_id'] = null;
+            $this->recalculateTotals();
+            $this->refreshStocksLeft();
+            return;
         }
+
+        $baseStock = $this->stocks[$productId] ?? 0;
+        $delivered = $this->getDeliveredByOthers($productId);
+
+        $usedInForm = collect($this->items)
+            ->filter(fn($r) => ($r['product_id'] ?? null) === $productId)
+            ->sum('quantity');
+
+        $currentQty = (int) ($this->items[$index]['quantity'] ?? 0);
+        $maxAllowed = $this->editing
+            ? max(0, $baseStock - $delivered - $usedInForm + $currentQty)
+            : max(0, $baseStock - $delivered - $usedInForm);
+
+        if ($maxAllowed <= 0) {
+            $actualStockLeft = max(0, $baseStock - $delivered);
+            $this->dispatch('qty-over', max: $actualStockLeft, name: $oi->product_name);
+            $this->items[$index]['product_id'] = null;
+            $this->recalculateTotals();
+            $this->refreshStocksLeft();
+            return;
+        }
+
+        $this->items[$index] = [
+            'product_id' => $productId,
+            'product_name' => $oi->product_name,
+            'product_detail' => $oi->product_detail,
+            'product_type' => $oi->product_type,
+            'product_length' => $oi->product_length ?? 1,
+            'product_calculation' => $oi->product_calculation ?? 1,
+            'product_weight' => $oi->product_weight,
+            'product_unit' => $oi->product_unit,
+            'unit_price' => $oi->unit_price,
+            'quantity' => max(1, $maxAllowed),
+            'total' => 0,
+        ];
 
         $this->recalculateTotals();
         $this->refreshStocksLeft();
+        return;
     }
+
+    if ($field === 'quantity') {
+        $productId = $this->items[$index]['product_id'] ?? null;
+        if ($productId) {
+            $qty = (int) $value;
+
+            $baseStock = $this->stocks[$productId] ?? 0;
+            $delivered = $this->getDeliveredByOthers($productId);
+
+            $usedInForm = collect($this->items)
+                ->filter(fn($r) => ($r['product_id'] ?? null) === $productId)
+                ->sum('quantity');
+
+            $currentQty = (int) ($this->items[$index]['quantity'] ?? 0);
+            $maxAllowed = $this->editing
+                ? max(0, $baseStock - $delivered - $usedInForm + $currentQty)
+                : max(0, $baseStock - $delivered - $usedInForm);
+
+            if ($qty > $maxAllowed) {
+                $this->items[$index]['quantity'] = $maxAllowed;
+                $actualStockLeft = max(0, $baseStock - $delivered);
+                $this->dispatch('qty-over', max: $actualStockLeft, name: $this->items[$index]['product_name']);
+            } elseif ($qty < 1) {
+                $this->items[$index]['quantity'] = 1;
+            }
+        }
+    }
+
+    if (in_array($field, ['quantity', 'unit_price', 'product_calculation', 'product_length'])) {
+        $qty = (float)($this->items[$index]['quantity'] ?? 0);
+        $up = (float)($this->items[$index]['unit_price'] ?? 0);
+        $calc = (float)($this->items[$index]['product_calculation'] ?? 1);
+        $len = (float)($this->items[$index]['product_length'] ?? 1);
+
+        $this->items[$index]['total'] = $qty * $up * max(1, $calc) * max(1, $len);
+    }
+
+    $this->recalculateTotals();
+    $this->refreshStocksLeft();
+}
+
 
     private function getDeliveredByOthers(int $productId): int
     {
