@@ -177,7 +177,7 @@ class OrderDelivery extends Component
         $this->refreshStocksLeft();
     }
 
-    public function updatedItems($value, $key): void
+   public function updatedItems($value, $key): void
 {
     [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
     $index = (int) $index;
@@ -221,13 +221,10 @@ class OrderDelivery extends Component
                 $delivered = $this->getDeliveredByOthers($productId);
 
                 $usedInForm = collect($this->items)
-                    ->filter(fn($r) => ($r['product_id'] ?? null) === $productId)
+                    ->filter(fn($r, $j) => $j !== $index && $j !== $i && ($r['product_id'] ?? null) === $productId)
                     ->sum('quantity');
 
-                $currentQty = (int) ($this->items[$index]['quantity'] ?? 0);
-                $maxAllowed = $this->editing
-                    ? max(0, $baseStock - $delivered - $usedInForm + $currentQty)
-                    : max(0, $baseStock - $delivered - $usedInForm);
+                $maxAllowed = max(0, $baseStock - $delivered - $usedInForm);
 
                 $this->items[$i]['quantity'] = max(1, min($row['quantity'] + $maxAllowed, $baseStock));
 
@@ -253,13 +250,10 @@ class OrderDelivery extends Component
         $delivered = $this->getDeliveredByOthers($productId);
 
         $usedInForm = collect($this->items)
-            ->filter(fn($r) => ($r['product_id'] ?? null) === $productId)
+            ->filter(fn($r, $j) => $j !== $index && ($r['product_id'] ?? null) === $productId)
             ->sum('quantity');
 
-        $currentQty = (int) ($this->items[$index]['quantity'] ?? 0);
-        $maxAllowed = $this->editing
-            ? max(0, $baseStock - $delivered - $usedInForm + $currentQty)
-            : max(0, $baseStock - $delivered - $usedInForm);
+        $maxAllowed = max(0, $baseStock - $delivered - $usedInForm);
 
         if ($maxAllowed <= 0) {
             $actualStockLeft = max(0, $baseStock - $delivered);
@@ -280,7 +274,7 @@ class OrderDelivery extends Component
             'product_weight' => $oi->product_weight,
             'product_unit' => $oi->product_unit,
             'unit_price' => $oi->unit_price,
-            'quantity' => max(1, $maxAllowed),
+            'quantity' => $maxAllowed,
             'total' => 0,
         ];
 
@@ -298,13 +292,10 @@ class OrderDelivery extends Component
             $delivered = $this->getDeliveredByOthers($productId);
 
             $usedInForm = collect($this->items)
-                ->filter(fn($r) => ($r['product_id'] ?? null) === $productId)
+                ->filter(fn($r, $j) => $j !== $index && ($r['product_id'] ?? null) === $productId)
                 ->sum('quantity');
 
-            $currentQty = (int) ($this->items[$index]['quantity'] ?? 0);
-            $maxAllowed = $this->editing
-                ? max(0, $baseStock - $delivered - $usedInForm + $currentQty)
-                : max(0, $baseStock - $delivered - $usedInForm);
+            $maxAllowed = max(0, $baseStock - $delivered - $usedInForm);
 
             if ($qty > $maxAllowed) {
                 $this->items[$index]['quantity'] = $maxAllowed;

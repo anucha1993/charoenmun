@@ -16,6 +16,7 @@ class OrderDeliverysModel extends Model
     protected $fillable = [
         'order_id',
         'order_delivery_number',
+        'delivery_address_id',
         'order_delivery_date',
         'order_delivery_status', // สถานะการจัดส่ง 0 = รอจัดส่ง , 1 = จัดส่งสำเร็จ , 2 =  ยกเลิกการจัดส่ง
         'payment_status', // สถานะการชำระเงิน 0 = รอชำระ , 1 = ชำระเงินครบแล้ว , 2 = ชำระเงินมัดจำ
