@@ -1,9 +1,11 @@
 <div>
     @php
-
-        $totalPages = ceil($delivery->deliveryItems->count() / 8);
+        $copies = ['ต้นฉบับ (ลูกค้า)', 'สำเนา (คลังสินค้า)', 'สำเนา (พนักงานขับรถ)','สำเนา (ฝ่ายบัญชี)'];
+        $copiesTotal = count($copies);
+        $totalPages = ceil($delivery->deliveryItems->count() / 8) * $copiesTotal ;
         $loopIndex = 1;
-        $copies = ['ต้นฉบับ (ลูกค้า)', 'สำเนา (คลังสินค้า)', 'สำเนา (พนักงานขับรถ)', 'สำเนา (ฝ่ายบัญชี)'];
+        $showPricePages = request('show_price', []);
+        
     @endphp
  <!-- Modal สำหรับเลือกหน้า -->
     <div class="modal fade" id="printPriceModal" tabindex="-1" role="dialog">
@@ -15,15 +17,15 @@
                 <div class="modal-body">
                     <form id="priceSelectionForm">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="0" id="showPrice0" checked>
+                            <input class="form-check-input" type="checkbox" value="0" id="showPrice0" >
                             <label class="form-check-label" for="showPrice0">หน้า 1</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="1" id="showPrice1" checked>
+                            <input class="form-check-input" type="checkbox" value="1" id="showPrice1" >
                             <label class="form-check-label" for="showPrice1">หน้า 2</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="2" id="showPrice2" checked>
+                            <input class="form-check-input" type="checkbox" value="2" id="showPrice2" >
                             <label class="form-check-label" for="showPrice2">หน้า 3</label>
                         </div>
                         <div class="form-check">
@@ -40,20 +42,21 @@
         </div>
     </div>
 
-    <div class="d-print-none text-center mt-4">
+    <div class="d-print-none text-center mb-4">
         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#printPriceModal">
             <i class="ri-printer-line"></i> พิมพ์ใบส่งของ
         </button>
     </div>
+    
 @foreach ($copies as $copyIndex => $copyName)
     @foreach ($delivery->deliveryItems->chunk(8) as $chunkIndex => $chunk)
-        <div class="card row text-black" style="margin-top: 0px">
+        <div class="card row text-black page-copy" >
             <div class="card-body">
                 <!-- Invoice Detail-->
                 <div class="clearfix">
                     <div class="float-start">
-                        <img src="/images/logo-cmc.png" class="mb-1" alt="dark logo" height="60">
-                        <h4 class="m-0 mb-3">Order Delivery / ใบส่งสินค้า</h4>
+                        <img src="/images/logo-cmc.png" class="mb-0" alt="dark logo" height="60">
+                        <h4 class="m-0 mb-0">Order Delivery / ใบส่งสินค้า</h4>
                     </div>
 
                     <div class="float-center">
@@ -62,7 +65,7 @@
 
                             <img src="{{ route('qr.deliveries', $delivery->id) }}" alt="QR"
                                 style="height:100px;"><br>
-                            <small class="float-end">หน้า {{ $chunkIndex + 1 }}/{{ $totalPages }}</small>
+                            <small class="float-end">หน้า {{ $copyIndex + 1 }}/{{ $totalPages }}</small>
                         </div>
 
                     </div>
@@ -231,13 +234,13 @@
 
                 <div class="row ">
                     <div class="col-sm-6">
-                        <div class="clearfix pt-5">
+                        <div class="clearfix pt-4">
                             <span>ลงชื่อผู้รับสินค้า............................................................ผู้รับสินค้า</span><br>
 
                         </div>
                     </div> <!-- end col -->
                     <div class="col-sm-6">
-                        <div class="float-end mt-sm-0  pt-5">
+                        <div class="float-end mt-sm-0  pt-4">
                             <span>ลงชื่อผู้รับเงิน............................................................ผู้รับเงิน</span><br>
 
                         </div>
@@ -245,74 +248,105 @@
                     </div> <!-- end col -->
                 </div>
 
-                <div class="d-print-none mt-4">
+                {{-- <div class="d-print-none mt-4">
                     <div class="text-center">
                         <a href="javascript:window.print()" class="btn btn-danger"><i class="ri-printer-line"></i>
                             Print</a>
 
                     </div>
-                </div>
+                </div> --}}
                 <!-- end buttons -->
 
             </div> <!-- end card-body-->
         </div> <!-- end card -->
+
+        <div class="d-print-none text-center mb-4">
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#printPriceModal">
+                <i class="ri-printer-line"></i> พิมพ์ใบส่งของ
+            </button>
+        </div>
+
+
     @endforeach
+    @if (!$loop->last)
+        <div class="page-break"></div>
+    @endif
     @endforeach
     <!-- end row -->
-</div>
-
-
-<script>
-    function applyPriceAndPrint() {
-        const selectedPages = [];
-        for (let i = 0; i <= 2; i++) {
-            if (document.getElementById('showPrice' + i).checked) {
-                selectedPages.push(i);
+    <style>
+        @media print {
+            .page-break {
+                page-break-before: always;
             }
         }
 
-        const allPages = document.querySelectorAll('.card');
-        allPages.forEach((page, index) => {
-            const priceEls = page.querySelectorAll('.price-section');
-            if (index < 3) {
-                priceEls.forEach(el => el.style.display = selectedPages.includes(index) ? '' : 'none');
-            } else {
-                priceEls.forEach(el => el.style.display = '');
-            }
-        });
-
-        const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
-        modal.hide();
-        setTimeout(() => window.print(), 300);
+        .watermark {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 150px;
+        font-weight: bold;
+        color: red;
+        opacity: 0.1;
+        z-index: 9999;
+        pointer-events: none;
+        font-style: italic;
+        text-align: center;
+        white-space: nowrap;
     }
 
+    @media print {
+        .watermark {
+            display: none !important;
+        }
+    }
+    </style>
+<div class="watermark">ตัวอย่างก่อนพิมพ์</div>
+</div>
+
+
+
+<script>
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     const printModal = new bootstrap.Modal(document.getElementById('printPriceModal'));
+    //     printModal.show();
+    // });
+
+    function applyPriceAndPrint() {
+    const selectedPages = [];
+    for (let i = 0; i <= 2; i++) {
+        if (document.getElementById('showPrice' + i).checked) {
+            selectedPages.push(i);
+        }
+    }
+
+    const allCopies = document.querySelectorAll('.page-copy');
+    allCopies.forEach((copyEl, index) => {
+        const priceEls = copyEl.querySelectorAll('.price-section');
+        if (index < 3) {
+            // ✅ ถ้าอยู่ใน selectedPages ให้แสดง
+            const show = selectedPages.includes(index);
+            priceEls.forEach(el => el.style.display = show ? '' : 'none');
+        } else {
+            // ✅ หน้า 4 แสดงราคาเสมอ
+            priceEls.forEach(el => el.style.display = '');
+        }
+    });
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
+    modal.hide();
+
+    setTimeout(() => window.print(), 300);
+}
+
+
     window.addEventListener('afterprint', () => {
-        history.back();
+        history.back(); 
     });
 </script>
 
 
 
-{{-- 
 
-<script>
-    // เรียกเมื่อหน้าโหลดเสร็จ
-    document.addEventListener('DOMContentLoaded', () => {
 
-        /** ฟังก์ชันกลับหน้าเดิม */
-        const goBack = () => {
-            // วิธี A: กลับหน้าเดิม
-            history.back();
-
-            // หรือ วิธี B: redirect ไป index โดยตรง
-            // location.href = "{{ route('deliverys.index') }}";
-        };
-
-        /* 1) เรียก dialog พิมพ์ทันที */
-        window.print();
-
-        /* 2) หลังกล่องพิมพ์ปิดแล้ว (กดพิมพ์หรือยกเลิก) → เรียก goBack */
-        window.addEventListener('afterprint', goBack); // Chrome/Edge
-        window.onafterprint = goBack; // Safari/Firefox fallback
-    });
-</script> --}}

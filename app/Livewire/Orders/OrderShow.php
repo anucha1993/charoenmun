@@ -13,6 +13,7 @@ class OrderShow extends Component
 {
    public OrderModel $order;
    public array $deliveredQtyMap = [];
+   public OrderDeliverysModel $delivery;
 
    public function mount(OrderModel $order)
 {
@@ -31,6 +32,8 @@ class OrderShow extends Component
     {
         return view('livewire.orders.order-show')->layout('layouts.horizontal', ['title' => 'Order #' . $this->order->order_number]);;
     }
+
+    
 
     /**
      * กดปุ่มสร้างรอบจัดส่งใหม่ (Delivery) 
