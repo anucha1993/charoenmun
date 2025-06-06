@@ -20,7 +20,7 @@ class OrderDeliveryService
 
             /* รวม field ที่อนุญาต */
             $data = Arr::only($payload, [
-                'order_delivery_date', 'order_delivery_status', 'payment_status',
+                'order_delivery_date', 'order_delivery_status', 'payment_status','delivery_address_id',
                 'order_delivery_note', 'order_delivery_subtotal',
                 'order_delivery_vat', 'order_delivery_discount',
                 'order_delivery_grand_total', 'order_delivery_enable_vat',
@@ -49,7 +49,7 @@ class OrderDeliveryService
         return DB::transaction(function () use ($delivery, $payload) {
 
             $data = Arr::only($payload, [
-                'order_delivery_date', 'order_delivery_status', 'payment_status',
+                'order_delivery_date', 'order_delivery_status', 'payment_status','delivery_address_id',
                 'order_delivery_note', 'order_delivery_subtotal',
                 'order_delivery_vat', 'order_delivery_discount',
                 'order_delivery_grand_total', 'order_delivery_enable_vat',

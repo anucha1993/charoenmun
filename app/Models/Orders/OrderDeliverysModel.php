@@ -2,9 +2,11 @@
 
 namespace App\Models\Orders;
 
+use App\Models\User;
 use App\Models\Orders\OrderModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Orders\OrderDeliveryItems;
+use App\Models\customers\deliveryAddressModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class OrderDeliverysModel extends Model
@@ -41,9 +43,18 @@ class OrderDeliverysModel extends Model
     {
         return $this->belongsTo(OrderModel::class, 'order_id');
     }
+    public function deliveryAddress()
+    {
+        return $this->belongsTo(deliveryAddressModel::class, 'delivery_address_id');
+    }
 
     public function deliveryItems()
     {
         return $this->hasMany(OrderDeliveryItems::class, 'order_delivery_id');
+    }
+
+    public function sale()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

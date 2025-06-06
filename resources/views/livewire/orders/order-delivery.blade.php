@@ -125,7 +125,7 @@
 
                                 </div>
 
-
+                                 {{-- {{$selected_delivery_id}} --}}
                                 <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
                                     class="form-select">
 

@@ -12,12 +12,21 @@ use App\Models\Orders\OrderDeliverysModel;
 class OrderShow extends Component
 {
    public OrderModel $order;
+   public array $deliveredQtyMap = [];
 
-    public function mount(OrderModel $order)
-    {
-        $this->order = $order->load(['customer', 'deliveryAddress', 'items', 'deliveries.deliveryItems']);
-    }
+   public function mount(OrderModel $order)
+{
+    $this->order = $order->load(['customer', 'deliveryAddress', 'items', 'deliveries.deliveryItems']);
 
+    // 🔽 สร้าง Map ของ product_id → จำนวนที่ถูกส่งไปแล้ว
+    $this->deliveredQtyMap = OrderDeliveryItems::query()
+        ->join('order_items', 'order_delivery_items.order_item_id', '=', 'order_items.id')
+        ->where('order_items.order_id', $order->id)
+        ->select('order_items.product_id', DB::raw('SUM(order_delivery_items.quantity) as delivered'))
+        ->groupBy('order_items.product_id')
+        ->pluck('delivered', 'product_id')
+        ->toArray();
+}
     public function render()
     {
         return view('livewire.orders.order-show')->layout('layouts.horizontal', ['title' => 'Order #' . $this->order->order_number]);;
@@ -34,73 +43,7 @@ class OrderShow extends Component
         return redirect()->route('order-delivery.create', $this->order->id);
     }
     
-    // public function createNewDelivery()
-    // {
-    //     // ตรวจยอดคงเหลือก่อน: ถ้า order.status != 'open' ให้หยุด
-    //     if ($this->order->order_status !== 'open') {
-    //         $this->dispatchBrowserEvent('notify', [
-    //             'type' => 'error',
-    //             'message' => 'ไม่สามารถสร้างรอบจัดส่งใหม่ได้ เนื่องจากสถานะออร์เดอร์ไม่เปิด'
-    //         ]);
-    //         return;
-    //     }
-
-    //     DB::transaction(function () {
-    //         // 1) generate order_delivery_number (เช่น ODL24060001)
-    //         $deliveryNumber = $this->generateOrderDeliveryNumber();
-
-    //         // 2) สร้าง order_delivery (header)
-    //         $delivery = OrderDeliverysModel::create([
-    //             'order_id'               => $this->order->id,
-    //             'order_delivery_number'  => $deliveryNumber,
-    //             'delivery_date'          => now()->toDateString(),
-    //             'delivery_status'        => 'pending',
-    //             'payment_status'         => 'pending',
-    //             'note'                   => null,
-    //             'created_by'             => Auth::id(),
-    //             'updated_by'             => Auth::id(),
-    //         ]);
-
-    //         // 3) วนสร้าง order_delivery_items จาก order_items ทั้งหมด
-    //         foreach ($this->order->items as $orderItem) {
-    //             // ถ้ายังมียอดคงเหลือ (quantity > 0) ให้สร้างเป็น delivery item
-    //             if ($orderItem->quantity > 0) {
-    //                 OrderDeliveryItems::create([
-    //                     'order_delivery_id' => $delivery->id,
-    //                     'order_item_id'     => $orderItem->id,
-    //                     // สมมติคราวนี้ส่งเต็มที่
-    //                     'quantity'          => $orderItem->quantity,
-    //                     'unit_price'        => $orderItem->unit_price,
-    //                     'total'             => $orderItem->quantity * $orderItem->unit_price,
-    //                 ]);
-
-    //                 // 4) ลดยอดคงเหลือใน order_items (เหลือ = 0)
-    //                 $orderItem->update([
-    //                     'quantity' => 0,
-    //                 ]);
-    //             }
-    //         }
-
-    //         // 5) อัปเดตสถานะออร์เดอร์หลักถ้าไม่มีสินค้าเหลือ
-    //         $remaining = $this->order->items()->sum('quantity');
-    //         if ($remaining == 0) {
-    //             $this->order->update([
-    //                 'status' => 'completed',
-    //             ]);
-    //         }
-
-    //         $this->order->load('deliveries.deliveryItems', 'items');
-
-    //         $this->dispatchBrowserEvent('notify', [
-    //             'type' => 'success',
-    //             'message' => 'สร้างรอบจัดส่ง #' . $deliveryNumber . ' เรียบร้อย'
-    //         ]);
-    //     });
-    // }
-
-    /**
-     * ตัวอย่างฟังก์ชันสุ่ม Order Delivery Number
-     */
+    
     private function generateOrderDeliveryNumber(): string
     {
         $prefix = 'ODL' . now()->format('ym');
