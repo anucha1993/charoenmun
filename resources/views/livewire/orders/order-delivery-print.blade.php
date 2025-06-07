@@ -35,7 +35,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <a href="{{ url()->previous() }}" class="btn btn-secondary">กลับ</a>
                     <button type="button" class="btn btn-primary" onclick="applyPriceAndPrint()">พิมพ์เอกสาร</button>
                 </div>
             </div>
@@ -260,11 +260,11 @@
             </div> <!-- end card-body-->
         </div> <!-- end card -->
 
-        <div class="d-print-none text-center mb-4">
+        {{-- <div class="d-print-none text-center mb-4">
             <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#printPriceModal">
                 <i class="ri-printer-line"></i> พิมพ์ใบส่งของ
             </button>
-        </div>
+        </div> --}}
 
 
     @endforeach
@@ -308,10 +308,10 @@
 
 
 <script>
-    // document.addEventListener('DOMContentLoaded', function () {
-    //     const printModal = new bootstrap.Modal(document.getElementById('printPriceModal'));
-    //     printModal.show();
-    // });
+    document.addEventListener('DOMContentLoaded', function () {
+        const printModal = new bootstrap.Modal(document.getElementById('printPriceModal'));
+        printModal.show();
+    });
 
     function applyPriceAndPrint() {
     const selectedPages = [];

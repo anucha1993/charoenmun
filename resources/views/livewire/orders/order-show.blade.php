@@ -168,7 +168,7 @@
                                                     <td>{!! order_delivery_status_badge($delivery->order_delivery_status) !!}</td>
                                                     <td>{!! payment_status_badge($delivery->payment_status) !!}</td>
                                                     <td>
-                                                        <a  target="_blank" href="{{route('deliveries.printer',$delivery->id)}}" class="text-pink"><i class="mdi mdi-printer"></i> พิมพ์</a> |
+                                                        <a  href="{{route('deliveries.printer',$delivery->id)}}" class="text-pink"><i class="mdi mdi-printer"></i> พิมพ์</a> |
                                                         <a href="{{ route('deliveries.edit', [$delivery->order_id, $delivery->id]) }}"
                                                             target="_blank">แก้ไข</a> |
                                                         <a href="" class="text-danger"><i class="mdi mdi-trash-can"></i>  ลบ</a>
@@ -199,12 +199,82 @@
     </div>
 
     
+<!-- Modal สำหรับเลือกหน้า -->
+<div class="modal fade" id="printPriceModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">เลือกสำเนาที่ต้องการแสดงราคา</h5>
+            </div>
+            <div class="modal-body">
+                <form id="priceSelectionForm" method="GET" >
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="0" id="showPrice0" >
+                        <label class="form-check-label" for="showPrice0">หน้า 1</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="1" id="showPrice1" >
+                        <label class="form-check-label" for="showPrice1">หน้า 2</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="2" id="showPrice2" >
+                        <label class="form-check-label" for="showPrice2">หน้า 3</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" disabled checked>
+                        <label class="form-check-label">หน้า 4 (แสดงราคาเสมอ)</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                <button type="button" class="btn btn-primary" onclick="applyPriceAndRedirect({{ $delivery->id }})">พิมพ์เอกสาร</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-print-none text-center mb-4">
+    <button type="button" class="btn btn-primary" onclick="openPrintPreview({{ $delivery->id }})">
+        พิมพ์เอกสาร
+    </button>
+</div>
+
+
 
 
 </div>
 
 <script>
+    function openPrintPreview(deliveryId) {
+        const selected = [];
+    
+        for (let i = 0; i <= 2; i++) {
+            const checkbox = document.getElementById('showPrice' + i);
+            if (checkbox && checkbox.checked) {
+                selected.push(i);
+            }
+        }
+    
+        // สร้าง query string เช่น show_price[]=0&show_price[]=1
+        const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
+    
+        // สร้าง URL ไปยัง route delivery/print
+        const printUrl = `{{ url('deliveries') }}/${deliveryId}/print?${query}`;
+    
+        // เปิดในแท็บใหม่
+        window.open(printUrl, '_blank');
+    
+        // ปิด modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
+        if (modal) modal.hide();
+    }
+    </script>
+    
+    
+
+{{-- <script>
     window.addEventListener('open-print', event => {
         window.open(event.detail.url, '_blank');
     });
-</script>
+</script> --}}
