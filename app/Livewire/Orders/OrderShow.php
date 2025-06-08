@@ -46,7 +46,7 @@ class OrderShow extends Component
     public function createNewDelivery()
     {
         // เมื่อผู้ใช้กดปุ่ม “สร้างรอบจัดส่งใหม่” → redirect ไปหน้าฟอร์มสร้างรอบจัดส่ง
-        return redirect()->route('order-delivery.create', $this->order->id);
+        return redirect()->route('deliveries.create', $this->order->id);
     }
 
     private function generateOrderDeliveryNumber(): string

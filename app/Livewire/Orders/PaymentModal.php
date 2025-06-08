@@ -27,6 +27,17 @@ class PaymentModal extends Component
     public $deliveryTotal = 0;
     public $deliveryPaid = 0;
     public $deliveryRemain = 0;
+    public string $mode = 'api'; // หรือ 'manual'
+    public bool $showManualForm = false;
+    public array $manual = [
+        'bank_name' => '',
+        'account_no' => '',
+        'sender_name' => '',
+        'receiver_name' => '',
+        'receiver_account_no' => '',
+        'transfer_at' => '',
+        'amount' => 0,
+    ];
 
     #[On('open-payment-modal')]
     public function openPaymentModal($orderId, $deliveryId)
@@ -52,45 +63,51 @@ class PaymentModal extends Component
         }
     }
 
-    public function updatedSlip()
-    {
-        $this->validate([
-            'slip' => 'required|image|max:2048',
-        ]);
-
-        $this->loading = true;
-
-        $this->preview = $this->slip->temporaryUrl(); // ✅ Preview ได้ทันที
-
-        // ตรวจสอบ Slip ผ่าน API
-        $tempPath = $this->slip->store('slips_temp', 'local'); // ใช้ local เก็บไว้ชั่วคราว
-        $fullPath = storage_path('app/' . $tempPath);
-
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . env('SLIP2GO_SECRET_KEY'),
-        ])
-            ->attach('file', file_get_contents($fullPath), basename($fullPath))
-            ->post('https://connect.slip2go.com/api/verify-slip/qr-image/info');
-
-        if ($response->successful() && $response->json('code') === '200000') {
-            $data = $response->json('data');
-            $this->slipData = [
-                'amount' => $data['amount'] ?? 0,
-                'sender_name' => $data['sender']['account']['name'] ?? '',
-                'receiver_name' => $data['receiver']['account']['name'] ?? '',
-                'transfer_at' => Carbon::parse($data['dateTime'] ?? now())->format('Y-m-d H:i:s'), // ✅ ดึงตรงจาก API
-                'reference_id' => $data['referenceId'] ?? null,
-                'trans_ref' => $data['transRef'] ?? null,
-                'bank_name' => $data['receiver']['bank']['name'] ?? null,
-            ];
-            session()->flash('success', 'ตรวจสอบสลิปถูกต้อง ✅');
-        } else {
-            session()->flash('error', 'ตรวจสอบสลิปล้มเหลว: ' . ($response->json('message') ?? ''));
-            $this->slipData = [];
-        }
-
-        $this->loading = false;
+   public function updatedSlip()
+{
+    if ($this->mode === 'manual') {
+        $this->preview = $this->slip?->temporaryUrl(); // แสดง preview เฉย ๆ
+        return; // ❌ ไม่เรียก API ตรวจสอบ
     }
+
+    $this->validate([
+        'slip' => 'required|image|max:2048',
+    ]);
+
+    $this->loading = true;
+
+    $this->preview = $this->slip->temporaryUrl();
+
+    // ตรวจสอบ Slip ผ่าน API
+    $tempPath = $this->slip->store('slips_temp', 'local');
+    $fullPath = storage_path('app/' . $tempPath);
+
+    $response = Http::withHeaders([
+        'Authorization' => 'Bearer ' . env('SLIP2GO_SECRET_KEY'),
+    ])
+        ->attach('file', file_get_contents($fullPath), basename($fullPath))
+        ->post('https://connect.slip2go.com/api/verify-slip/qr-image/info');
+
+    if ($response->successful() && $response->json('code') === '200000') {
+        $data = $response->json('data');
+        $this->slipData = [
+            'amount' => $data['amount'] ?? 0,
+            'sender_name' => $data['sender']['account']['name'] ?? '',
+            'receiver_name' => $data['receiver']['account']['name'] ?? '',
+            'transfer_at' => Carbon::parse($data['dateTime'] ?? now())->format('Y-m-d H:i:s'),
+            'reference_id' => $data['referenceId'] ?? null,
+            'trans_ref' => $data['transRef'] ?? null,
+            'bank_name' => $data['receiver']['bank']['name'] ?? null,
+        ];
+        session()->flash('success', 'ตรวจสอบสลิปถูกต้อง ✅');
+    } else {
+        session()->flash('error', 'ตรวจสอบสลิปล้มเหลว: ' . ($response->json('message') ?? ''));
+        $this->slipData = [];
+    }
+
+    $this->loading = false;
+}
+
 
     public function render()
     {
@@ -98,52 +115,69 @@ class PaymentModal extends Component
     }
 
     public function submitPayment()
-    {
-        $this->validate([
-            'slip' => 'required|image|max:2048',
+{
+    $this->validate([
+        'slip' => 'required|image|max:2048',
+    ]);
+
+    if ($this->mode === 'api' && empty($this->slipData)) {
+        session()->flash('error', 'กรุณาแนบสลิปให้ถูกต้องก่อนบันทึก');
+        return;
+    }
+
+    $this->loading = true;
+
+    $storedPath = $this->slip->store('payments', 'public');
+
+    if ($this->mode === 'manual') {
+        OrderPayment::create([
+            'order_id' => $this->orderId,
+            'order_delivery_id' => $this->deliveryId,
+            'user_id' => Auth::id(),
+            'slip_path' => $storedPath,
+            'amount' => $this->manual['amount'] ?? 0,
+            'sender_name' => $this->manual['sender_name'] ?? '',
+            'bank_name' => $this->manual['bank_name'] ?? '',
+            'sender_account_no' => $this->manual['account_no'] ?? '',
+            'receiver_name' => $this->manual['receiver_name'] ?? '',
+            'receiver_account_no' => $this->manual['receiver_account_no'] ?? '',
+            'reference_id' => null,
+            'trans_ref' => null,
+            'transfer_at' => $this->manual['transfer_at'] ?? now(),
+            'status' => 'รอยืนยันยอด',
         ]);
-
-        if (empty($this->slipData)) {
-            session()->flash('error', 'กรุณาแนบสลิปให้ถูกต้องก่อนบันทึก');
-            return;
-        }
-
-        $this->loading = true;
-
-        // ✅ 1. บันทึกไฟล์ลง storage แบบถาวร
-        $storedPath = $this->slip->store('payments', 'public');
-
-        // ✅ 2. บันทึกลง order_payments
+    } else {
         OrderPayment::create([
             'order_id' => $this->orderId,
             'order_delivery_id' => $this->deliveryId,
             'user_id' => Auth::id(),
             'slip_path' => $storedPath,
             'amount' => $this->slipData['amount'],
-            'reference_id' => $this->slipData['reference_id'],
-            'trans_ref' => $this->slipData['trans_ref'],
-            'sender_name' => $this->slipData['sender_name'],
-            'receiver_name' => $this->slipData['receiver_name'],
-            'bank_name' => $this->slipData['bank_name'],
+            'reference_id' => $this->slipData['reference_id'] ?? null,
+            'trans_ref' => $this->slipData['trans_ref'] ?? null,
+            'sender_name' => $this->slipData['sender_name'] ?? '',
+            'sender_account_no' => $this->slipData['sender_account_no'] ?? null,
+            'receiver_name' => $this->slipData['receiver_name'] ?? '',
+            'receiver_account_no' => $this->slipData['receiver_account_no'] ?? null,
+            'bank_name' => $this->slipData['bank_name'] ?? '',
             'transfer_at' => Carbon::parse($this->slipData['transfer_at'] ?? now())->format('Y-m-d H:i:s'),
             'status' => 'รอยืนยันยอด',
         ]);
+    }
 
-        // ✅ 3. อัปเดตสถานะการชำระเงินของบิลย่อย
-        $delivery = OrderDeliverysModel::find($this->deliveryId);
+    $delivery = OrderDeliverysModel::find($this->deliveryId);
+    if ($delivery) {
         $delivery->payment_status = 'waiting_confirmation';
         $delivery->save();
-
-        // แจ้งให้ order-show รู้ว่ามีการสร้าง payment แล้ว
-        $this->dispatch('payment-created');
-
-        // ปิด modal
-        $this->dispatch('close-payment-modal');
-
-        $this->reset(['slip', 'slipData', 'preview']);
-        $this->dispatch('notify', type: 'success', message: 'แจ้งชำระเงินเรียบร้อยแล้ว');
-        // session()->flash('success', 'บันทึกข้อมูลการชำระเงินเรียบร้อยแล้ว ✅');
-
-        $this->loading = false;
     }
+
+    $this->dispatch('payment-created');
+    $this->dispatch('close-payment-modal');
+
+    $this->reset(['slip', 'slipData', 'preview', 'manual']);
+    $this->dispatch('notify', type: 'success', message: 'แจ้งชำระเงินเรียบร้อยแล้ว');
+
+    $this->loading = false;
+}
+
 }

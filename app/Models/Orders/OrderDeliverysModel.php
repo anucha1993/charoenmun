@@ -63,31 +63,32 @@ class OrderDeliverysModel extends Model
     }
 
     public function updatePaymentStatus(): void
-    {
-        $confirmedAmount = $this->payments()
-            ->where('status', 'ชำระเงินแล้ว') // เฉพาะยอดที่ถูกยืนยันแล้ว
-            ->sum('amount');
-    
-        $total = $this->order_delivery_grand_total;
-    
-        $hasPendingSlip = $this->payments()
-            ->where('status', 'รอยืนยันยอด')
-            ->exists();
-    
-        if ($hasPendingSlip) {
-            $this->payment_status = 'waiting_confirmation'; // ✅ แจ้งสลิปแต่ยังไม่ยืนยัน
-        } elseif ($confirmedAmount == 0) {
-            $this->payment_status = 'pending'; // ✅ ยังไม่มีการชำระเลย
-        } elseif ($confirmedAmount < $total) {
-            $this->payment_status = 'partial'; // ✅ ยืนยันยอดแล้วแต่ยอดยังไม่ครบ
-        } elseif ($confirmedAmount == $total) {
-            $this->payment_status = 'paid'; // ✅ ชำระครบ
-        } else {
-            $this->payment_status = 'overpayment'; // ✅ ชำระเกิน
-        }
-    
-        $this->save();
+{
+    $confirmedAmount = $this->payments()
+        ->where('status', 'ชำระเงินแล้ว')
+        ->sum('amount');
+
+    $total = $this->order_delivery_grand_total;
+
+    $hasPendingSlip = $this->payments()
+        ->where('status', 'รอยืนยันยอด')
+        ->exists();
+
+    if ($confirmedAmount > $total) {
+        $this->payment_status = 'overpayment'; // ✅ มากกว่าต้องมาก่อน
+    } elseif ($confirmedAmount == $total) {
+        $this->payment_status = 'paid'; // ✅ พอดี
+    } elseif ($confirmedAmount > 0 && $confirmedAmount < $total) {
+        $this->payment_status = 'partial'; // ✅ จ่ายบางส่วน
+    } elseif ($hasPendingSlip) {
+        $this->payment_status = 'waiting_confirmation'; // ✅ แจ้งชำระแต่ยังไม่ยืนยัน
+    } else {
+        $this->payment_status = 'pending'; // ✅ ยังไม่จ่าย
     }
+
+    $this->save();
+}
+
     
     
 }

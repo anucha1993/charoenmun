@@ -50,17 +50,40 @@
                         </div>
                     </li>
 
-                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="{{route('quotations.index')}}" id="topnav-apps" role="button"
+                     {{-- <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="{{route('quotations.index')}}"  role="button"
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="ri-pages-line"></i>ใบเสนอราคา
                         </a>
-                     </li>
+                     </li> --}}
+                      
+                   
                     
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="{{route('customers.index')}}">
                             <i class="ri-briefcase-line"></i>ข้อมูลลูกค้า 
                         </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="{{route('quotations.index')}}">
+                            <i class="ri-pages-line"></i>ใบเสนอราคา 
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="{{route('orders.index')}}">
+                            <i class="ri-numbers-line"></i>คำสั่งซื้อ
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="{{route('scan.invoice')}}">
+                            <i class="ri-qr-code-line"></i>ScanQrcode
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="{{route('payments.confirm')}}">
+                            <i class="ri-money-dollar-box-line"></i>อนุมัติยอด
+                        </a>
+                    </li>
                        
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-layouts" role="button"

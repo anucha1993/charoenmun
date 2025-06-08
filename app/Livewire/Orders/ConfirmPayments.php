@@ -43,7 +43,7 @@ class ConfirmPayments extends Component
     {
         $payment = OrderPayment::find($paymentId);
         if ($payment) {
-            $payment->status = 'ไม่ผ่านการตรวจสอบ';
+            $payment->status = 'ปฏิเสธ';
             $payment->save();
             $this->loadPayments();
             session()->flash('error', 'ปฏิเสธการชำระเงินเรียบร้อย ❌');

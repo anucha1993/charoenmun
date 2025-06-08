@@ -63,28 +63,36 @@ class OrderModel extends Model
     }
 
     public function updatePaymentStatus(): void
-{
-    $total = $this->order_grand_total;
-
-    $confirmedAmount = $this->deliveries()
-        ->with('payments')
-        ->get()
-        ->flatMap(fn ($d) => $d->payments)
-        ->where('status', 'ชำระเงินแล้ว')
-        ->sum('amount');
-
-        if ($confirmedAmount === 0) {
-            $this->payment_status = 'pending';
-        } elseif ($confirmedAmount < $total) {
-            $this->payment_status = 'partial';
+    {
+        $total = $this->order_grand_total;
+    
+        $deliveries = $this->deliveries()->with('payments')->get();
+    
+        $confirmedAmount = $deliveries
+            ->flatMap(fn($d) => $d->payments)
+            ->where('status', 'ชำระเงินแล้ว')
+            ->sum('amount');
+    
+        $hasPendingSlip = $deliveries
+            ->flatMap(fn($d) => $d->payments)
+            ->where('status', 'รอยืนยันยอด')
+            ->isNotEmpty();
+    
+        if ($confirmedAmount > $total) {
+            $this->payment_status = 'overpayment';
         } elseif ($confirmedAmount == $total) {
             $this->payment_status = 'paid';
-        } elseif ($confirmedAmount > $total) {
-            $this->payment_status = 'overpayment';
+        } elseif ($confirmedAmount > 0 && $confirmedAmount < $total) {
+            $this->payment_status = 'partial';
+        } elseif ($hasPendingSlip) {
+            $this->payment_status = 'waiting_confirmation';
+        } else {
+            $this->payment_status = 'pending';
         }
-
-    $this->save();
-}
+    
+        $this->save();
+    }
+    
 
 
 }

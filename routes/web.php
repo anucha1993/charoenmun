@@ -11,6 +11,7 @@ use App\Livewire\Orders\OrderForm;
 use App\Livewire\Orders\OrderShow;
 
 use App\Livewire\Orders\OrderIndex;
+use App\Livewire\Orders\ScanInvoice;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Orders\OrderDelivery;
 use App\Livewire\Products\ProductIndex;
@@ -22,8 +23,8 @@ use App\Models\Quotations\QuotationModel;
 use App\Livewire\Customers\CustomerCreate;
 use App\Livewire\Orders\OrderDeliveryEdit;
 use App\Livewire\Orders\PaymentSlipUpload;
-use App\Models\Orders\OrderDeliverysModel;
 
+use App\Models\Orders\OrderDeliverysModel;
 use App\Http\Controllers\RoutingController;
 use App\Livewire\Orders\OrderDeliveryPrint;
 use App\Livewire\Quotations\QuotationIndex;
@@ -109,6 +110,9 @@ Route::middleware(['auth'])->group(function () {
      //payment
      Route::get('/order/payment-slip', PaymentSlipUpload::class)->name('order.payment.slip');
      Route::get('/confirm-payments', ConfirmPayments::class)->name('payments.confirm');
+
+     //SCANS QR CODE
+     Route::get('/scan-invoice', ScanInvoice::class)->name('scan.invoice');
 
   
 });

@@ -301,7 +301,15 @@
 </script> --}}
 
 
-
+<script>
+    document.addEventListener('livewire:load', () => {
+        Livewire.on('close-payment-modal', () => {
+            console.log('close-payment-modal received'); // ตรวจสอบว่า event ถึงจริงไหม
+            const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+            if (modal) modal.hide();
+        });
+    });
+</script>
 
 <script>
     function openPrintPreview(deliveryId) {
