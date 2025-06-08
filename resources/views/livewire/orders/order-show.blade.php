@@ -1,16 +1,25 @@
 <div>
     {{-- resources/views/livewire/orders/show.blade.php --}}
+
+    @php
+        $totalConfirmed = $order->deliveries->flatMap->payments->where('status', 'ชำระเงินแล้ว')->sum('amount');
+        $totalWaiting = $order->deliveries->flatMap->payments->where('status', 'รอยืนยันยอด')->sum('amount');
+    @endphp
     <div class="container py-3">
         <div class="card">
             <div class="card-header">
                 <h4>Order / ใบสั่งซื้อ</h4>
                 <p class="float-end">เลขที่: <strong>{{ $order->order_number }}</strong></p>
                 <p>วันที่: <strong>{{ $order->order_date->format('d/m/Y') }}</strong></p>
+                <p class="float-end">ชำระเงินแล้ว: <strong class="text-success">{{ number_format($totalConfirmed) }} บาท</strong></p>
+                <p>รอยืนยันยอด: <strong class="text-warning">{{ number_format($totalWaiting) }} บาท</strong></p>
             </div>
             <div class="card-body">
 
                 {{-- หัวใจ --}}
                 <div class="row  float-end">
+
+
                     <div class="col-12 ">
                         <span>สถานะ: <strong> {!! order_status_badge($order->order_status) !!}</strong></span><br>
                         <span>สถานะชำระเงิน: <strong>{!! payment_status_badge($order->payment_status) !!}</strong></span><br>
@@ -19,7 +28,9 @@
                         <span>ส่วนลด: <strong> {{ number_format($order->order_discount, 2) }} บาท</strong></span><br>
                         <span>จำนวนเงินทั้งสิ้น: <strong> {{ number_format($order->order_grand_total, 2) }}
                                 บาท</strong></span><br>
+
                     </div>
+
                     <div class="col-4 text-end">
                         {{-- ปุ่มอนุมัติสำหรับ Order สินค้า (ถ้ามี) --}}
                         @if ($order->status === 'open')
@@ -89,7 +100,7 @@
                                             <td>{{ $item->product_name }}</td>
                                             <td>{{ $item->product_detail }}</td>
                                             <td>
-                                                  @php
+                                                @php
                                                     $delivered = $deliveredQtyMap[$item->product_id] ?? 0;
                                                 @endphp
                                                 {{ $item->quantity }}
@@ -100,9 +111,9 @@
                                             </td>
                                             <td>{{ $item->product_unit }}</td>
                                             <td>
-                                              
+
                                                 {{ number_format($item->unit_price, 2) }}
-                                                
+
 
                                             </td>
                                             <td class="text-end">{{ number_format($item->total, 2) }}</td>
@@ -145,13 +156,16 @@
                         <div class="card border-secondary">
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-sm table-striped table-hover mb-0" style="font-size: 14px">
+                                    <table class="table table-sm table-striped table-hover mb-0"
+                                        style="font-size: 14px">
                                         <thead>
                                             <tr>
                                                 <th>ลำดับ</th>
                                                 <th>วันที่จัดส่ง</th>
                                                 <th>เลขที่บิลย่อย</th>
                                                 <th>จำนวนเงินทั้งสิ้น</th>
+                                                <th>ชำระเงินแล้ว</th>
+                                                <th>รอยืนยันยอด</th>
                                                 <th>สถานะจัดส่ง</th>
                                                 <th>สถานะชำระเงิน</th>
                                                 <th>Actions</th>
@@ -159,25 +173,52 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($order->deliveries as $key => $delivery)
+                                                @php
+                                                    $confirmed = $delivery->payments
+                                                        ->where('status', 'ชำระเงินแล้ว')
+                                                        ->sum('amount');
+                                                    $waiting = $delivery->payments
+                                                        ->where('status', 'รอยืนยันยอด')
+                                                        ->sum('amount');
+                                                @endphp
+
                                                 <tr>
                                                     <td>{{ $key + 1 }}</td>
                                                     <td>{{ $delivery->order_delivery_date->format('d/m/Y') }}</td>
                                                     <td>{{ $delivery->order_delivery_number }}</td>
+
                                                     <td>{{ number_format($delivery->order_delivery_grand_total, 2) }}
                                                     </td>
+
+                                                    <td class="text-succcess">{{ number_format($confirmed, 2) }}</td>
+                                                    <td class="text-warning">{{ number_format($waiting, 2) }}</td>
                                                     <td>{!! order_delivery_status_badge($delivery->order_delivery_status) !!}</td>
                                                     <td>{!! payment_status_badge($delivery->payment_status) !!}</td>
                                                     <td>
-                                                        <a  href="{{route('deliveries.printer',$delivery->id)}}" class="text-pink"><i class="mdi mdi-printer"></i> พิมพ์</a> |
+                                                        <a href="{{ route('deliveries.printer', $delivery->id) }}"
+                                                            class="text-pink"><i class="mdi mdi-printer"></i> พิมพ์</a>
+                                                        |
+
+                                                        <a href="javascript: void(0);" type="button"
+                                                            data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                            wire:click="$dispatch('open-payment-modal', { orderId: {{ $order->id }}, deliveryId: {{ $delivery->id }} })">
+                                                            <i class="mdi mdi-cash-multiple "></i> แจ้งชำระเงิน
+                                                        </a>
+                                                        |
                                                         <a href="{{ route('deliveries.edit', [$delivery->order_id, $delivery->id]) }}"
-                                                            target="_blank">แก้ไข</a> |
-                                                        <a href="" class="text-danger"><i class="mdi mdi-trash-can"></i>  ลบ</a>
+                                                            class="text-dark" target="_blank"><i
+                                                                class="mdi mdi-content-save-edit-outline"></i> แก้ไข</a>
+
+                                                        |
+                                                        <a href="" class="text-danger"><i
+                                                                class="mdi mdi-trash-can"></i> ลบ</a>
+
                                                     </td>
                                             @endforeach
-                                            </tbody>
+                                        </tbody>
                                     </table>
                                 </div>
-                              
+
                             </div>
                         </div>
                     </div>
@@ -198,80 +239,97 @@
         </div>
     </div>
 
-    
-<!-- Modal สำหรับเลือกหน้า -->
-<div class="modal fade" id="printPriceModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">เลือกสำเนาที่ต้องการแสดงราคา</h5>
-            </div>
-            <div class="modal-body">
-                <form id="priceSelectionForm" method="GET" >
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="0" id="showPrice0" >
-                        <label class="form-check-label" for="showPrice0">หน้า 1</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="1" id="showPrice1" >
-                        <label class="form-check-label" for="showPrice1">หน้า 2</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="2" id="showPrice2" >
-                        <label class="form-check-label" for="showPrice2">หน้า 3</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" disabled checked>
-                        <label class="form-check-label">หน้า 4 (แสดงราคาเสมอ)</label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                <button type="button" class="btn btn-primary" onclick="applyPriceAndRedirect({{ $delivery->id }})">พิมพ์เอกสาร</button>
+
+    <!-- Modal สำหรับเลือกหน้า -->
+    <div class="modal fade" id="printPriceModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">เลือกสำเนาที่ต้องการแสดงราคา</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="priceSelectionForm" method="GET">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="0" id="showPrice0">
+                            <label class="form-check-label" for="showPrice0">หน้า 1</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="1" id="showPrice1">
+                            <label class="form-check-label" for="showPrice1">หน้า 2</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="2" id="showPrice2">
+                            <label class="form-check-label" for="showPrice2">หน้า 3</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled checked>
+                            <label class="form-check-label">หน้า 4 (แสดงราคาเสมอ)</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-primary"
+                        onclick="applyPriceAndRedirect({{ $delivery->id }})">พิมพ์เอกสาร</button>
+                </div>
             </div>
         </div>
     </div>
+
+
+
+
+    <livewire:orders.payment-modal />
 </div>
 
-<div class="d-print-none text-center mb-4">
-    <button type="button" class="btn btn-primary" onclick="openPrintPreview({{ $delivery->id }})">
-        พิมพ์เอกสาร
-    </button>
-</div>
+{{-- <script>
+    document.addEventListener("livewire:init", () => {
+        Livewire.on("show-payment-modal", () => {
+            const modal = new bootstrap.Modal(document.getElementById("paymentModal"));
+            modal.show();
+        });
+    });
+</script> --}}
+
+{{-- <script>
+    document.addEventListener("livewire:init", () => {
+        Livewire.on("close-payment-modal", () => {
+            const modal = new bootstrap.Modal(document.getElementById("paymentModal"));
+            modal.hide();
+        });
+    });
+</script> --}}
 
 
 
-
-</div>
 
 <script>
     function openPrintPreview(deliveryId) {
         const selected = [];
-    
+
         for (let i = 0; i <= 2; i++) {
             const checkbox = document.getElementById('showPrice' + i);
             if (checkbox && checkbox.checked) {
                 selected.push(i);
             }
         }
-    
+
         // สร้าง query string เช่น show_price[]=0&show_price[]=1
         const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
-    
+
         // สร้าง URL ไปยัง route delivery/print
         const printUrl = `{{ url('deliveries') }}/${deliveryId}/print?${query}`;
-    
+
         // เปิดในแท็บใหม่
         window.open(printUrl, '_blank');
-    
+
         // ปิด modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
         if (modal) modal.hide();
     }
-    </script>
-    
-    
+</script>
+
+
 
 {{-- <script>
     window.addEventListener('open-print', event => {

@@ -22,7 +22,7 @@ class OrderDeliverysModel extends Model
         'order_delivery_date',
         'order_delivery_status', // สถานะการจัดส่ง 0 = รอจัดส่ง , 1 = จัดส่งสำเร็จ , 2 =  ยกเลิกการจัดส่ง
         'payment_status', // สถานะการชำระเงิน 0 = รอชำระ , 1 = ชำระเงินครบแล้ว , 2 = ชำระเงินมัดจำ
-        'order_delivery_status_order',//สถานะการส่งทั้งหมดของ order ว่าบิลไหนจัดส่งครบเป็นบิลสุดท้าย  1 = ส่งครบแล้ว , 0 = ''
+        'order_delivery_status_order', //สถานะการส่งทั้งหมดของ order ว่าบิลไหนจัดส่งครบเป็นบิลสุดท้าย  1 = ส่งครบแล้ว , 0 = ''
         'order_delivery_note',
         'created_by',
         'updated_by',
@@ -33,7 +33,6 @@ class OrderDeliverysModel extends Model
         'order_delivery_enable_vat',
         'order_delivery_vat_included',
     ];
-
 
     protected $casts = [
         'order_delivery_date' => 'date',
@@ -57,4 +56,38 @@ class OrderDeliverysModel extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function payments()
+    {
+        return $this->hasMany(OrderPayment::class, 'order_delivery_id');
+    }
+
+    public function updatePaymentStatus(): void
+    {
+        $confirmedAmount = $this->payments()
+            ->where('status', 'ชำระเงินแล้ว') // เฉพาะยอดที่ถูกยืนยันแล้ว
+            ->sum('amount');
+    
+        $total = $this->order_delivery_grand_total;
+    
+        $hasPendingSlip = $this->payments()
+            ->where('status', 'รอยืนยันยอด')
+            ->exists();
+    
+        if ($hasPendingSlip) {
+            $this->payment_status = 'waiting_confirmation'; // ✅ แจ้งสลิปแต่ยังไม่ยืนยัน
+        } elseif ($confirmedAmount == 0) {
+            $this->payment_status = 'pending'; // ✅ ยังไม่มีการชำระเลย
+        } elseif ($confirmedAmount < $total) {
+            $this->payment_status = 'partial'; // ✅ ยืนยันยอดแล้วแต่ยอดยังไม่ครบ
+        } elseif ($confirmedAmount == $total) {
+            $this->payment_status = 'paid'; // ✅ ชำระครบ
+        } else {
+            $this->payment_status = 'overpayment'; // ✅ ชำระเกิน
+        }
+    
+        $this->save();
+    }
+    
+    
 }

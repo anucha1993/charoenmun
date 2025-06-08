@@ -12,23 +12,25 @@ use App\Livewire\Orders\OrderShow;
 
 use App\Livewire\Orders\OrderIndex;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Orders\OrderDelivery;
 use App\Livewire\Products\ProductIndex;
 use App\Livewire\Customers\CustomerEdit;
+use App\Livewire\Orders\ConfirmPayments;
 use Illuminate\Support\Facades\Response;
 use App\Livewire\Customers\CustomerIndex;
 use App\Models\Quotations\QuotationModel;
 use App\Livewire\Customers\CustomerCreate;
 use App\Livewire\Orders\OrderDeliveryEdit;
+use App\Livewire\Orders\PaymentSlipUpload;
+use App\Models\Orders\OrderDeliverysModel;
+
 use App\Http\Controllers\RoutingController;
+use App\Livewire\Orders\OrderDeliveryPrint;
 use App\Livewire\Quotations\QuotationIndex;
 use App\Livewire\Quotations\QuotationPrint;
 use App\Livewire\Quotations\QuotationsForm;
-
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use App\Livewire\Orders\OrderDelivery;
 use App\Livewire\Globalsets\GlobalSetManager;
-use App\Livewire\Orders\OrderDeliveryPrint;
-use App\Models\Orders\OrderDeliverysModel;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,7 +56,7 @@ Route::get('/qr/quotation/{id}', function (int $id) {
     ]);
 })
     ->whereNumber('id')
-    ->name('qr.deliveries');
+    ->name('qr.quotation');
 
     Route::get('/qr/deliveries/{id}', function (int $id) {
     $number = OrderDeliverysModel::whereKey($id)->value('order_delivery_number') ?? abort(404);
@@ -98,11 +100,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/{order}/edit', OrderForm::class)->name('orders.edit');
 
     Route::get('/orders/{order}/show', OrderShow::class)->name('order.show');
-
+    
     //deluvery 
     Route::get('orders/{order}/deliveries/create', OrderDelivery::class)->name('deliveries.create')->whereNumber('order');
     Route::get('orders/{order}/deliveries/{delivery}/edit', OrderDelivery::class)->name('deliveries.edit')->whereNumber('order')->whereNumber('delivery');
      Route::get('deliveries/{delivery}/print', OrderDeliveryPrint::class)->name('deliveries.printer');
+
+     //payment
+     Route::get('/order/payment-slip', PaymentSlipUpload::class)->name('order.payment.slip');
+     Route::get('/confirm-payments', ConfirmPayments::class)->name('payments.confirm');
+
   
 });
 

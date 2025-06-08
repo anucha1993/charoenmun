@@ -61,4 +61,30 @@ class OrderModel extends Model
     {
         return $this->hasMany(OrderDeliverysModel::class, 'order_id');
     }
+
+    public function updatePaymentStatus(): void
+{
+    $total = $this->order_grand_total;
+
+    $confirmedAmount = $this->deliveries()
+        ->with('payments')
+        ->get()
+        ->flatMap(fn ($d) => $d->payments)
+        ->where('status', 'ชำระเงินแล้ว')
+        ->sum('amount');
+
+        if ($confirmedAmount === 0) {
+            $this->payment_status = 'pending';
+        } elseif ($confirmedAmount < $total) {
+            $this->payment_status = 'partial';
+        } elseif ($confirmedAmount == $total) {
+            $this->payment_status = 'paid';
+        } elseif ($confirmedAmount > $total) {
+            $this->payment_status = 'overpayment';
+        }
+
+    $this->save();
+}
+
+
 }
