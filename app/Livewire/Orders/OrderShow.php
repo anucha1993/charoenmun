@@ -61,6 +61,23 @@ class OrderShow extends Component
         return $prefix . str_pad($next, 4, '0', STR_PAD_LEFT);
     }
 
+
+    public function updateDeliveryStatus($deliveryId, $status)
+{
+    $delivery = OrderDeliverysModel::find($deliveryId);
+
+    if (!$delivery) {
+        $this->dispatch('notify', type: 'error', message: 'ไม่พบบิลย่อย');
+        return;
+    }
+
+    $delivery->order_delivery_status = $status;
+    $delivery->save();
+
+    $this->dispatch('notify', type: 'success', message: 'อัปเดตสถานะจัดส่งแล้ว');
+}
+
+
     /**
      * กดปุ่มยืนยันจัดส่งในรอบนี้ → delivery_status = 'delivered'
      */

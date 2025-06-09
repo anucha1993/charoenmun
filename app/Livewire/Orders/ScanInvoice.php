@@ -9,36 +9,37 @@ use App\Models\Orders\OrderDeliverysModel;
 class ScanInvoice extends Component
 {
     public $scanInput = '';
-    public $delivery = null;
     public ?OrderModel $order = null;
+    public array $deliveredQtyMap = [];
 
     public function updatedScanInput()
     {
-        $delivery = OrderDeliverysModel::with(['order', 'payments'])->where('order_delivery_number', $this->scanInput)->first();
-    
-        if (!$delivery) {
-            $this->order = null;
-            $this->delivery = null;
-            $this->dispatch('notify', type: 'error', message: 'ไม่พบบิลย่อยนี้');
-        } else {
-            $this->delivery = $delivery;
+        // ค้นหา OrderDelivery จากเลขบิลย่อย
+        $delivery = OrderDeliverysModel::with(['order.customer', 'order.items', 'order.deliveryAddress', 'order.deliveries.payments'])
+            ->where('order_delivery_number', $this->scanInput)
+            ->first();
+
+        if ($delivery) {
             $this->order = $delivery->order;
-            $this->dispatch('notify', type: 'success', message: 'พบข้อมูลบิล ' . $this->scanInput);
+
+            // สร้าง Map ของ qty ที่ส่งแล้วในแต่ละสินค้า
+            $this->deliveredQtyMap = $this->order->deliveries
+                ->flatMap->items
+                ->groupBy('product_id')
+                ->map(fn($group) => $group->sum('quantity'))
+                ->toArray();
+        } else {
+            $this->order = null;
+            $this->dispatch('notify', type: 'error', message: 'ไม่พบบิลย่อยนี้');
         }
-    
-        // ✅ ล้างค่าหลังสแกน เพื่อให้ยิงต่อเนื่องได้
+
         $this->scanInput = '';
     }
-    
-
 
     public function render()
     {
-        if ($this->order) {
-            $this->dispatch('show-invoice-modal'); // ✅ Trigger modal หลัง render
-        }
-
-        return view('livewire.orders.scan-invoice')
-            ->layout('layouts.horizontal', ['title' => 'สแกนบิล']);
+        return view('livewire.orders.scan-invoice')->layout('layouts.horizontal', [
+            'title' => 'แสดงบิลจากการสแกน'
+        ]);
     }
 }

@@ -194,7 +194,9 @@
                                                     <td class="text-warning">{{ number_format($waiting, 2) }}</td>
                                                     <td>{!! order_delivery_status_badge($delivery->order_delivery_status) !!}</td>
                                                     <td>{!! payment_status_badge($delivery->payment_status) !!}</td>
+                                                    
                                                     <td>
+                                                        <a href=""> 🚚 การจัดส่ง</a> | 
                                                         <a href="{{ route('deliveries.printer', $delivery->id) }}"
                                                             class="text-pink"><i class="mdi mdi-printer"></i> พิมพ์</a>
                                                         |
