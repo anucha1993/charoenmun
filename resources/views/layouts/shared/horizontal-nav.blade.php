@@ -1,7 +1,7 @@
 <!-- ========== Horizontal Menu Start ========== -->
-<div class="topnav">
+<div class="topnav" >
     <div class="container-fluid">
-        <nav class="navbar navbar-expand-lg">
+        <nav class="navbar navbar-expand-lg" >
             <div class="collapse navbar-collapse" id="topnav-menu-content">
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
@@ -59,7 +59,7 @@
                       
                    
                     
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown" >
                         <a class="nav-link dropdown-toggle arrow-none" href="{{route('customers.index')}}">
                             <i class="ri-briefcase-line"></i>ข้อมูลลูกค้า 
                         </a>

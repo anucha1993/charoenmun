@@ -3,8 +3,8 @@
     <br>
     <!-- end page title -->
 
-         @php use App\Enums\QuotationStatus; @endphp
-    <div class="row">
+    @php use App\Enums\QuotationStatus; @endphp
+    <div class="row" >
         <div class="col-12">
             <div class="card">
                 <form wire:submit.prevent="save">
@@ -52,7 +52,7 @@
                             <div class="col-sm-5 offset-sm-2">
                                 <div class="mt-3 float-sm-end">
 
-                               
+
                                     @if ($quotation && $quotation->quote_status === 'wait')
                                         <button type="button" class="btn btn-sm btn-info mb-1 float-end"
                                             wire:click="approveQuotation({{ $quotation->id }})"
@@ -83,8 +83,9 @@
 
                                 </div>
                                 <div>
-                           
-                                    <select id="customerSelect" class="form-control" {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}>
+
+                                    <select id="customerSelect" class="form-control"
+                                        {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}>
                                         <option value="">-- เลือกลูกค้า --</option>
                                         @foreach ($customers as $c)
                                             <option value="{{ $c->id }}" @selected($c->id == $customer_id)>
@@ -130,7 +131,8 @@
                                 </div>
 
 
-                                <select wire:model.live="selected_delivery_id" name="selected_delivery_id"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
+                                    {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                     class="form-select">
                                     <option value="">-- เลือกที่อยู่จัดส่ง --</option>
                                     @foreach ($customerDelivery as $delivery)
@@ -178,14 +180,15 @@
                             <div class="col-12">
                                 <div class="table">
                                     <table class="table table-sm table-centered table-hover table-borderless mb-0 mt-3">
-                                        <thead class="border-top border-bottom bg-light-subtle border-light" >
+                                        <thead class="border-top border-bottom bg-light-subtle border-light">
                                             <tr>
                                                 <th>#</th>
                                                 <th>รายการสินค้า</th>
                                                 <th>รายละเอียดสินค้า</th>
+                                                <th>Vat</th>
                                                 <th>ความยาว</th>
                                                 {{-- <th>หนา</th> --}}
-                                                <th>น้ำหนัก</th>
+                                                {{-- <th>น้ำหนัก</th> --}}
                                                 <th>จำนวน</th>
                                                 <th>หน่วยนับ</th>
                                                 <th>ราคา/หน่วย</th>
@@ -197,12 +200,13 @@
 
 
                                             @foreach ($items as $i => $item)
-                                                <tr class="align-top" wire:key="row-{{ $i }}" >
+                                                <tr class="align-top" wire:key="row-{{ $i }}">
                                                     <td class="align-top">{{ $i + 1 }}</td>
                                                     <td style="min-width: 350px;">
 
                                                         <div class="position-relative" wire:ignore.self>
-                                                            <input type="text" class="form-control form-control-sm"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                            <input type="text" class="form-control form-control-sm"
+                                                                {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                                 placeholder="ค้นหาสินค้า..."
                                                                 wire:model.live.debounce.500ms="items.{{ $i }}.product_search"
                                                                 wire:keydown.escape="$set('items.{{ $i }}.product_results', [])"
@@ -214,11 +218,13 @@
                                                                 <ul class="list-group position-absolute shadow"
                                                                     style="max-height: 400px; overflow-y: auto; z-index: 9999999999;">
                                                                     @foreach ($item['product_results'] as $result)
+                                                                    <a href="javascript: void(0);">
                                                                         <li class="list-group-item list-group-item-action"
                                                                             wire:click="selectProduct({{ $i }}, {{ $result['product_id'] }}, '{{ $result['product_name'] }}')">
                                                                             {{ $result['product_name'] }}
                                                                             ({{ $result['product_size'] }})
                                                                         </li>
+                                                                        </a>
                                                                     @endforeach
                                                                 </ul>
                                                             @endif
@@ -239,45 +245,66 @@
 
 
                                                     </td>
+                                                    
 
-                                                    <td style="min-width: 200px;"> {!! $item['product_detail'] ?? '' !!} </td>
+                                                    <td style="min-width:200px;">
+                                                        @if ($item['product_calculation'] !== 1)
+                                                            <span>ความหนา:</span>
+                                                            <input type="number" min="1"
+                                                                wire:model.debounce.300ms="items.{{ $i }}.product_calculation"
+                                                                class="form-control form-control-sm"
+                                                                style="display:inline-block; width:80px; vertical-align:middle;"
+                                                                {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }} />
+                                                        @else
+                                                            {!! $item['product_detail'] ?? '' !!}
+                                                        @endif
+                                                    </td>
+                                                    <td> 
+                                                        <input type="checkbox"  wire:model.live="items.{{ $i }}.product_vat">
+                                                    </td>
 
 
                                                     <td style="width: 110px">
-                                                        <input type="text"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+
+                                                        <input type="text"
+                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_length"
                                                             class="form-control form-control-sm">
                                                     </td>
-                                                    <td style="display: none">
+                                                    {{-- <td style="display: none">
 
                                                         <input type="number" min="1"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_calculation"
                                                             class="form-control form-control-sm" />
-                                                    </td>
+                                                    </td> --}}
 
-                                                    <td style="width: 110px">
+                                                    <td style="display: none">
 
-                                                        <input type="number" min="1"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                        <input type="number" min="1"
+                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_weight"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
 
                                                     <td style="width: 110px">
-                                                        <input type="number" min="1"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                        <input type="number" min="1"
+                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.quantity"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
                                                     <td style="width: 100px">
-                                                        <input type="text"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                        <input type="text"
+                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                             wire:model.live="items.{{ $i }}.product_unit"
                                                             class="form-control form-control-sm"
                                                             style="background-color: aliceblue" readonly>
                                                     </td>
                                                     <td style="width: 200px" class="text-end">
 
-                                                        <input type="number" min="0" step="0.01"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                        <input type="number" min="0" step="0.01"
+                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.unit_price"
                                                             class="form-control form-control-sm text-end" />
 
@@ -288,12 +315,12 @@
                                                     </td>
                                                     <td>
                                                         @if (!$quotation?->quote_status === QuotationStatus::Success)
-                                                              <a href="javascript: void(0);" 
-                                                            wire:click="removeItem({{ $i }})"><i
-                                                                class="mdi mdi-trash-can text-danger"
-                                                                style="font-size: 25px"></i></a>
+                                                            <a href="javascript: void(0);"
+                                                                wire:click="removeItem({{ $i }})"><i
+                                                                    class="mdi mdi-trash-can text-danger"
+                                                                    style="font-size: 25px"></i></a>
                                                         @endif
-                                                      
+
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -314,16 +341,18 @@
                         <hr>
 
                         <div class="form-check mt-2" style="z-index: -9999999999; ">
-                            <input class="form-check-input" type="checkbox" wire:model.live="quote_enable_vat"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                            <input class="form-check-input" type="checkbox" wire:model.live="quote_enable_vat"
+                                {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                 id="enableVatCheck">
                             <label class="form-check-label" for="enableVatCheck">
-                                 คำนวณ VAT 7%
+                                คำนวณ VAT 7%
                             </label>
                         </div>
 
                         @if ($quote_enable_vat)
                             <div class="form-check mt-2 ms-3">
-                                <input class="form-check-input" type="checkbox" wire:model.live="quote_vat_included"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                <input class="form-check-input" type="checkbox" wire:model.live="quote_vat_included"
+                                    {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                     id="vatIncludedCheck">
                                 <label class="form-check-label" for="vatIncludedCheck">
                                     💡 คิดรวม VAT ในราคารวม (VAT-In)
@@ -336,7 +365,8 @@
                                 <div class="clearfix pt-3">
                                     <h6 class="text-muted fs-14">Notes:</h6>
                                     <small>
-                                        <textarea wire:model="quote_note" class="form-control" cols="3" rows="3"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}></textarea>
+                                        <textarea wire:model="quote_note" class="form-control" cols="3" rows="3"
+                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}></textarea>
                                     </small>
 
                                 </div>
@@ -355,7 +385,8 @@
                                     </div>
                                     <div class="col-md-2">
                                         <span class="float-end">
-                                            <input type="number" wire:model.live.debounce.300ms="quote_discount"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                            <input type="number" wire:model.live.debounce.300ms="quote_discount"
+                                                {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                 class="form-control text-end form-control-sm" min="0"
                                                 step="0.01">
                                         </span>
@@ -390,7 +421,8 @@
 
 
                                 @if (!$this->isCreate)
-                                    <button type="submit" class="btn btn-primary"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}>
+                                    <button type="submit" class="btn btn-primary"
+                                        {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}>
                                         บันทึก
                                     </button>
                                 @else

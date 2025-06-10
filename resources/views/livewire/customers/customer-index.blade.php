@@ -5,9 +5,9 @@
         <div class="col-md-4">
             <div class="card border-secondary border">
                 <div class="card-body">
-                    <h5 class="card-title">จำนวนลูกค้าทั้งหมด</h5>
+                    <h3 class="card-title">จำนวนลูกค้าทั้งหมด</h3>
                     <h2 class="my-2">{{$customers->count()}} ราย</h2>
-                    <p class="card-text">นับจำนวนจากข้อมูลลูกค้าทั้งหมด</p>
+                    <p class="card-text" style="font-size: 18px">นับจำนวนจากข้อมูลลูกค้าทั้งหมด</p>
                     
                 </div> <!-- end card-body-->
             </div> <!-- end card-->
@@ -16,9 +16,9 @@
         <div class="col-md-4">
             <div class="card border-primary border">
                 <div class="card-body">
-                    <h5 class="card-title text-primary">ลูกค้ารายใหม่</h5>
+                    <h3 class="card-title text-primary">ลูกค้ารายใหม่</h3>
                      <h2 class="my-2">{{$customers->count()}} ราย</h2>
-                    <p class="card-text">คิดจากลูกค้าที่เพิ่มในระบบในระยะเวลา 3 เดือน</p>
+                    <p class="card-text"  style="font-size: 18px">คิดจากลูกค้าที่เพิ่มในระบบในระยะเวลา 3 เดือน</p>
                   
                 </div> <!-- end card-body-->
             </div> <!-- end card-->
@@ -27,25 +27,25 @@
         <div class="col-md-4">
             <div class="card border-success border">
                 <div class="card-body">
-                    <h5 class="card-title text-success">ลูกค้าที่ไม่การเคลือนไหว</h5>
+                    <h3 class="card-title text-success">ลูกค้าที่ไม่การเคลือนไหว</h3>
                         <h2 class="my-2">{{$customers->count()}} ราย</h2>
-                    <p class="card-text">คิดจากลูกค้าที่ไม่มีการสั่งซื้อสินค้าเป็นระยะยเวลานาน</p>
+                    <p class="card-text"  style="font-size: 18px">คิดจากลูกค้าที่ไม่มีการสั่งซื้อสินค้าเป็นระยะยเวลานาน</p>
                 </div> <!-- end card-body-->
             </div> <!-- end card-->
         </div> <!-- end col-->
     </div>
     <!-- end row -->
 
-     <div class="card">
+     <div class="card" style="font-size: 18px">
         <div class="card-header">
-            <h4>รายการข้อมูลลูกค้าทั้งหมด</h4>
+            <h3>รายการข้อมูลลูกค้าทั้งหมด</h3>
             <a href="{{route('customers.create')}}" class="float-end btn btn-outline-success" style="font-size: 18px">+ เพิ่มข้อมูลลูกค้า</a>
         </div>
         <div class="card-body">
 
     {{-- Search --}}
     <div class="mb-3">
-        <input type="text" wire:model.live.debounce.300ms="search" class="form-control" placeholder="ค้นหา ชื่อ, เบอร์โทร, อีเมล...">
+        <input type="text" wire:model.live.debounce.300ms="search" class="form-control" style="font-size: 18px" placeholder="ค้นหา ชื่อ, เบอร์โทร, อีเมล...">
     </div>
 
     {{-- Table --}}

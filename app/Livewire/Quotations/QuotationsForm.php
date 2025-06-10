@@ -41,6 +41,7 @@ class QuotationsForm extends Component
 
     public bool $quote_enable_vat = false;
     public bool $quote_vat_included = false;
+    public bool $checkVat = false;
 
     /* ─── ฟิลด์ใบเสนอราคา ─── */
     public ?int $quotation_id = null;
@@ -113,6 +114,7 @@ class QuotationsForm extends Component
                     'quantity' => $i->quantity,
                     'unit_price' => $i->unit_price,
                     'total' => $i->total ?? $i->quantity * $i->unit_price,
+                    'checkVat' => $i->product_vat ?? false,
 
                     // ✅ เพิ่มบรรทัดนี้:
                     'product_search' => $i->product_name, // แสดงชื่อใน input
@@ -137,6 +139,7 @@ class QuotationsForm extends Component
             'items.*.product_id' => 'required_with:items|exists:products,product_id',
             'items.*.quantity' => 'required_with:items|integer|min:1',
             'items.*.unit_price' => 'required_with:items|numeric|min:0',
+            'items.*.product_vat' => 'boolean',
         ];
     }
 
@@ -195,6 +198,7 @@ class QuotationsForm extends Component
                     'quote_vat_included' => $this->quote_vat_included,
                     'quote_status' => $this->quote_status,
                     'created_by' => $isCreate ? Auth::id() : $this->quotation->created_by ?? Auth::id(),
+                  
                     'updated_by' => Auth::id(),
                 ],
             );
@@ -222,6 +226,7 @@ class QuotationsForm extends Component
                         'quantity' => $row['quantity'],
                         'unit_price' => $row['unit_price'],
                         'total' => $row['quantity'] * $row['unit_price'],
+                        'product_vat' => $row['product_vat'] ? 1 : 0,
                     ],
                 );
                 $existingIds[] = $item->id;
@@ -270,6 +275,7 @@ class QuotationsForm extends Component
             'quantity' => 1,
             'unit_price' => 0,
             'total' => 0,
+            'product_vat' => false,
         ];
     }
 
@@ -353,42 +359,57 @@ class QuotationsForm extends Component
     /* ─────────── VAT & ยอดรวม ─────────── */
 
     public function calculateTotals(): void
-    {
-        $this->quote_subtotal = collect($this->items)->sum(function ($i) {
-            $quantity = (float) ($i['quantity'] ?? 0);
-            $unitPrice = (float) ($i['unit_price'] ?? 0);
-            $length = (float) ($i['product_length'] ?? 1);
-            $thickness = (float) ($i['product_calculation'] ?? 1);
+{
+    // 1) คำนวณยอดรวมก่อน VAT (ทั้งสินค้ารวมกัน)
+    $subtotal = collect($this->items)->sum(function ($i) {
+        $q   = (float) ($i['quantity'] ?? 0);
+        $up  = (float) ($i['unit_price'] ?? 0);
+        $len = max(1, (float) ($i['product_length'] ?? 1));
+        $th  = max(1, (float) ($i['product_calculation'] ?? 1));
+        return $q * $up * $len * $th;
+    });
 
-            if ($length <= 0) {
-                $length = 1;
-            }
-            if ($thickness <= 0) {
-                $thickness = 1;
-            }
+    // 2) หักส่วนลด
+    $netSubtotal = max(0, $subtotal - $this->quote_discount);
 
-            return $quantity * $unitPrice * $length * $thickness;
+    // 3) ถ้าไม่เปิด VAT → เสร็จ
+    if (! $this->quote_enable_vat) {
+        $this->quote_subtotal    = $netSubtotal;
+        $this->quote_vat         = 0;
+        $this->quote_grand_total = $netSubtotal;
+        return;
+    }
+
+    // 4) คำนวณยอดที่นำมาคิด VAT (เฉพาะรายการที่ product_vat == true)
+    $vatableBase = collect($this->items)->filter(fn($i) => !empty($i['product_vat']))
+        ->sum(function ($i) {
+            $q   = (float) ($i['quantity'] ?? 0);
+            $up  = (float) ($i['unit_price'] ?? 0);
+            $len = max(1, (float) ($i['product_length'] ?? 1));
+            $th  = max(1, (float) ($i['product_calculation'] ?? 1));
+            return $q * $up * $len * $th;
         });
 
-        // ✅ ใช้ quote_subtotal ในการคำนวณ
-        $netSubtotal = max(0, $this->quote_subtotal - $this->quote_discount);
+    // 5) ถ้า VAT รวมในราคา (VAT-In)
+    if ($this->quote_vat_included) {
+        // แยก VAT ออกจากส่วนที่มีกำหนด VAT
+        $netVatable = round($vatableBase / 1.07, 2);
+        $vatAmount  = round($vatableBase - $netVatable, 2);
 
-        if (!$this->quote_enable_vat) {
-            $this->quote_vat = 0;
-            $this->quote_grand_total = $netSubtotal;
-            return;
-        }
+        // ยอดรวมสินค้าต้องหักส่วนลดแล้ว และหัก VAT-Included ออก
+        $this->quote_subtotal    = round($netSubtotal - $vatAmount, 2);
+        $this->quote_vat         = $vatAmount;
+        $this->quote_grand_total = round($this->quote_subtotal + $vatAmount, 2);
 
-        if ($this->quote_vat_included) {
-            $net = round($netSubtotal / 1.07, 2);
-            $this->quote_vat = round($net * 0.07, 2);
-            $this->quote_subtotal = $net;
-            $this->quote_grand_total = $net + $this->quote_vat;
-        } else {
-            $this->quote_vat = round($netSubtotal * 0.07, 2);
-            $this->quote_grand_total = $netSubtotal + $this->quote_vat;
-        }
+    } else {
+        // VAT แยกนอก
+        $vatAmount = round($vatableBase * 0.07, 2);
+        $this->quote_subtotal    = $netSubtotal;
+        $this->quote_vat         = $vatAmount;
+        $this->quote_grand_total = round($netSubtotal + $vatAmount, 2);
     }
+}
+
 
     public function updatedQuoteDiscount()
     {

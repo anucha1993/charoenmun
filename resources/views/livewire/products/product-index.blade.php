@@ -80,7 +80,7 @@
                                             <td>{{ $products->firstItem() + $i }}</td>
                                             <td>{{ $p->product_code }}</td>
                                             <td>{{ $p->product_name."(".$p->product_size.")" }}</td>
-                                            <td class="text-end">{{ number_format($p->product_weight, 2) }}</td>
+                                            <td class="text-end">{{ number_format($p->product_weight).'.Kg/เมตร' }}</td>
                                             <td class="text-end">{{ number_format($p->product_price, 2) }}</td>
                                             <td>{{ $p->productType->value?? 'ไม่ระบุ' }}</td>
                                             <td>{{ $p->productUnit->value }}</td>
