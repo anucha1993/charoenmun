@@ -135,7 +135,7 @@
                                 {{-- Form --}}
                                 <form wire:submit.prevent="{{ $isEdit ? 'update' : 'store' }}">
                                     <div class="modal-body">
-                                        <div class="row g-3">
+                                        <div class="row g-1">
                                             {{-- product_code --}}
                                             <div class="col-md-6">
                                                 <label class="form-label">รหัสสินค้า *</label>
