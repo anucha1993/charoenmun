@@ -14,27 +14,37 @@ class CustomerIndex extends Component
 
     protected $listeners = ['deleteCustomer'];
 
-    public function deleteCustomer($data)
+
+ public function __construct(array $data = [])
     {
-        $id = $data['id'] ?? null;
-        if ($id) {
-            CustomerModel::findOrFail($id)->delete();
-            session()->flash('success', 'ลบลูกค้าเรียบร้อยแล้ว');
-        }
+        // ไม่ต้องทำอะไรกับ $data ก็ได้
     }
+
+    public function updatingSearch() { $this->resetPage(); }
+
+  public function deleteCustomer(int $id): void
+{
+    if ($id) {
+        CustomerModel::findOrFail($id)->delete();
+         $this->dispatch('notify', message: 'ลบลูกค้าเรียบร้อยแล้ว');
+
+    }
+}
 
     public function render()
     {
         $customers = CustomerModel::query()
-            ->when($this->search, fn($query) =>
-                $query->where('customer_name', 'like', "%{$this->search}%")
+            ->when($this->search, fn ($q) =>
+                $q->where(function ($q) {
+                    $q->where('customer_name',  'like', "%{$this->search}%")
                       ->orWhere('customer_phone', 'like', "%{$this->search}%")
-                      ->orWhere('customer_email', 'like', "%{$this->search}%")
+                      ->orWhere('customer_email', 'like', "%{$this->search}%");
+                })
             )
-            ->orderByDesc('id')
+            ->latest('id')
             ->paginate(15);
 
         return view('livewire.customers.customer-index', compact('customers'))
-            ->layout('layouts.horizontal', ['title' => 'Customers - List']);
+               ->layout('layouts.horizontal', ['title' => 'Customers - List']);
     }
 }

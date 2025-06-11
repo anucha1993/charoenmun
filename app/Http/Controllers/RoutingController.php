@@ -49,20 +49,23 @@ class RoutingController extends Controller
     /**
      * second level route
      */
-    public function secondLevel(Request $request, $first, $second)
-    {
-
-        $mode = $request->query('mode');
-        $demo = $request->query('demo');
-
-       if ($first === 'customer' && $second === 'create') {
-        return redirect()->route('customers.create');   // ✅ ชี้ไป Livewire
+   public function secondLevel(Request $request, $first, $second)
+{
+    // ช่วยกันไม่ให้ชน route ใหม่
+    if ($first === 'customers') {
+        abort(404);
     }
 
-
-
-    return view($first .'.'. $second, ['mode' => $mode, 'demo' => $demo]);
+    // ตัวอย่าง redirect ไป Livewire customer/create
+    if ($first === 'customer' && $second === 'create') {
+        return redirect()->route('customers.create');
     }
+
+    return view("{$first}.{$second}", [
+        'mode' => $request->query('mode'),
+        'demo' => $request->query('demo'),
+    ]);
+}
 
     /**
      * third level route

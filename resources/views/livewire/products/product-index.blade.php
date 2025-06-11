@@ -79,7 +79,7 @@
                                         <tr wire:key="row-{{ $p->product_id }}">
                                             <td>{{ $products->firstItem() + $i }}</td>
                                             <td>{{ $p->product_code }}</td>
-                                            <td>{{ $p->product_name."(".$p->product_size.")" }}</td>
+                                            <td>{{ $p->product_name."(".$p->product_size.")".' '.$p->productWireType?->value }}</td>
                                             <td class="text-end">{{ number_format($p->product_weight).'.Kg/เมตร' }}</td>
                                             <td class="text-end">{{ number_format($p->product_price, 2) }}</td>
                                             <td>{{ $p->productType->value?? 'ไม่ระบุ' }}</td>
@@ -146,7 +146,6 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
-
                                             {{-- product_name --}}
                                             <div class="col-md-12">
                                                 <label class="form-label">ชื่อสินค้า *</label>

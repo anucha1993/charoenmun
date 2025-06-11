@@ -136,6 +136,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/home', fn() => view('index'))->name('home');
 
     // ---- wildcard พวกนี้ต้องอยู่ “ท้ายสุด” ----
+//     Route::get('/{first}', [RoutingController::class, 'root'])
+//       ->where('first', '^(?!customers$).+');
+//       Route::get('/{first}/{second}', [RoutingController::class, 'secondLevel'])
+//       ->where('first', '^(?!customers$).+');
+
+// Route::get('/{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])
+//       ->where('first', '^(?!customers$).+');
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
     Route::get('{any}', [RoutingController::class, 'root'])->name('any');

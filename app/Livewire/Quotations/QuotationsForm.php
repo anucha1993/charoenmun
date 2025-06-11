@@ -149,23 +149,27 @@ class QuotationsForm extends Component
         if (preg_match('/items\.(\d+)\.product_search/', $name, $matches)) {
             $index = $matches[1];
 
-            $this->items[$index]['product_results'] = ProductModel::where('product_name', 'like', "%{$value}%")
+            $this->items[$index]['product_results'] = ProductModel::with('productWireType:id,value')->where('product_name', 'like', "%{$value}%")
                 ->take(10)
-                ->get(['product_id', 'product_name', 'product_size'])
-                ->toArray();
+                ->get(['product_id', 'product_name', 'product_size','product_wire_type']);
             $this->items[$index]['product_results_visible'] = true;
         }
     }
 
     public function selectProduct($index, $productId, $productName)
-    {
-        $this->items[$index]['product_id'] = $productId;
-        $this->items[$index]['product_search'] = $productName;
-        $this->items[$index]['product_results'] = [];
-        $this->items[$index]['product_size'] = [];
-        $this->items[$index]['product_results_visible'] = false;
-        $this->updatedItems($productId, "items.{$index}.product_id");
-    }
+{
+    $product = ProductModel::with('productWireType:id,value')->find($productId);
+
+    $this->items[$index]['product_id']        = $productId;
+    $this->items[$index]['product_search']    = $productName.' '.$product->productWireType?->value;
+    $this->items[$index]['product_size']      = $product->product_size;
+    $this->items[$index]['product_wire_type'] = $product->productWireType?->value ?? null;
+
+    $this->items[$index]['product_results']    = [];
+    $this->items[$index]['product_results_visible'] = false;
+
+    $this->updatedItems($productId, "items.{$index}.product_id");
+}
 
     public function save()
     {
@@ -276,6 +280,8 @@ class QuotationsForm extends Component
             'unit_price' => 0,
             'total' => 0,
             'product_vat' => false,
+            'product_results' => collect(),
+            'product_results_visible'  => false,
         ];
     }
 
@@ -416,9 +422,11 @@ class QuotationsForm extends Component
         $this->calculateTotals();
     }
 
-    public function updatedEnableVat(): void
+    public function updatedQuoteEnableVat(): void
     {
         $this->calculateTotals();
+        $this->updatedVatIncluded();
+        
     }
     public function updatedVatIncluded(): void
     {
