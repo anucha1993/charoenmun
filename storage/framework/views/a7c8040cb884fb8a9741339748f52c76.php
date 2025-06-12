@@ -244,12 +244,10 @@
                                                                      <a href="javascript: void(0);">
                                                                         <li class="list-group-item list-group-item-action"
                                                                             wire:click="selectProduct(<?php echo e($i); ?>, <?php echo e($result->product_id); ?>, <?php echo \Illuminate\Support\Js::from($result->product_name)->toHtml() ?>)">
-
                                                                             <?php echo e($result->product_name); ?>
 
                                                                             (<?php echo e($result->product_size); ?>)
                                                                             <?php echo e($result->productWireType?->value ?? '-'); ?>
-
 
                                                                         </li>
                                                                         </a>
@@ -269,7 +267,7 @@
                                                     <td style="min-width:200px;">
                                                         <!--[if BLOCK]><![endif]--><?php if($item['product_calculation'] != 1): ?>
                                                             <span>ความหนา:</span>
-                                                            <input type="number" min="1"
+                                                            <input type="number" step="0.01"
                                                                 wire:model.debounce.300ms="items.<?php echo e($i); ?>.product_calculation"
                                                                 class="form-control form-control-sm"
                                                                 style="display:inline-block; width:80px; vertical-align:middle;"
@@ -297,7 +295,7 @@
 
                                                     <td style="display: none">
 
-                                                        <input type="number" min="1"
+                                                        <input type="number" 
                                                             <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
 
                                                             wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.product_weight"
@@ -336,7 +334,7 @@
 
                                                     </td>
                                                     <td>
-                                                        <!--[if BLOCK]><![endif]--><?php if(!$quotation?->quote_status === QuotationStatus::Success): ?>
+                                                        <!--[if BLOCK]><![endif]--><?php if(!$quotation?->quote_status == 'success'): ?>
                                                             <a href="javascript: void(0);"
                                                                 wire:click="removeItem(<?php echo e($i); ?>)"><i
                                                                     class="mdi mdi-trash-can text-danger"
@@ -372,17 +370,7 @@
                             </label>
                         </div>
 
-                        <!--[if BLOCK]><![endif]--><?php if($quote_enable_vat): ?>
-                            <div class="form-check mt-2 ms-3">
-                                <input class="form-check-input" type="checkbox" wire:model.live="quote_vat_included"
-                                    <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
-
-                                    id="vatIncludedCheck">
-                                <label class="form-check-label" for="vatIncludedCheck">
-                                    💡 คิดรวม VAT ในราคารวม (VAT-In)
-                                </label>
-                            </div>
-                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                        
 
                         <div class="row">
                             <div class="col-sm-6">

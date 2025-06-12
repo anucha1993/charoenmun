@@ -223,11 +223,9 @@
                                                                      <a href="javascript: void(0);">
                                                                         <li class="list-group-item list-group-item-action"
                                                                             wire:click="selectProduct({{ $i }}, {{ $result->product_id }}, @js($result->product_name))">
-
                                                                             {{ $result->product_name }}
                                                                             ({{ $result->product_size }})
                                                                             {{ $result->productWireType?->value ?? '-' }}
-
                                                                         </li>
                                                                         </a>
                                                                     @endforeach
@@ -255,7 +253,7 @@
                                                     <td style="min-width:200px;">
                                                         @if ($item['product_calculation'] != 1)
                                                             <span>ความหนา:</span>
-                                                            <input type="number" min="1"
+                                                            <input type="number" step="0.01"
                                                                 wire:model.debounce.300ms="items.{{ $i }}.product_calculation"
                                                                 class="form-control form-control-sm"
                                                                 style="display:inline-block; width:80px; vertical-align:middle;"
@@ -286,7 +284,7 @@
 
                                                     <td style="display: none">
 
-                                                        <input type="number" min="1"
+                                                        <input type="number" 
                                                             {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_weight"
                                                             class="form-control form-control-sm" />
@@ -320,7 +318,7 @@
                                                         {{ number_format($item['total'], 2) }}
                                                     </td>
                                                     <td>
-                                                        @if (!$quotation?->quote_status === QuotationStatus::Success)
+                                                        @if (!$quotation?->quote_status == 'success')
                                                             <a href="javascript: void(0);"
                                                                 wire:click="removeItem({{ $i }})"><i
                                                                     class="mdi mdi-trash-can text-danger"
@@ -355,7 +353,7 @@
                             </label>
                         </div>
 
-                        @if ($quote_enable_vat)
+                        {{-- @if ($quote_enable_vat)
                             <div class="form-check mt-2 ms-3">
                                 <input class="form-check-input" type="checkbox" wire:model.live="quote_vat_included"
                                     {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
@@ -364,7 +362,7 @@
                                     💡 คิดรวม VAT ในราคารวม (VAT-In)
                                 </label>
                             </div>
-                        @endif
+                        @endif --}}
 
                         <div class="row">
                             <div class="col-sm-6">
