@@ -28,6 +28,10 @@ class OrderItemsModel extends Model
         'unit_price',
         'total',
     ];
+    protected $guarded = [];
+    protected $casts = [
+        'product_vat' => 'boolean',
+    ];
 
     public function order()
     {
