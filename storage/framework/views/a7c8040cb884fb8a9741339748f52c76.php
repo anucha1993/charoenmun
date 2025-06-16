@@ -225,7 +225,7 @@
                                                     <td style="min-width: 350px;">
 
                                                         <div class="position-relative" wire:ignore.self>
-                                                            <input type="text" class="form-control form-control-sm"
+                                                            <input type="text" class="form-control form-control-sm mb-1 text-black"
                                                                 <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
 
                                                                 placeholder="ค้นหาสินค้า..."
@@ -235,7 +235,7 @@
                                                                 wire:key="search-<?php echo e($i); ?>"
                                                                  />
 
-                                                           
+                                                             <input type="text" wire:model="items.<?php echo e($i); ?>.product_note" class="form-control form-control-sm" placeholder="หมายเหตุ">
 
                                                             <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_results_visible'])): ?>
                                                                 <ul class="list-group position-absolute shadow"
@@ -279,7 +279,9 @@
                                                     </td>
                                                     <td>
                                                         <input type="checkbox"
-                                                            wire:model.live="items.<?php echo e($i); ?>.product_vat" >
+                                                        wire:model.live="items.<?php echo e($i); ?>.product_vat"
+                                                        wire:change="refreshVat">
+                                                 
                                                     </td>
 
 

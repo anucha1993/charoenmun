@@ -4,6 +4,7 @@ namespace App\Models\Quotations;
 
 use App\Models\products\ProductModel;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Quotations\QuotationModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class QuotationItemModel extends Model
@@ -14,7 +15,7 @@ class QuotationItemModel extends Model
      protected $fillable = [
         'quotation_id','product_id','product_name','product_type',
         'product_unit','product_length','product_weight',
-        'quantity','unit_price','total','product_detail','product_calculation','product_vat'
+        'quantity','unit_price','total','product_detail','product_calculation','product_vat','product_note'
     ];
 
     protected $casts = [

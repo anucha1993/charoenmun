@@ -104,6 +104,7 @@ class QuotationsForm extends Component
                     'id' => $i->id,
                     'product_id' => $i->product_id,
                     'product_name' => $i->product_name,
+                    'product_note' => $i->product_note,
                     'product_type' => $i->product_type,
                     'product_unit' => $i->product_unit,
                     'product_detail' => $i->product_detail ?? ($product ? $product->product_size : ''), // (ถ้าเก็บใน DB)
@@ -229,6 +230,7 @@ class QuotationsForm extends Component
                         'product_length' => $row['product_length'],
                         'product_weight' => $row['product_weight'],
                         'product_calculation' => $row['product_calculation'],
+                        'product_note' => $row['product_note'],
                         'quantity' => $row['quantity'],
                         'unit_price' => $row['unit_price'],
                         'total' => $row['quantity'] * $row['unit_price'],
@@ -275,6 +277,7 @@ class QuotationsForm extends Component
             'product_name' => '',
             'product_type' => '',
             'product_unit' => '',
+            'product_note' => '',
             'product_calculation' => 1,
             'product_length' => null,
             'product_weight' => null,
@@ -337,6 +340,7 @@ class QuotationsForm extends Component
             $this->items[$index]['product_detail'] = $product->product_size;
             $this->items[$index]['product_type'] = $product->productType->value;
             $this->items[$index]['product_name'] = $product->product_name;
+            $this->items[$index]['product_note'] = $product->product_note;
             $this->items[$index]['unit_price'] = $product->product_price;
             $this->items[$index]['product_weight'] = $product->product_weight;
             $this->items[$index]['product_calculation'] = $product->product_calculation;

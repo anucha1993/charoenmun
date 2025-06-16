@@ -205,7 +205,7 @@
                                                     <td style="min-width: 350px;">
 
                                                         <div class="position-relative" wire:ignore.self>
-                                                            <input type="text" class="form-control form-control-sm"
+                                                            <input type="text" class="form-control form-control-sm mb-1 text-black"
                                                                 {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
                                                                 placeholder="ค้นหาสินค้า..."
                                                                 wire:model.live.debounce.500ms="items.{{ $i }}.product_search"
@@ -214,7 +214,7 @@
                                                                 wire:key="search-{{ $i }}"
                                                                 {{-- เพิ่ม wire:key ให้ Livewire รู้ว่า input แต่ละแถวไม่ใช่ element เดิม --}} />
 
-                                                           
+                                                             <input type="text" wire:model="items.{{ $i }}.product_note" class="form-control form-control-sm" placeholder="หมายเหตุ">
 
                                                             @if (!empty($item['product_results_visible']))
                                                                 <ul class="list-group position-absolute shadow"

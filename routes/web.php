@@ -89,6 +89,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('quotations.')
         ->group(function () {
             Route::get('/', QuotationIndex::class)->name('index');
+            
             Route::get('/create', QuotationsForm::class)->name('create');
             Route::get('/{quotation}/edit', QuotationsForm::class)->name('edit');
         });
@@ -128,12 +129,15 @@ Route::get('/customers/create', CustomerCreate::class)->name('customers.create')
 Route::get('/customers', CustomerIndex::class)->name('customers.index');
 
 //Quotations
+Route::middleware(['auth'])->group(function () {
 Route::get('/quotations/create', QuotationsForm::class)->name('quotations.create');
+Route::get('/index', QuotationIndex::class)->name('quotations.index');
+});
 
 require __DIR__ . '/auth.php';
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', [RoutingController::class, 'index'])->name('root');
-    Route::get('/home', fn() => view('index'))->name('home');
+    // Route::get('/home', fn() => view('index'))->name('home');
 
     // ---- wildcard พวกนี้ต้องอยู่ “ท้ายสุด” ----
 //     Route::get('/{first}', [RoutingController::class, 'root'])

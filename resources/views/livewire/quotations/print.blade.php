@@ -126,7 +126,9 @@
                                             <td>{{ $loopIndex++ }}</td>
                                             <td>{{ $item->quantity }}</td>
                                             <td>{{ $item->product_unit }}</td>
-                                            <td><b>{{ $item->product_name }}</b> ({{ $item->product_detail }})</td>
+                                            <td><b>{{ $item->product_name }}</b> <br />
+                                                {{ $item->product_note }}
+                                            </td>
                                             <td>{{ number_format($item->unit_price, 2) }}</td>
                                             <td class="text-end">{{ number_format($item->total, 2) }}</td>
                                         </tr>

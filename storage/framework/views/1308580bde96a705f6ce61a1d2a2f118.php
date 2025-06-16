@@ -114,7 +114,10 @@
                                             <td><?php echo e($loopIndex++); ?></td>
                                             <td><?php echo e($item->quantity); ?></td>
                                             <td><?php echo e($item->product_unit); ?></td>
-                                            <td><b><?php echo e($item->product_name); ?></b> (<?php echo e($item->product_detail); ?>)</td>
+                                            <td><b><?php echo e($item->product_name); ?></b> <br />
+                                                <?php echo e($item->product_note); ?>
+
+                                            </td>
                                             <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
                                             <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                         </tr>
