@@ -44,7 +44,7 @@ class OrderModel extends Model
 
     public function customer()
     {
-        return $this->belongsTo(CustomerModel::class, 'customer_id');
+        return $this->belongsTo(customerModel::class, 'customer_id');
     }
 
     public function deliveryAddress()

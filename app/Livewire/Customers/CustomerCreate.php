@@ -64,7 +64,7 @@ class CustomerCreate extends Component
         return;
     }
 
-    $query = CustomerModel::query()
+    $query = customerModel::query()
         ->where('customer_name', $this->customer_name)
         ->where('customer_taxid', $this->customer_taxid);
 
@@ -140,7 +140,7 @@ class CustomerCreate extends Component
             'customer_level' => 'required',
         ]);
 
-        $customer = CustomerModel::create([
+        $customer = customerModel::create([
             'customer_name' => $this->customer_name,
             'customer_type' => $this->customer_type,
             'customer_level' => $this->customer_level,

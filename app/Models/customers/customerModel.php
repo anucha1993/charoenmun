@@ -9,7 +9,7 @@ use App\Models\addressList\provincesModel;
 use App\Models\globalsets\GlobalSetValueModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class CustomerModel extends Model
+class customerModel extends Model
 {
     use HasFactory;
 

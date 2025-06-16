@@ -62,7 +62,7 @@ class CustomerEdit extends Component
         $this->customerType = $set?->values->where('status', 'Enable')->values() ?? collect();
         $this->customerLevel = $setLevel?->values->where('status', 'Enable')->values() ?? collect();
 
-        $customer = CustomerModel::with('deliveryAddresses')->findOrFail($this->customerId);
+        $customer = customerModel::with('deliveryAddresses')->findOrFail($this->customerId);
         $this->customer_pocket_money = $customer->customer_pocket_money ?? 0;
 
         $this->customer_code = $customer->customer_code;
@@ -99,14 +99,14 @@ class CustomerEdit extends Component
         // ตรวจสอบรหัสผ่าน
         if ($this->confirm_password !== env('PASSWORD_POCKET_MONEY')) {
             // ✅ โหลดค่าจริงจาก DB กลับมา แทนค่าใหม่
-            $this->customer_pocket_money = CustomerModel::find($this->customerId)->customer_pocket_money;
+            $this->customer_pocket_money = customerModel::find($this->customerId)->customer_pocket_money;
 
             $this->dispatch('notify', message: 'รหัสไม่ถูกต้อง', type: 'error');
             return;
         }
 
         // ✅ บันทึกเมื่อรหัสถูกต้อง
-        CustomerModel::where('id', $this->customerId)->update([
+        customerModel::where('id', $this->customerId)->update([
             'customer_pocket_money' => $this->customer_pocket_money,
         ]);
 
@@ -318,7 +318,7 @@ class CustomerEdit extends Component
                 ]),
             );
         }
-        $this->deliveryAddresses = CustomerModel::with('deliveryAddresses')->find($this->customerId)->deliveryAddresses->toArray();
+        $this->deliveryAddresses = customerModel::with('deliveryAddresses')->find($this->customerId)->deliveryAddresses->toArray();
         // รีเซต modal
         $this->dispatch('closeModal');
         $this->dispatch('notify', message: 'บันทึกข้อมูลเรียบร้อยแล้ว');
@@ -342,7 +342,7 @@ class CustomerEdit extends Component
 
     public function update()
     {
-        $customer = CustomerModel::findOrFail($this->customerId);
+        $customer = customerModel::findOrFail($this->customerId);
 
         $customer->customer_name = $this->customer_name;
         $customer->customer_type = $this->customer_type;

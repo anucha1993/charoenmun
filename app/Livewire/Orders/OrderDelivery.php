@@ -19,7 +19,7 @@ class OrderDelivery extends Component
     public ?int $delivery_id = null; // ถ้า view ต้องการ
     public ?OrderModel $orderModel = null; // เก็บ Order ตัวเดียว
     public Collection $orderItems;
-    public ?CustomerModel $customer = null;
+    public ?customerModel $customer = null;
     public Collection $customerDelivery;
     public ?deliveryAddressModel $selectedDelivery = null;
     public ?int $selected_delivery_id = null;

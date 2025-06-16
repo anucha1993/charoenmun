@@ -25,7 +25,7 @@ class CustomerIndex extends Component
   public function deleteCustomer(int $id): void
 {
     if ($id) {
-        CustomerModel::findOrFail($id)->delete();
+        customerModel::findOrFail($id)->delete();
          $this->dispatch('notify', message: 'ลบลูกค้าเรียบร้อยแล้ว');
 
     }
@@ -33,7 +33,7 @@ class CustomerIndex extends Component
 
     public function render()
     {
-        $customers = CustomerModel::query()
+        $customers = customerModel::query()
             ->when($this->search, fn ($q) =>
                 $q->where(function ($q) {
                     $q->where('customer_name',  'like', "%{$this->search}%")

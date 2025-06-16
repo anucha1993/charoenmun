@@ -44,7 +44,7 @@ class CustomerModal extends Component
             return;
         }
 
-        $query = CustomerModel::query()->where('customer_name', $this->customer_name)->where('customer_taxid', $this->customer_taxid);
+        $query = customerModel::query()->where('customer_name', $this->customer_name)->where('customer_taxid', $this->customer_taxid);
 
         if (isset($this->customerId)) {
             $query->where('id', '!=', $this->customerId);
@@ -111,7 +111,7 @@ class CustomerModal extends Component
 
     public function loadCustomer(int $id)
     {
-        $customer = CustomerModel::find($id);
+        $customer = customerModel::find($id);
 
         if ($customer) {
             $this->customer_id = $customer->id;
@@ -197,7 +197,7 @@ class CustomerModal extends Component
             'customer_level' => 'required|string|max:255',
             'customer_type' => 'required|string|max:255',
         ]);
-        $customer = CustomerModel::updateOrCreate(
+        $customer = customerModel::updateOrCreate(
             ['id' => $this->customer_id],
             [
                 'customer_type' => $this->customer_type,

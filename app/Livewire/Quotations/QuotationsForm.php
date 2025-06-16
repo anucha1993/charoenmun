@@ -27,7 +27,7 @@ class QuotationsForm extends Component
 
     public ?int $selected_delivery_id = null;
 
-    public ?CustomerModel $selectedCustomer = null;
+    public ?customerModel $selectedCustomer = null;
     public ?deliveryAddressModel $selectedDelivery = null;
 
     public array $items = [];
@@ -76,7 +76,7 @@ class QuotationsForm extends Component
         }
 
         /* โหลด dropdown */
-        $this->customers = CustomerModel::all();
+        $this->customers = customerModel::all();
         $this->customerDelivery = $this->customer_id ? deliveryAddressModel::where('customer_id', $this->customer_id)->get() : collect();
     }
 
@@ -93,7 +93,7 @@ class QuotationsForm extends Component
         $this->quote_vat_included = $q->quote_vat_included;
         $this->quote_discount = $q->quote_discount;
         $this->quote_status = $q->quote_status?->value ?? 'wait';
-        $this->selectedCustomer = CustomerModel::find($q->customer_id);
+        $this->selectedCustomer = customerModel::find($q->customer_id);
         $this->selectedDelivery = deliveryAddressModel::find($q->delivery_address_id);
 
         /* map items -> array */
@@ -468,7 +468,7 @@ public function refreshVat(): void
 
     public function updatedCustomerId($value): void
     {
-        $this->selectedCustomer = CustomerModel::find($value);
+        $this->selectedCustomer = customerModel::find($value);
         $this->customerDelivery = deliveryAddressModel::where('customer_id', $value)->get();
         $this->selected_delivery_id = null;
         $this->selectedDelivery = null;
@@ -487,7 +487,7 @@ public function refreshVat(): void
 
     public function refreshCustomers(): void
     {
-        $this->customers = CustomerModel::all();
+        $this->customers = customerModel::all();
         if ($this->customer_id) {
             $this->customerDelivery = deliveryAddressModel::where('customer_id', $this->customer_id)->get();
             $this->updatedCustomerId($this->customer_id);

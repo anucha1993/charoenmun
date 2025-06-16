@@ -39,7 +39,7 @@ class DeliveryAddressModal extends Component
     public function editDelivery($deliveryId)
     {
         $delivery = deliveryAddressModel::find($deliveryId);
-        $customer = CustomerModel::find($delivery->customer_id);
+        $customer = customerModel::find($delivery->customer_id);
 
         if ($delivery) {
             $this->editing = true;
@@ -109,7 +109,7 @@ class DeliveryAddressModal extends Component
             return;
         }
 
-        $customer = CustomerModel::find($customerId);
+        $customer = customerModel::find($customerId);
 
         if ($customer) {
             $this->delivery_customer_id = $customerId;
