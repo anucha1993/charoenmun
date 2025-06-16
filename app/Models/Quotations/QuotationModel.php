@@ -26,7 +26,7 @@ class QuotationModel extends Model
     // ความสัมพันธ์
     public function customer()
     {
-        return $this->belongsTo(CustomerModel::class, 'customer_id');
+        return $this->belongsTo(customerModel::class, 'customer_id');
     }
      public function sale()
     {
