@@ -4,7 +4,7 @@ namespace App\Livewire\Quotations;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Models\customers\CustomerModel;
+use App\Models\customers\customerModel;
 use App\Models\customers\deliveryAddressModel;
 use App\Models\addressList\provincesModel;
 use App\Models\addressList\amphuresModel;

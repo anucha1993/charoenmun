@@ -4,7 +4,7 @@ namespace App\Livewire\Customers;
 
 use Livewire\Component;
 use Illuminate\Support\Carbon;
-use App\Models\customers\CustomerModel;
+use App\Models\customers\customerModel;
 use App\Models\addressList\amphuresModel;
 use App\Models\globalsets\GlobalSetModel;
 use App\Models\addressList\districtsModel;

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\products\ProductModel;
 use App\Models\Orders\OrderItemsModel;
-use App\Models\customers\CustomerModel;
+use App\Models\customers\customerModel;
 use App\Models\Quotations\QuotationModel;
 use App\Models\customers\deliveryAddressModel;
 

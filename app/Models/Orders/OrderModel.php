@@ -3,7 +3,7 @@
 namespace App\Models\Orders;
 
 use App\Models\Orders\OrderItemsModel;
-use App\Models\customers\CustomerModel;
+use App\Models\customers\customerModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Quotations\QuotationModel;
 use App\Models\customers\deliveryAddressModel;

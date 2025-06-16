@@ -3,7 +3,7 @@ namespace App\Livewire\Quotations;
 
 use Livewire\Component;
 use Illuminate\Support\Collection;
-use App\Models\customers\CustomerModel;
+use App\Models\customers\customerModel;
 use App\Models\addressList\amphuresModel;
 use App\Models\globalsets\GlobalSetModel;
 use App\Models\addressList\districtsModel;
