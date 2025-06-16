@@ -43,7 +43,7 @@ class CustomerModel extends Model
     /* -------- ความสัมพันธ์ -------- */
     public function deliveryAddresses()
     {
-        return $this->hasMany(DeliveryAddressModel::class, 'customer_id');
+        return $this->hasMany(deliveryAddressModel::class, 'customer_id');
     }
 
     public function type()
