@@ -4,7 +4,7 @@ namespace App\Models\Quotations;
 
 use App\Models\User;
 use App\Enums\QuotationStatus;
-use App\Models\customers\CustomerModel;
+use App\Models\customers\customerModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\customers\deliveryAddressModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
