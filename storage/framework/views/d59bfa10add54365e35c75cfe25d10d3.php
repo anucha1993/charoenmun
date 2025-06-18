@@ -1,83 +1,87 @@
 <div>
-    {{-- resources/views/livewire/orders/show.blade.php --}}
+    
 
-    @php
+    <?php
         $totalConfirmed = $order->deliveries->flatMap->payments->where('status', 'ชำระเงินแล้ว')->sum('amount');
         $totalWaiting = $order->deliveries->flatMap->payments->where('status', 'รอยืนยันยอด')->sum('amount');
-    @endphp
+    ?>
     <div class="container py-3">
         <div class="card">
             <div class="card-header">
                 <h4>Order / ใบสั่งซื้อ</h4>
-                <p class="float-end">เลขที่: <strong>{{ $order->order_number }}</strong></p>
-                <p>วันที่: <strong>{{ $order->order_date->format('d/m/Y') }}</strong></p>
-                <p class="float-end">ชำระเงินแล้ว: <strong class="text-success">{{ number_format($totalConfirmed) }} บาท</strong></p>
-                <p>รอยืนยันยอด: <strong class="text-warning">{{ number_format($totalWaiting) }} บาท</strong></p>
+                <p class="float-end">เลขที่: <strong><?php echo e($order->order_number); ?></strong></p>
+                <p>วันที่: <strong><?php echo e($order->order_date->format('d/m/Y')); ?></strong></p>
+                <p class="float-end">ชำระเงินแล้ว: <strong class="text-success"><?php echo e(number_format($totalConfirmed)); ?> บาท</strong></p>
+                <p>รอยืนยันยอด: <strong class="text-warning"><?php echo e(number_format($totalWaiting)); ?> บาท</strong></p>
             </div>
             <div class="card-body">
 
-                {{-- หัวใจ --}}
+                
                 <div class="row  float-end">
 
 
                     <div class="col-12 ">
-                        <span>สถานะ: <strong> {!! order_status_badge($order->order_status) !!}</strong></span><br>
-                        <span>สถานะชำระเงิน: <strong>{!! payment_status_badge($order->payment_status) !!}</strong></span><br>
-                        <span>ภาษีมูลค่าเพิ่ม: <strong> {{ number_format($order->order_vat, 2) }}
+                        <span>สถานะ: <strong> <?php echo order_status_badge($order->order_status); ?></strong></span><br>
+                        <span>สถานะชำระเงิน: <strong><?php echo payment_status_badge($order->payment_status); ?></strong></span><br>
+                        <span>ภาษีมูลค่าเพิ่ม: <strong> <?php echo e(number_format($order->order_vat, 2)); ?>
+
                                 บาท</strong></span><br>
-                        <span>ส่วนลด: <strong> {{ number_format($order->order_discount, 2) }} บาท</strong></span><br>
-                        <span>จำนวนเงินทั้งสิ้น: <strong> {{ number_format($order->order_grand_total, 2) }}
+                        <span>ส่วนลด: <strong> <?php echo e(number_format($order->order_discount, 2)); ?> บาท</strong></span><br>
+                        <span>จำนวนเงินทั้งสิ้น: <strong> <?php echo e(number_format($order->order_grand_total, 2)); ?>
+
                                 บาท</strong></span><br>
 
                     </div>
 
                     <div class="col-4 text-end">
-                        {{-- ปุ่มอนุมัติสำหรับ Order สินค้า (ถ้ามี) --}}
-                        @if ($order->status === 'open')
+                        
+                        <!--[if BLOCK]><![endif]--><?php if($order->status === 'open'): ?>
                             <button wire:click="approveOrder" class="btn btn-primary">อนุมัติ Order</button>
-                        @endif
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                     </div>
                 </div>
 
-                {{-- ข้อมูลลูกค้า/ที่อยู่จัดส่ง --}}
+                
                 <div class="row ">
                     <div class="col-6">
                         <h4>ข้อมูลลูกค้า</h4>
                         <address>
-                            {{ $order->customer->customer_name }}<br>
-                            {{ $order->customer->customer_address }}<br>
-                            {{ $order->customer->customer_district_name .
+                            <?php echo e($order->customer->customer_name); ?><br>
+                            <?php echo e($order->customer->customer_address); ?><br>
+                            <?php echo e($order->customer->customer_district_name .
                                 ' ' .
                                 $order->customer->customer_amphur_name .
                                 ' ' .
                                 $order->customer->customer_province_name .
                                 ' ' .
-                                $order->customer->customer_zipcode }}<br>
-                            (+66) {{ $order->customer->customer_phone }}
+                                $order->customer->customer_zipcode); ?><br>
+                            (+66) <?php echo e($order->customer->customer_phone); ?>
+
                         </address>
                     </div>
                     <div class="col-6">
                         <h4>ที่อยู่จัดส่ง</h4>
-                        @if ($order->deliveryAddress)
+                        <!--[if BLOCK]><![endif]--><?php if($order->deliveryAddress): ?>
                             <address>
-                                {{ $order->deliveryAddress->delivery_contact_name }}
-                                ({{ $order->deliveryAddress->delivery_phone }})<br>
-                                {{ $order->deliveryAddress->delivery_number }}<br>
-                                {{ $order->deliveryAddress->delivery_district_name .
+                                <?php echo e($order->deliveryAddress->delivery_contact_name); ?>
+
+                                (<?php echo e($order->deliveryAddress->delivery_phone); ?>)<br>
+                                <?php echo e($order->deliveryAddress->delivery_number); ?><br>
+                                <?php echo e($order->deliveryAddress->delivery_district_name .
                                     ' ' .
                                     $order->deliveryAddress->delivery_amphur_name .
                                     ' ' .
                                     $order->deliveryAddress->delivery_province_name .
                                     ' ' .
-                                    $order->deliveryAddress->delivery_zipcode }}<br>
+                                    $order->deliveryAddress->delivery_zipcode); ?><br>
                             </address>
-                        @else
+                        <?php else: ?>
                             <span class="text-muted">ไม่ได้ระบุที่อยู่จัดส่ง</span>
-                        @endif
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                     </div>
                 </div>
 
-                {{-- ตารางรายการสินค้า (Order Items) --}}
+                
                 <div class="row ">
                     <div class="col-12">
                         <div class="table-responsive">
@@ -94,62 +98,44 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($order->items as $idx => $item)
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $order->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td>{{ $idx + 1 }}</td>
-                                            <td ><b>{{ $item->product_name }}</b> </br>
-                                                {{ $item->product_note }}
+                                            <td><?php echo e($idx + 1); ?></td>
+                                            <td ><b><?php echo e($item->product_name); ?></b> </br>
+                                                <?php echo e($item->product_note); ?>
+
                                             </td>
-                                            <td>{{ $item->product_detail }}</td>
+                                            <td><?php echo e($item->product_detail); ?></td>
                                             <td>
-                                                @php
+                                                <?php
                                                     $delivered = $deliveredQtyMap[$item->product_id] ?? 0;
-                                                @endphp
-                                                {{ $item->quantity }}
+                                                ?>
+                                                <?php echo e($item->quantity); ?>
 
-                                                @if ($delivered > 0)
-                                                    ({{ $delivered }})
-                                                @endif
+
+                                                <!--[if BLOCK]><![endif]--><?php if($delivered > 0): ?>
+                                                    (<?php echo e($delivered); ?>)
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             </td>
-                                            <td>{{ $item->product_unit }}</td>
+                                            <td><?php echo e($item->product_unit); ?></td>
                                             <td>
 
-                                                {{ number_format($item->unit_price, 2) }}
+                                                <?php echo e(number_format($item->unit_price, 2)); ?>
+
 
 
                                             </td>
-                                            <td class="text-end">{{ number_format($item->total, 2) }}</td>
+                                            <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                         </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                {{-- สรุปยอดรวม --}}
-                {{-- <div class="row mb-4">
-        <div class="col-sm-6 text-muted">
-            <p>หมายเหตุ: {{ $order->note ?? '-' }}</p>
-        </div>
-        <div class="col-sm-6">
-            <div class="float-end">
-                <p><b>Sub-Total:</b>
-                    <span class="float-end">{{ number_format($order->order_subtotal, 2) }}</span>
-                </p>
-                <p><b>Discount:</b>
-                    <span class="float-end">{{ number_format($order->order_discount, 2) }}</span>
-                </p>
-                <p><b>VAT:</b>
-                    <span class="float-end">{{ number_format($order->order_vat, 2) }}</span>
-                </p>
-                <h5><b>Grand Total:</b>
-                    <span class="float-end">{{ number_format($order->order_grand_total, 2) }}</span>
-                </h5>
-            </div>
-            <div class="clearfix"></div>
-        </div>
-    </div> --}}
+                
+                
                 <div class="row">
                     <div class="col-12 mb-2">
                         <h5>รายการจัดส่ง (Order Deliveries)</h5>
@@ -174,42 +160,43 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($order->deliveries as $key => $delivery)
-                                                @php
+                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $order->deliveries; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $delivery): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php
                                                     $confirmed = $delivery->payments
                                                         ->where('status', 'ชำระเงินแล้ว')
                                                         ->sum('amount');
                                                     $waiting = $delivery->payments
                                                         ->where('status', 'รอยืนยันยอด')
                                                         ->sum('amount');
-                                                @endphp
+                                                ?>
 
                                                 <tr>
-                                                    <td>{{ $key + 1 }}</td>
-                                                    <td>{{ $delivery->order_delivery_date->format('d/m/Y') }}</td>
-                                                    <td>{{ $delivery->order_delivery_number }}</td>
+                                                    <td><?php echo e($key + 1); ?></td>
+                                                    <td><?php echo e($delivery->order_delivery_date->format('d/m/Y')); ?></td>
+                                                    <td><?php echo e($delivery->order_delivery_number); ?></td>
 
-                                                    <td>{{ number_format($delivery->order_delivery_grand_total, 2) }}
+                                                    <td><?php echo e(number_format($delivery->order_delivery_grand_total, 2)); ?>
+
                                                     </td>
 
-                                                    <td class="text-succcess">{{ number_format($confirmed, 2) }}</td>
-                                                    <td class="text-warning">{{ number_format($waiting, 2) }}</td>
-                                                    <td>{!! order_delivery_status_badge($delivery->order_delivery_status) !!}</td>
-                                                    <td>{!! payment_status_badge($delivery->payment_status) !!}</td>
+                                                    <td class="text-succcess"><?php echo e(number_format($confirmed, 2)); ?></td>
+                                                    <td class="text-warning"><?php echo e(number_format($waiting, 2)); ?></td>
+                                                    <td><?php echo order_delivery_status_badge($delivery->order_delivery_status); ?></td>
+                                                    <td><?php echo payment_status_badge($delivery->payment_status); ?></td>
                                                     
                                                     <td>
                                                         <a href=""> 🚚 การจัดส่ง</a> | 
-                                                        <a href="{{ route('deliveries.printer', $delivery->id) }}"
+                                                        <a href="<?php echo e(route('deliveries.printer', $delivery->id)); ?>"
                                                             class="text-pink"><i class="mdi mdi-printer"></i> พิมพ์</a>
                                                         |
 
                                                         <a href="javascript: void(0);" type="button"
                                                             data-bs-toggle="modal" data-bs-target="#paymentModal"
-                                                            wire:click="$dispatch('open-payment-modal', { orderId: {{ $order->id }}, deliveryId: {{ $delivery->id }} })">
+                                                            wire:click="$dispatch('open-payment-modal', { orderId: <?php echo e($order->id); ?>, deliveryId: <?php echo e($delivery->id); ?> })">
                                                             <i class="mdi mdi-cash-multiple "></i> แจ้งชำระเงิน
                                                         </a>
                                                         |
-                                                        <a href="{{ route('deliveries.edit', [$delivery->order_id, $delivery->id]) }}"
+                                                        <a href="<?php echo e(route('deliveries.edit', [$delivery->order_id, $delivery->id])); ?>"
                                                             class="text-dark" target="_blank"><i
                                                                 class="mdi mdi-content-save-edit-outline"></i> แก้ไข</a>
 
@@ -218,7 +205,7 @@
                                                                 class="mdi mdi-trash-can"></i> ลบ</a>
 
                                                     </td>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                         </tbody>
                                     </table>
                                 </div>
@@ -228,14 +215,14 @@
                     </div>
 
 
-                    {{-- ถ้ายังสามารถสร้าง Delivery รอบใหม่ได้ (ยังไม่ delivered ครบ) --}}
-                    @if ($order->order_status === 'open')
+                    
+                    <!--[if BLOCK]><![endif]--><?php if($order->order_status === 'open'): ?>
                         <div class="col-12">
                             <button wire:click="createNewDelivery" class="btn btn-primary">
                                 <i class="ri-truck-line"></i> สร้างรอบจัดส่งใหม่
                             </button>
                         </div>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
             </div>
 
@@ -273,10 +260,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                @if ($delivery)
+                <!--[if BLOCK]><![endif]--><?php if($delivery): ?>
                     <button type="button" class="btn btn-primary"
-                        onclick="applyPriceAndRedirect({{ $delivery->id }})">พิมพ์เอกสาร</button>
-                        @endif
+                        onclick="applyPriceAndRedirect(<?php echo e($delivery->id); ?>)">พิมพ์เอกสาร</button>
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
             </div>
         </div>
@@ -285,26 +272,27 @@
 
 
 
-    <livewire:orders.payment-modal />
+    <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('orders.payment-modal', []);
+
+$__html = app('livewire')->mount($__name, $__params, 'lw-2629980014-0', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
 </div>
 
-{{-- <script>
-    document.addEventListener("livewire:init", () => {
-        Livewire.on("show-payment-modal", () => {
-            const modal = new bootstrap.Modal(document.getElementById("paymentModal"));
-            modal.show();
-        });
-    });
-</script> --}}
 
-{{-- <script>
-    document.addEventListener("livewire:init", () => {
-        Livewire.on("close-payment-modal", () => {
-            const modal = new bootstrap.Modal(document.getElementById("paymentModal"));
-            modal.hide();
-        });
-    });
-</script> --}}
+
+
 
 
 <script>
@@ -332,7 +320,7 @@
         const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
 
         // สร้าง URL ไปยัง route delivery/print
-        const printUrl = `{{ url('deliveries') }}/${deliveryId}/print?${query}`;
+        const printUrl = `<?php echo e(url('deliveries')); ?>/${deliveryId}/print?${query}`;
 
         // เปิดในแท็บใหม่
         window.open(printUrl, '_blank');
@@ -345,8 +333,5 @@
 
 
 
-{{-- <script>
-    window.addEventListener('open-print', event => {
-        window.open(event.detail.url, '_blank');
-    });
-</script> --}}
+
+<?php /**PATH C:\laragon\www\charoenmun\resources\views/livewire/orders/order-show.blade.php ENDPATH**/ ?>

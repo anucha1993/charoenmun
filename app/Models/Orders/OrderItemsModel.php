@@ -23,6 +23,7 @@ class OrderItemsModel extends Model
         'product_length',
         'product_weight',
         'product_vat',
+        'product_note',
         'product_calculation',
         'quantity',
         'unit_price',

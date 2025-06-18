@@ -54,9 +54,9 @@
                                 <div class="mt-3 float-sm-end">
 
 
-                                    <!--[if BLOCK]><![endif]--><?php if($quotation && $quotation->quote_status === 'wait'): ?>
+                                    <!--[if BLOCK]><![endif]--><?php if($quotation && $quote_status ==='wait'): ?>
                                         <button type="button" class="btn btn-sm btn-info mb-1 float-end"
-                                            wire:click="approveQuotation(<?php echo e($quotation->id); ?>)"
+                                            wire:click="approveQuotation(<?php echo e($quotation->id); ?>)" 
                                             onclick="return confirm('ยืนยันการอนุมัติใบเสนอราคา เลขที่ <?php echo e($quotation->quote_number); ?> ?') || event.stopImmediatePropagation()">
                                             อนุมัติใบเสนอราคา
                                         </button>
@@ -65,7 +65,8 @@
                                     <div class="mb-1">
                                         <div class="input-group flex-nowrap">
                                             <span class="input-group-text" id="basic-addon1">วันที่ออกเอกสาร :</span>
-                                            <input type="date" class="form-control col-form-label-lg"
+                                            <input type="date" class="form-control col-form-label-lg" <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
                                                 wire:model="quote_date" aria-describedby="basic-addon1">
                                         </div>
                                     </div>
@@ -85,7 +86,7 @@
                                 <div>
 
                                     <select id="customerSelect" class="form-control"
-                                        <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>>
+                                        <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
                                         <option value="">-- เลือกลูกค้า --</option>
                                         <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <option value="<?php echo e($c->id); ?>" <?php if($c->id == $customer_id): echo 'selected'; endif; ?>>
@@ -138,7 +139,7 @@
 
 
                                 <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
-                                    <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
+                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                     class="form-select">
                                     <option value="">-- เลือกที่อยู่จัดส่ง --</option>
@@ -226,7 +227,7 @@
 
                                                         <div class="position-relative" wire:ignore.self>
                                                             <input type="text" class="form-control form-control-sm mb-1 text-black"
-                                                                <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
+                                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                                 placeholder="ค้นหาสินค้า..."
                                                                 wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.product_search"
@@ -271,7 +272,7 @@
                                                                 wire:model.debounce.300ms="items.<?php echo e($i); ?>.product_calculation"
                                                                 class="form-control form-control-sm"
                                                                 style="display:inline-block; width:80px; vertical-align:middle;"
-                                                                <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?> />
+                                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?> />
                                                         <?php else: ?>
                                                             <?php echo $item['product_detail'] ?? ''; ?>
 
@@ -288,7 +289,7 @@
                                                     <td style="width: 110px">
 
                                                         <input type="text"
-                                                            <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
+                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                             wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.product_length"
                                                             class="form-control form-control-sm">
@@ -298,7 +299,7 @@
                                                     <td style="display: none">
 
                                                         <input type="number" 
-                                                            <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
+                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                             wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.product_weight"
                                                             class="form-control form-control-sm" />
@@ -307,7 +308,7 @@
 
                                                     <td style="width: 110px">
                                                         <input type="number" min="1"
-                                                            <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
+                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                             wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.quantity"
                                                             class="form-control form-control-sm" />
@@ -315,7 +316,7 @@
 
                                                     <td style="width: 100px">
                                                         <input type="text"
-                                                            <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
+                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                             wire:model.live="items.<?php echo e($i); ?>.product_unit"
                                                             class="form-control form-control-sm"
@@ -324,7 +325,7 @@
                                                     <td style="width: 200px" class="text-end">
 
                                                         <input type="number" min="0" step="0.01"
-                                                            <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
+                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                             wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.unit_price"
                                                             class="form-control form-control-sm text-end" />
@@ -364,7 +365,7 @@
 
                         <div class="form-check mt-2" style="z-index: -9999999999; ">
                             <input class="form-check-input" type="checkbox" wire:model.live="quote_enable_vat"
-                                <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
+                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                 id="enableVatCheck">
                             <label class="form-check-label" for="enableVatCheck">
@@ -380,7 +381,7 @@
                                     <h6 class="text-muted fs-14">Notes:</h6>
                                     <small>
                                         <textarea wire:model="quote_note" class="form-control" cols="3" rows="3"
-                                            <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>></textarea>
+                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>></textarea>
                                     </small>
 
                                 </div>
@@ -400,7 +401,7 @@
                                     <div class="col-md-2">
                                         <span class="float-end">
                                             <input type="number" wire:model.live.debounce.300ms="quote_discount"
-                                                <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                 class="form-control text-end form-control-sm" min="0"
                                                 step="0.01">
@@ -425,6 +426,7 @@
                             </div> <!-- end col -->
                         </div>
                         <!-- end row-->
+                      
 
                         <div class="d-print-none mt-4">
                             <div class="text-center">
@@ -435,9 +437,10 @@
                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
 
+
                                 <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
                                     <button type="submit" class="btn btn-primary"
-                                        <?php echo e($quotation?->quote_status === QuotationStatus::Success ? 'disabled' : ''); ?>>
+                                      <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
                                         บันทึก
                                     </button>
                                 <?php else: ?>
@@ -457,6 +460,14 @@
     </div> <!-- end col-->
 </div>
 
+
+
+
+
+<!-- Spinner จะแสดงอัตโนมัติขณะ Livewire ทำงาน -->
+
+
+
 <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
@@ -473,7 +484,6 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-
 <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
@@ -492,14 +502,16 @@ if (isset($__slots)) unset($__slots);
 ?>
 
 
-
-
 <div>
 
 </div>
 
 
-
+<script>
+    document.addEventListener("livewire:updated", () => {
+        console.log("Livewire updated spinner block");
+    });
+</script>
 
 
 <script>

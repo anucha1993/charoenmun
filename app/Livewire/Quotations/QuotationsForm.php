@@ -2,8 +2,11 @@
 
 namespace App\Livewire\Quotations;
 
+use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use App\Enums\QuotationStatus;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Orders\OrderModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\products\ProductModel;
 use App\Models\Orders\OrderItemsModel;
 use App\Models\customers\customerModel;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Quotations\QuotationModel;
 use App\Models\customers\deliveryAddressModel;
 
@@ -22,12 +26,17 @@ class QuotationsForm extends Component
     /* ──────────────── State หลัก ──────────────── */
     public Collection $customers;
     public Collection $customerDelivery;
+    public bool $isProcessing = false;
+    public bool $spinner = false;
+    public array $steps = [];
+    public ?string $orderNumber = null;
+
 
     public ?int $customer_id = null;
 
     public ?int $selected_delivery_id = null;
 
-    public ?customerModel $selectedCustomer = null;
+    public ?customerModel $selectedCustomer = null; 
     public ?deliveryAddressModel $selectedDelivery = null;
 
     public array $items = [];
@@ -61,9 +70,11 @@ class QuotationsForm extends Component
         if ($id) {
             $this->quotation_id = $id;
             $quotation = QuotationModel::with(['items', 'customer', 'deliveryAddress', 'sale'])->find($id);
+           
             if ($quotation) {
                 $this->quote_number = $quotation->quote_number;
-                $this->quote_status = $quotation->quote_status;
+                //$this->quote_status = $quotation->quote_status;
+                $this->fillFromModel($this->quotation);
                 // … เติม state อื่น ๆ จาก $quotation …
             }
         }
@@ -76,6 +87,7 @@ class QuotationsForm extends Component
         }
 
         /* โหลด dropdown */
+
         $this->customers = customerModel::all();
         $this->customerDelivery = $this->customer_id ? deliveryAddressModel::where('customer_id', $this->customer_id)->get() : collect();
     }
@@ -92,7 +104,7 @@ class QuotationsForm extends Component
         $this->quote_enable_vat = $q->quote_enable_vat;
         $this->quote_vat_included = $q->quote_vat_included;
         $this->quote_discount = $q->quote_discount;
-        $this->quote_status = $q->quote_status?->value ?? 'wait';
+        $this->quote_status = $q->quote_status->value;
         $this->selectedCustomer = customerModel::find($q->customer_id);
         $this->selectedDelivery = deliveryAddressModel::find($q->delivery_address_id);
 
@@ -346,7 +358,6 @@ class QuotationsForm extends Component
             $this->items[$index]['product_calculation'] = $product->product_calculation;
             $this->items[$index]['product_unit'] = $product->productUnit->value;
             $this->items[$index]['product_length'] = $product->product_length ?? null;
-         
         }
 
         // ─── คำนวณยอดรวมใหม่ทุกครั้ง
@@ -375,7 +386,7 @@ class QuotationsForm extends Component
     public function calculateTotals(): void
     {
         // 1) คำนวณยอดรวมก่อน VAT (ทั้งสินค้ารวมกัน)
-        $subtotal = collect($this->items)->sum(function ($i) { 
+        $subtotal = collect($this->items)->sum(function ($i) {
             $q = (float) ($i['quantity'] ?? 0);
             $up = (float) ($i['unit_price'] ?? 0);
             $len = max(1, (float) ($i['product_length'] ?? 1));
@@ -425,31 +436,35 @@ class QuotationsForm extends Component
     }
 
     /* เรียกเมื่อผู้ใช้เปลี่ยนส่วนลด */
-public function updatedQuoteDiscount() {                 // ✔ ใช้ได้
-    $this->calculateTotals();
-}
-
-/* เปิด-ปิด “คำนวณ VAT 7 %” */
-public function updatedQuoteEnableVat($value): void {    // ← ชื่อ method ต้องมี Quote
-    $this->refreshVat();        // คิดยอดครบในนี้ตัวเดียว
-}
-
-/* เปิด-ปิด “VAT รวมในราคา” */
-public function updatedQuoteVatIncluded($value): void {  // ← ชื่อใหม่ (Quote-Vat-Included)
-    $this->refreshVat();
-}
-
-/* ถูกเรียกจาก checkbox แต่ละแถว   wire:change="refreshVat" */
-public function refreshVat(): void
-{
-    foreach ($this->items as $i => $row) {
-        unset($this->items[$i]['checkVat']);       // เคลียร์คีย์เก่าถ้ามี
-        $this->items[$i]['product_vat'] =
-            filter_var($row['product_vat'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    public function updatedQuoteDiscount()
+    {
+        // ✔ ใช้ได้
+        $this->calculateTotals();
     }
-    $this->calculateTotals();
-}
 
+    /* เปิด-ปิด “คำนวณ VAT 7 %” */
+    public function updatedQuoteEnableVat($value): void
+    {
+        // ← ชื่อ method ต้องมี Quote
+        $this->refreshVat(); // คิดยอดครบในนี้ตัวเดียว
+    }
+
+    /* เปิด-ปิด “VAT รวมในราคา” */
+    public function updatedQuoteVatIncluded($value): void
+    {
+        // ← ชื่อใหม่ (Quote-Vat-Included)
+        $this->refreshVat();
+    }
+
+    /* ถูกเรียกจาก checkbox แต่ละแถว   wire:change="refreshVat" */
+    public function refreshVat(): void
+    {
+        foreach ($this->items as $i => $row) {
+            unset($this->items[$i]['checkVat']); // เคลียร์คีย์เก่าถ้ามี
+            $this->items[$i]['product_vat'] = filter_var($row['product_vat'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        }
+        $this->calculateTotals();
+    }
 
     /* ─────────── Customer / Delivery helpers ─────────── */
 
@@ -510,31 +525,27 @@ public function refreshVat(): void
 
     /// convert Quotations To orers
 
-    public function approveQuotation($quotationId)
+
+    public function approveQuotation()
     {
-        // 1) โหลดใบเสนอราคา ใหม่อีกครั้ง
+      
+        $this->dispatch('step-change', 'กำลังสร้าง PDF...');
+        $quotationId = $this->quotation_id;
+
+        $this->dispatch('step-change', 'กำลังโหลดใบเสนอราคา...');
+        usleep(500 * 1000); // 0.5 วิ พอแค่ให้เห็น
+
         $quotation = QuotationModel::with(['items', 'customer', 'deliveryAddress', 'sale'])->find($quotationId);
 
-        if (!$quotation) {
-            $this->dispatch('notify', [
-                'type' => 'error',
-                'message' => 'ไม่พบใบเสนอราคา',
-            ]);
+        if (!$quotation || $quotation->quote_status !== QuotationStatus::Wait) {
+            $this->dispatch('notify', type: 'error', message: 'เกิดข้อผิดพลาดไม่สามารถสร้างคำสั่งซื้อซ้ำได้!');
             return;
         }
 
-        // 2) ตรวจสถานะก่อน (ต้องเป็น 'wait')
-        if ($quotation->quote_status !== 'wait') {
-            $this->dispatch('notify', [
-                'type' => 'error',
-                'message' => 'ใบเสนอราคานี้ไม่สามารถอนุมัติได้อีก',
-            ]);
-            return;
-        }
-
-        // 3) เริ่ม transaction เพื่อ clone ไปเป็น Order
         DB::transaction(function () use ($quotation) {
-            // 3.1) สร้าง Running Number สำหรับ Order
+            $this->dispatch('step-change', 'กำลังสร้างเลขที่ใบสั่งซื้อ...');
+            usleep(500 * 1000);
+
             $prefix = 'OR' . now()->format('ym');
             $lastOrderNumber = OrderModel::where('order_number', 'like', $prefix . '%')
                 ->orderBy('order_number', 'desc')
@@ -542,7 +553,9 @@ public function refreshVat(): void
             $next = $lastOrderNumber ? ((int) substr($lastOrderNumber, -4)) + 1 : 1;
             $orderNumber = $prefix . str_pad($next, 4, '0', STR_PAD_LEFT);
 
-            // 3.2) สร้าง Order หลัก (clone header จาก Quotation)
+            $this->dispatch('step-change', 'บันทึกใบสั่งซื้อ...');
+            usleep(500 * 1000);
+
             $order = OrderModel::create([
                 'quote_id' => $quotation->id,
                 'order_number' => $orderNumber,
@@ -559,7 +572,6 @@ public function refreshVat(): void
                 'updated_by' => Auth::id(),
             ]);
 
-            // 3.3) Clone รายการสินค้า (QuotationItem → OrderItems)
             foreach ($quotation->items as $qItem) {
                 OrderItemsModel::create([
                     'order_id' => $order->id,
@@ -570,6 +582,8 @@ public function refreshVat(): void
                     'product_detail' => $qItem->product_detail,
                     'product_length' => $qItem->product_length,
                     'product_weight' => $qItem->product_weight,
+                    'product_vat' => $qItem->product_vat,
+                    'product_note' => $qItem->product_note,
                     'product_calculation' => $qItem->product_calculation,
                     'quantity' => $qItem->quantity,
                     'unit_price' => $qItem->unit_price,
@@ -577,13 +591,26 @@ public function refreshVat(): void
                 ]);
             }
 
-            // 3.4) เปลี่ยนสถานะ Quotation → 'approved'
             $quotation->update(['quote_status' => 'success']);
+            $quoteDate = Carbon::parse($quotation->quote_date);
+            $year = $quoteDate->format('Y');
+            $month = $quoteDate->format('m');
 
-            // 3.5) แจ้ง success แล้ว redirect ไปหน้า Order ใหม่
-            $this->dispatch('notify', type: 'success', message: 'สร้าง Order เรียบร้อย เลขที่: ' . $orderNumber);
+            // Export PDF
+            // $this->dispatch('step-change', 'Export PDF...');
+            // $pdf = Pdf::loadView('livewire.quotations.print', ['quotation' => $quotation]);
+            // $pdf->setOptions([
+            //     'isHtml5ParserEnabled' => true,
+            //     'isRemoteEnabled' => true,
+            //     'defaultFont' => 'THSarabunNew',
+            // ]);
+            // $filename = $quotation->quote_number . '.pdf';
+            //  $path = "quotations/{$year}/{$month}/{$filename}";
+            //  Storage::disk('public')->put($path, $pdf->output());
+     
+            $this->dispatch('notify', type: 'success', message: 'สร้าง Order สำเร็จ: ' . $orderNumber);
 
-            redirect()->route('orders.show', $order->id);
+            redirect()->route('order.show', $order->id);
         });
     }
 }

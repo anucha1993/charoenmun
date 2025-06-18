@@ -1,10 +1,45 @@
 <div>
+ <style>
+    @font-face {
+        font-family: 'THSarabunNew';
+        font-style: normal;
+        font-weight: normal;
+        src: url('<?php echo e(storage_path("fonts/THSarabunNew.ttf")); ?>') format("truetype");
+    }
+
+    @font-face {
+        font-family: 'THSarabunNew';
+        font-style: normal;
+        font-weight: bold;
+        src: url('<?php echo e(storage_path("fonts/THSarabunNew Bold.ttf")); ?>') format("truetype");
+    }
+
+    @font-face {
+        font-family: 'THSarabunNew';
+        font-style: italic;
+        font-weight: normal;
+        src: url('<?php echo e(storage_path("fonts/THSarabunNew Italic.ttf")); ?>') format("truetype");
+    }
+
+    @font-face {
+        font-family: 'THSarabunNew';
+        font-style: italic;
+        font-weight: bold;
+        src: url('<?php echo e(storage_path("fonts/THSarabunNew BoldItalic.ttf")); ?>') format("truetype");
+    }
+
+    body {
+        font-family: 'THSarabunNew', sans-serif;
+        font-size: 16pt;
+    }
+</style>
+
     <?php
         $totalPages = ceil($quotation->items->count() / 8);
         $loopIndex = 1;
     ?>
 
-    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $quotation->items->chunk(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <?php $__currentLoopData = $quotation->items->chunk(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <div class="card row text-black" style="margin-top: 0px">
             <div class="card-body">
                 <!-- Invoice Detail-->
@@ -109,7 +144,7 @@
 
                                 <tbody>
                                     
-                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
                                             <td><?php echo e($loopIndex++); ?></td>
                                             <td><?php echo e($item->quantity); ?></td>
@@ -121,7 +156,7 @@
                                             <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
                                             <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                         </tr>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 
                                 </tbody>
@@ -189,7 +224,7 @@
             </div> <!-- end card-body-->
         </div> <!-- end card -->
 
-  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 <!-- end row -->
 </div>
 

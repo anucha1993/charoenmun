@@ -53,9 +53,9 @@
                                 <div class="mt-3 float-sm-end">
 
 
-                                    @if ($quotation && $quotation->quote_status === 'wait')
+                                    @if ($quotation && $quote_status ==='wait')
                                         <button type="button" class="btn btn-sm btn-info mb-1 float-end"
-                                            wire:click="approveQuotation({{ $quotation->id }})"
+                                            wire:click="approveQuotation({{ $quotation->id }})" 
                                             onclick="return confirm('ยืนยันการอนุมัติใบเสนอราคา เลขที่ {{ $quotation->quote_number }} ?') || event.stopImmediatePropagation()">
                                             อนุมัติใบเสนอราคา
                                         </button>
@@ -64,7 +64,7 @@
                                     <div class="mb-1">
                                         <div class="input-group flex-nowrap">
                                             <span class="input-group-text" id="basic-addon1">วันที่ออกเอกสาร :</span>
-                                            <input type="date" class="form-control col-form-label-lg"
+                                            <input type="date" class="form-control col-form-label-lg" {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                 wire:model="quote_date" aria-describedby="basic-addon1">
                                         </div>
                                     </div>
@@ -85,7 +85,7 @@
                                 <div>
 
                                     <select id="customerSelect" class="form-control"
-                                        {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}>
+                                        {{ $quote_status === 'success' ? 'disabled' : '' }}>
                                         <option value="">-- เลือกลูกค้า --</option>
                                         @foreach ($customers as $c)
                                             <option value="{{ $c->id }}" @selected($c->id == $customer_id)>
@@ -132,7 +132,7 @@
 
 
                                 <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
-                                    {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                    {{ $quote_status === 'success' ? 'disabled' : '' }}
                                     class="form-select">
                                     <option value="">-- เลือกที่อยู่จัดส่ง --</option>
                                     @foreach ($customerDelivery as $delivery)
@@ -206,7 +206,7 @@
 
                                                         <div class="position-relative" wire:ignore.self>
                                                             <input type="text" class="form-control form-control-sm mb-1 text-black"
-                                                                {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                                {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                                 placeholder="ค้นหาสินค้า..."
                                                                 wire:model.live.debounce.500ms="items.{{ $i }}.product_search"
                                                                 wire:keydown.escape="$set('items.{{ $i }}.product_results', [])"
@@ -257,7 +257,7 @@
                                                                 wire:model.debounce.300ms="items.{{ $i }}.product_calculation"
                                                                 class="form-control form-control-sm"
                                                                 style="display:inline-block; width:80px; vertical-align:middle;"
-                                                                {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }} />
+                                                                {{ $quote_status === 'success' ? 'disabled' : '' }} />
                                                         @else
                                                             {!! $item['product_detail'] ?? '' !!}
                                                         @endif
@@ -273,13 +273,13 @@
                                                     <td style="width: 110px">
 
                                                         <input type="text"
-                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                            {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_length"
                                                             class="form-control form-control-sm">
                                                     </td>
                                                     {{-- <td style="display: none">
 
-                                                        <input type="number" min="1"  {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                        <input type="number" min="1"  {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_calculation"
                                                             class="form-control form-control-sm" />
                                                     </td> --}}
@@ -287,7 +287,7 @@
                                                     <td style="display: none">
 
                                                         <input type="number" 
-                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                            {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_weight"
                                                             class="form-control form-control-sm" />
                                                     </td>
@@ -295,14 +295,14 @@
 
                                                     <td style="width: 110px">
                                                         <input type="number" min="1"
-                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                            {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.quantity"
                                                             class="form-control form-control-sm" />
                                                     </td>
 
                                                     <td style="width: 100px">
                                                         <input type="text"
-                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                            {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                             wire:model.live="items.{{ $i }}.product_unit"
                                                             class="form-control form-control-sm"
                                                             style="background-color: aliceblue" readonly>
@@ -310,7 +310,7 @@
                                                     <td style="width: 200px" class="text-end">
 
                                                         <input type="number" min="0" step="0.01"
-                                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                            {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.unit_price"
                                                             class="form-control form-control-sm text-end" />
 
@@ -348,7 +348,7 @@
 
                         <div class="form-check mt-2" style="z-index: -9999999999; ">
                             <input class="form-check-input" type="checkbox" wire:model.live="quote_enable_vat"
-                                {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                {{ $quote_status === 'success' ? 'disabled' : '' }}
                                 id="enableVatCheck">
                             <label class="form-check-label" for="enableVatCheck">
                                 คำนวณ VAT 7%
@@ -358,7 +358,7 @@
                         {{-- @if ($quote_enable_vat)
                             <div class="form-check mt-2 ms-3">
                                 <input class="form-check-input" type="checkbox" wire:model.live="quote_vat_included"
-                                    {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                    {{ $quote_status === 'success' ? 'disabled' : '' }}
                                     id="vatIncludedCheck">
                                 <label class="form-check-label" for="vatIncludedCheck">
                                     💡 คิดรวม VAT ในราคารวม (VAT-In)
@@ -372,7 +372,7 @@
                                     <h6 class="text-muted fs-14">Notes:</h6>
                                     <small>
                                         <textarea wire:model="quote_note" class="form-control" cols="3" rows="3"
-                                            {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}></textarea>
+                                            {{ $quote_status === 'success' ? 'disabled' : '' }}></textarea>
                                     </small>
 
                                 </div>
@@ -392,7 +392,7 @@
                                     <div class="col-md-2">
                                         <span class="float-end">
                                             <input type="number" wire:model.live.debounce.300ms="quote_discount"
-                                                {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}
+                                                {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                 class="form-control text-end form-control-sm" min="0"
                                                 step="0.01">
                                         </span>
@@ -416,6 +416,7 @@
                             </div> <!-- end col -->
                         </div>
                         <!-- end row-->
+                      
 
                         <div class="d-print-none mt-4">
                             <div class="text-center">
@@ -426,9 +427,10 @@
                                 @endif
 
 
+
                                 @if (!$this->isCreate)
                                     <button type="submit" class="btn btn-primary"
-                                        {{ $quotation?->quote_status === QuotationStatus::Success ? 'disabled' : '' }}>
+                                      {{ $quote_status === 'success' ? 'disabled' : '' }}>
                                         บันทึก
                                     </button>
                                 @else
@@ -448,11 +450,37 @@
     </div> <!-- end col-->
 </div>
 
+
+
+{{-- <div x-data="{ loading: false }"
+     x-on:processing-start.window="loading = true"
+     x-on:processing-finish.window="loading = false"
+     x-show="loading"
+     
+     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75"
+     style="z-index: 9999; display: none;">
+    <span>กำลังสร้าง PDF ....</span></br>
+    <div class="spinner-border avatar-lg text-primary m-2" role="status"></div>
+    
+</div> --}}
+
+<!-- Spinner จะแสดงอัตโนมัติขณะ Livewire ทำงาน -->
+{{-- <p>spinner = {{ json_encode($spinner) }}</p>
+@if ($spinner)
+    <div class="d-flex justify-content-center align-items-center"
+         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255,255,255,0.7); z-index: 9999;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">กำลังโหลด...</span>
+        </div>
+        <span class="ms-3">กำลังสร้าง PDF...</span>
+    </div>
+@endif
+
+ --}}
+
+
 <livewire:quotations.customer-modal />
-
 <livewire:quotations.delivery-address-modal />
-
-
 
 
 <div>
@@ -460,7 +488,11 @@
 </div>
 
 
-
+<script>
+    document.addEventListener("livewire:updated", () => {
+        console.log("Livewire updated spinner block");
+    });
+</script>
 
 
 <script>
