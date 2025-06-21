@@ -132,6 +132,7 @@ Route::get('/customers', CustomerIndex::class)->name('customers.index');
 Route::middleware(['auth'])->group(function () {
 Route::get('/quotations/create', QuotationsForm::class)->name('quotations.create');
 Route::get('/index', QuotationIndex::class)->name('quotations.index');
+Route::get('/home', QuotationIndex::class)->name('quotations.home');
 });
 
 require __DIR__ . '/auth.php';
