@@ -53,9 +53,9 @@
                                 <div class="mt-3 float-sm-end">
 
 
-                                    @if ($quotation && $quote_status ==='wait')
+                                    @if ($quotation && $quote_status === 'wait')
                                         <button type="button" class="btn btn-sm btn-info mb-1 float-end"
-                                            wire:click="approveQuotation({{ $quotation->id }})" 
+                                            wire:click="approveQuotation({{ $quotation->id }})"
                                             onclick="return confirm('ยืนยันการอนุมัติใบเสนอราคา เลขที่ {{ $quotation->quote_number }} ?') || event.stopImmediatePropagation()">
                                             อนุมัติใบเสนอราคา
                                         </button>
@@ -64,7 +64,8 @@
                                     <div class="mb-1">
                                         <div class="input-group flex-nowrap">
                                             <span class="input-group-text" id="basic-addon1">วันที่ออกเอกสาร :</span>
-                                            <input type="date" class="form-control col-form-label-lg" {{ $quote_status === 'success' ? 'disabled' : '' }}
+                                            <input type="date" class="form-control col-form-label-lg"
+                                                {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                 wire:model="quote_date" aria-describedby="basic-addon1">
                                         </div>
                                     </div>
@@ -129,16 +130,21 @@
                                         <span class="text-danger">กรุณาเลือกลูกค้า</span>
                                     @endif
                                 </div>
+{{-- 
+                                <p class="text-muted">
+                                    selected_delivery_id: {{ $selected_delivery_id }} <br>
+                                    customerDelivery IDs: {{ $customerDelivery->pluck('id')->join(', ') }}
+                                </p> --}}
 
 
                                 <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
-                                    {{ $quote_status === 'success' ? 'disabled' : '' }}
-                                    class="form-select">
+                                    {{ $quote_status === 'success' ? 'disabled' : '' }} class="form-select">
                                     <option value="">-- เลือกที่อยู่จัดส่ง --</option>
                                     @foreach ($customerDelivery as $delivery)
-                                        <option value="{{ $delivery->id }}">
+                                         <option value="{{ $delivery->id }}" @if ($delivery->id == $selected_delivery_id) selected @endif>
                                             {{ $delivery->delivery_contact_name }} - {{ $delivery->delivery_phone }}
                                         </option>
+                                       
                                     @endforeach
                                 </select>
 
@@ -205,7 +211,8 @@
                                                     <td style="min-width: 350px;">
 
                                                         <div class="position-relative" wire:ignore.self>
-                                                            <input type="text" class="form-control form-control-sm mb-1 text-black"
+                                                            <input type="text"
+                                                                class="form-control form-control-sm mb-1 text-black"
                                                                 {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                                 placeholder="ค้นหาสินค้า..."
                                                                 wire:model.live.debounce.500ms="items.{{ $i }}.product_search"
@@ -214,19 +221,22 @@
                                                                 wire:key="search-{{ $i }}"
                                                                 {{-- เพิ่ม wire:key ให้ Livewire รู้ว่า input แต่ละแถวไม่ใช่ element เดิม --}} />
 
-                                                             <input type="text" wire:model="items.{{ $i }}.product_note" class="form-control form-control-sm" placeholder="หมายเหตุ">
+                                                            <input type="text"
+                                                                wire:model="items.{{ $i }}.product_note"
+                                                                class="form-control form-control-sm"
+                                                                placeholder="หมายเหตุ">
 
                                                             @if (!empty($item['product_results_visible']))
                                                                 <ul class="list-group position-absolute shadow"
                                                                     style="max-height: 400px; overflow-y: auto; z-index: 999999;">
                                                                     @foreach ($item['product_results'] as $result)
-                                                                     <a href="javascript: void(0);">
-                                                                        <li class="list-group-item list-group-item-action"
-                                                                            wire:click="selectProduct({{ $i }}, {{ $result->product_id }}, @js($result->product_name))">
-                                                                            {{ $result->product_name }}
-                                                                            ({{ $result->product_size }})
-                                                                            {{ $result->productWireType?->value ?? '-' }}
-                                                                        </li>
+                                                                        <a href="javascript: void(0);">
+                                                                            <li class="list-group-item list-group-item-action"
+                                                                                wire:click="selectProduct({{ $i }}, {{ $result->product_id }}, @js($result->product_name))">
+                                                                                {{ $result->product_name }}
+                                                                                ({{ $result->product_size }})
+                                                                                {{ $result->productWireType?->value ?? '-' }}
+                                                                            </li>
                                                                         </a>
                                                                     @endforeach
                                                                 </ul>
@@ -264,9 +274,9 @@
                                                     </td>
                                                     <td>
                                                         <input type="checkbox"
-                                                        wire:model.live="items.{{ $i }}.product_vat"
-                                                        wire:change="refreshVat">
-                                                 
+                                                            wire:model.live="items.{{ $i }}.product_vat"
+                                                            wire:change="refreshVat">
+
                                                     </td>
 
 
@@ -286,7 +296,7 @@
 
                                                     <td style="display: none">
 
-                                                        <input type="number" 
+                                                        <input type="number"
                                                             {{ $quote_status === 'success' ? 'disabled' : '' }}
                                                             wire:model.live.debounce.300ms="items.{{ $i }}.product_weight"
                                                             class="form-control form-control-sm" />
@@ -348,8 +358,7 @@
 
                         <div class="form-check mt-2" style="z-index: -9999999999; ">
                             <input class="form-check-input" type="checkbox" wire:model.live="quote_enable_vat"
-                                {{ $quote_status === 'success' ? 'disabled' : '' }}
-                                id="enableVatCheck">
+                                {{ $quote_status === 'success' ? 'disabled' : '' }} id="enableVatCheck">
                             <label class="form-check-label" for="enableVatCheck">
                                 คำนวณ VAT 7%
                             </label>
@@ -416,7 +425,7 @@
                             </div> <!-- end col -->
                         </div>
                         <!-- end row-->
-                      
+
 
                         <div class="d-print-none mt-4">
                             <div class="text-center">
@@ -430,7 +439,7 @@
 
                                 @if (!$this->isCreate)
                                     <button type="submit" class="btn btn-primary"
-                                      {{ $quote_status === 'success' ? 'disabled' : '' }}>
+                                        {{ $quote_status === 'success' ? 'disabled' : '' }}>
                                         บันทึก
                                     </button>
                                 @else

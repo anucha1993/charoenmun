@@ -31,12 +31,11 @@ class QuotationsForm extends Component
     public array $steps = [];
     public ?string $orderNumber = null;
 
-
     public ?int $customer_id = null;
 
     public ?int $selected_delivery_id = null;
 
-    public ?customerModel $selectedCustomer = null; 
+    public ?customerModel $selectedCustomer = null;
     public ?deliveryAddressModel $selectedDelivery = null;
 
     public array $items = [];
@@ -70,7 +69,7 @@ class QuotationsForm extends Component
         if ($id) {
             $this->quotation_id = $id;
             $quotation = QuotationModel::with(['items', 'customer', 'deliveryAddress', 'sale'])->find($id);
-           
+
             if ($quotation) {
                 $this->quote_number = $quotation->quote_number;
                 //$this->quote_status = $quotation->quote_status;
@@ -498,18 +497,34 @@ class QuotationsForm extends Component
     public function handleDeliveryUpdatedSuccess(array $payload)
     {
         $this->selected_delivery_id = $payload['deliveryId'] ?? null;
+        $this->refreshCustomers();
     }
 
-    public function refreshCustomers(): void
+    #[On('delivery-created-success')]
+    public function handleDeliveryCreatedSuccess(array $payload): void
     {
-        $this->customers = customerModel::all();
-        if ($this->customer_id) {
-            $this->customerDelivery = deliveryAddressModel::where('customer_id', $this->customer_id)->get();
-            $this->updatedCustomerId($this->customer_id);
-        }
+        $this->selected_delivery_id = $payload['deliveryId'] ?? null;
 
-        $this->dispatch('$refresh');
+        // โหลด dropdown ใหม่ (เพื่อให้มี delivery option)
+        $this->refreshCustomers(); // ✅ โหลด customerDelivery ใหม่
+
+        // อัปเดต selectedDelivery ด้วย
+        $this->selectedDelivery = deliveryAddressModel::find($this->selected_delivery_id);
     }
+
+   public function refreshCustomers(): void
+{
+    $this->customers = customerModel::all();
+
+    if ($this->customer_id) {
+        $this->customerDelivery = deliveryAddressModel::where('customer_id', $this->customer_id)->get();
+
+        // ✅ ไม่ต้องเรียก updatedCustomerId เพราะมันล้าง selected_delivery_id
+        $this->selectedCustomer = customerModel::find($this->customer_id);
+    }
+
+    $this->dispatch('$refresh');
+}
 
     public function getIsCreateProperty(): bool
     {
@@ -525,10 +540,8 @@ class QuotationsForm extends Component
 
     /// convert Quotations To orers
 
-
     public function approveQuotation()
     {
-      
         $this->dispatch('step-change', 'กำลังสร้าง PDF...');
         $quotationId = $this->quotation_id;
 
@@ -607,7 +620,7 @@ class QuotationsForm extends Component
             // $filename = $quotation->quote_number . '.pdf';
             //  $path = "quotations/{$year}/{$month}/{$filename}";
             //  Storage::disk('public')->put($path, $pdf->output());
-     
+
             $this->dispatch('notify', type: 'success', message: 'สร้าง Order สำเร็จ: ' . $orderNumber);
 
             redirect()->route('order.show', $order->id);

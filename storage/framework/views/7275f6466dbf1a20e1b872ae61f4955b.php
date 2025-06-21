@@ -45,7 +45,7 @@
                         <!-- จังหวัด -->
                         <div class="mb-2">
                             <label for="">จังหวัด</label>
-                            <select class="form-select" wire:model.live="deliveryForm.delivery_province" required>
+                            <select class="form-select" wire:model.live="deliveryForm.delivery_province" >
                                 <option value="">-- เลือกจังหวัด --</option>
                                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $deliveryProvinces; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($code); ?>"><?php echo e($name); ?></option>
@@ -57,7 +57,7 @@
                         <div class="mb-2">
                             <label for="">อำเภอ/เขต</label>
                             <select class="form-select" wire:model.live="deliveryForm.delivery_amphur"
-                                <?php if(!$deliveryAmphures): echo 'disabled'; endif; ?> required>
+                                <?php if(!$deliveryAmphures): echo 'disabled'; endif; ?> >
                                 <option value="">-- เลือกอำเภอ --</option>
                                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $deliveryAmphures; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($code); ?>"
@@ -73,7 +73,7 @@
                         <div class="mb-2">
                             <label for="">ตำบล/แขวง</label>
                             <select class="form-select" wire:model.live="deliveryForm.delivery_district"
-                                <?php if(!$deliveryDistricts): echo 'disabled'; endif; ?> required>
+                                <?php if(!$deliveryDistricts): echo 'disabled'; endif; ?> >
                                 <option value="">-- เลือกตำบล --</option>
 
                                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $deliveryDistricts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>

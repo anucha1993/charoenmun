@@ -45,7 +45,7 @@
                         <!-- จังหวัด -->
                         <div class="mb-2">
                             <label for="">จังหวัด</label>
-                            <select class="form-select" wire:model.live="deliveryForm.delivery_province" required>
+                            <select class="form-select" wire:model.live="deliveryForm.delivery_province" >
                                 <option value="">-- เลือกจังหวัด --</option>
                                 @foreach ($deliveryProvinces as $code => $name)
                                     <option value="{{ $code }}">{{ $name }}</option>
@@ -57,7 +57,7 @@
                         <div class="mb-2">
                             <label for="">อำเภอ/เขต</label>
                             <select class="form-select" wire:model.live="deliveryForm.delivery_amphur"
-                                @disabled(!$deliveryAmphures) required>
+                                @disabled(!$deliveryAmphures) >
                                 <option value="">-- เลือกอำเภอ --</option>
                                 @foreach ($deliveryAmphures as $code => $name)
                                     <option value="{{ $code }}"
@@ -72,7 +72,7 @@
                         <div class="mb-2">
                             <label for="">ตำบล/แขวง</label>
                             <select class="form-select" wire:model.live="deliveryForm.delivery_district"
-                                @disabled(!$deliveryDistricts) required>
+                                @disabled(!$deliveryDistricts) >
                                 <option value="">-- เลือกตำบล --</option>
 
                                 @foreach ($deliveryDistricts as $code => $name)

@@ -69,11 +69,11 @@ class DeliveryAddressModal extends Component
         $this->validate([
             'deliveryForm.delivery_contact_name' => 'required',
             'deliveryForm.delivery_phone' => 'required',
-            'deliveryForm.delivery_number' => 'required',
-            'deliveryForm.delivery_province' => 'required',
-            'deliveryForm.delivery_amphur' => 'required',
-            'deliveryForm.delivery_district' => 'required',
-            'deliveryForm.delivery_zipcode' => 'required',
+            // 'deliveryForm.delivery_number' => 'required',
+            // 'deliveryForm.delivery_province' => 'required',
+            // 'deliveryForm.delivery_amphur' => 'required',
+            // 'deliveryForm.delivery_district' => 'required',
+            // 'deliveryForm.delivery_zipcode' => 'required',
         ]);
 
         if ($this->editing && $this->editing_delivery_id) {
@@ -185,11 +185,11 @@ class DeliveryAddressModal extends Component
         $this->validate([
             'deliveryForm.delivery_contact_name' => 'required|string|max:255',
             'deliveryForm.delivery_phone' => 'required|string|max:50',
-            'deliveryForm.delivery_number' => 'required|string|max:255',
-            'deliveryForm.delivery_province' => 'required|string',
-            'deliveryForm.delivery_amphur' => 'required|string',
-            'deliveryForm.delivery_district' => 'required|string',
-            'deliveryForm.delivery_zipcode' => 'required|string|size:5',
+            // 'deliveryForm.delivery_number' => 'required|string|max:255',
+            // 'deliveryForm.delivery_province' => 'required|string',
+            // 'deliveryForm.delivery_amphur' => 'required|string',
+            // 'deliveryForm.delivery_district' => 'required|string',
+            // 'deliveryForm.delivery_zipcode' => 'required|string|size:5',
         ]);
 
         $delivery = deliveryAddressModel::create([

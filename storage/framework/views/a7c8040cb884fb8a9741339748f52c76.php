@@ -54,9 +54,9 @@
                                 <div class="mt-3 float-sm-end">
 
 
-                                    <!--[if BLOCK]><![endif]--><?php if($quotation && $quote_status ==='wait'): ?>
+                                    <!--[if BLOCK]><![endif]--><?php if($quotation && $quote_status === 'wait'): ?>
                                         <button type="button" class="btn btn-sm btn-info mb-1 float-end"
-                                            wire:click="approveQuotation(<?php echo e($quotation->id); ?>)" 
+                                            wire:click="approveQuotation(<?php echo e($quotation->id); ?>)"
                                             onclick="return confirm('ยืนยันการอนุมัติใบเสนอราคา เลขที่ <?php echo e($quotation->quote_number); ?> ?') || event.stopImmediatePropagation()">
                                             อนุมัติใบเสนอราคา
                                         </button>
@@ -65,7 +65,8 @@
                                     <div class="mb-1">
                                         <div class="input-group flex-nowrap">
                                             <span class="input-group-text" id="basic-addon1">วันที่ออกเอกสาร :</span>
-                                            <input type="date" class="form-control col-form-label-lg" <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+                                            <input type="date" class="form-control col-form-label-lg"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                 wire:model="quote_date" aria-describedby="basic-addon1">
                                         </div>
@@ -138,16 +139,16 @@
                                 </div>
 
 
-                                <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
-                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
-                                    class="form-select">
+                                <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
+                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?> class="form-select">
                                     <option value="">-- เลือกที่อยู่จัดส่ง --</option>
                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customerDelivery; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $delivery): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <option value="<?php echo e($delivery->id); ?>">
+                                         <option value="<?php echo e($delivery->id); ?>" <?php if($delivery->id == $selected_delivery_id): ?> selected <?php endif; ?>>
                                             <?php echo e($delivery->delivery_contact_name); ?> - <?php echo e($delivery->delivery_phone); ?>
 
                                         </option>
+                                       
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                 </select>
 
@@ -226,7 +227,8 @@
                                                     <td style="min-width: 350px;">
 
                                                         <div class="position-relative" wire:ignore.self>
-                                                            <input type="text" class="form-control form-control-sm mb-1 text-black"
+                                                            <input type="text"
+                                                                class="form-control form-control-sm mb-1 text-black"
                                                                 <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                                 placeholder="ค้นหาสินค้า..."
@@ -236,21 +238,24 @@
                                                                 wire:key="search-<?php echo e($i); ?>"
                                                                  />
 
-                                                             <input type="text" wire:model="items.<?php echo e($i); ?>.product_note" class="form-control form-control-sm" placeholder="หมายเหตุ">
+                                                            <input type="text"
+                                                                wire:model="items.<?php echo e($i); ?>.product_note"
+                                                                class="form-control form-control-sm"
+                                                                placeholder="หมายเหตุ">
 
                                                             <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_results_visible'])): ?>
                                                                 <ul class="list-group position-absolute shadow"
                                                                     style="max-height: 400px; overflow-y: auto; z-index: 999999;">
                                                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $item['product_results']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $result): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                                     <a href="javascript: void(0);">
-                                                                        <li class="list-group-item list-group-item-action"
-                                                                            wire:click="selectProduct(<?php echo e($i); ?>, <?php echo e($result->product_id); ?>, <?php echo \Illuminate\Support\Js::from($result->product_name)->toHtml() ?>)">
-                                                                            <?php echo e($result->product_name); ?>
+                                                                        <a href="javascript: void(0);">
+                                                                            <li class="list-group-item list-group-item-action"
+                                                                                wire:click="selectProduct(<?php echo e($i); ?>, <?php echo e($result->product_id); ?>, <?php echo \Illuminate\Support\Js::from($result->product_name)->toHtml() ?>)">
+                                                                                <?php echo e($result->product_name); ?>
 
-                                                                            (<?php echo e($result->product_size); ?>)
-                                                                            <?php echo e($result->productWireType?->value ?? '-'); ?>
+                                                                                (<?php echo e($result->product_size); ?>)
+                                                                                <?php echo e($result->productWireType?->value ?? '-'); ?>
 
-                                                                        </li>
+                                                                            </li>
                                                                         </a>
                                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                                                 </ul>
@@ -280,9 +285,9 @@
                                                     </td>
                                                     <td>
                                                         <input type="checkbox"
-                                                        wire:model.live="items.<?php echo e($i); ?>.product_vat"
-                                                        wire:change="refreshVat">
-                                                 
+                                                            wire:model.live="items.<?php echo e($i); ?>.product_vat"
+                                                            wire:change="refreshVat">
+
                                                     </td>
 
 
@@ -298,7 +303,7 @@
 
                                                     <td style="display: none">
 
-                                                        <input type="number" 
+                                                        <input type="number"
                                                             <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
                                                             wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.product_weight"
@@ -365,9 +370,7 @@
 
                         <div class="form-check mt-2" style="z-index: -9999999999; ">
                             <input class="form-check-input" type="checkbox" wire:model.live="quote_enable_vat"
-                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
-
-                                id="enableVatCheck">
+                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?> id="enableVatCheck">
                             <label class="form-check-label" for="enableVatCheck">
                                 คำนวณ VAT 7%
                             </label>
@@ -426,7 +429,7 @@
                             </div> <!-- end col -->
                         </div>
                         <!-- end row-->
-                      
+
 
                         <div class="d-print-none mt-4">
                             <div class="text-center">
@@ -440,7 +443,7 @@
 
                                 <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
                                     <button type="submit" class="btn btn-primary"
-                                      <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
+                                        <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
                                         บันทึก
                                     </button>
                                 <?php else: ?>
