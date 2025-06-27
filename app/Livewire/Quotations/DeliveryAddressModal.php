@@ -197,10 +197,10 @@ class DeliveryAddressModal extends Component
             'delivery_contact_name' => $this->deliveryForm['delivery_contact_name'],
             'delivery_phone' => $this->deliveryForm['delivery_phone'],
             'delivery_number' => $this->deliveryForm['delivery_number'],
-            'delivery_province' => $this->deliveryForm['delivery_province'],
-            'delivery_amphur' => $this->deliveryForm['delivery_amphur'],
-            'delivery_district' => $this->deliveryForm['delivery_district'],
-            'delivery_zipcode' => $this->deliveryForm['delivery_zipcode'],
+            'delivery_province' => $this->deliveryForm['delivery_province'] ?: null,
+            'delivery_amphur' => $this->deliveryForm['delivery_amphur'] ?: null,
+            'delivery_district' => $this->deliveryForm['delivery_district'] ?: null,
+            'delivery_zipcode' => $this->deliveryForm['delivery_zipcode']?: null,
         ]);
 
         // แจ้ง parent ว่ามีการเพิ่มข้อมูลใหม่
@@ -208,7 +208,7 @@ class DeliveryAddressModal extends Component
             'customerId' => $this->delivery_customer_id,
             'deliveryId' => $delivery->id,
         ]);
-        $this->dispatch('delivery-created-success',['deliveryId' => $delivery->id])->to(\App\Livewire\Orders\OrderDelivery::class);
+        $this->dispatch('delivery-created-success', ['deliveryId' => $delivery->id])->to(\App\Livewire\Orders\OrderDelivery::class);
 
         $this->resetInput();
         $this->dispatch('close-delivery-modal');
