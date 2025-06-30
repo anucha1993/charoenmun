@@ -600,11 +600,15 @@
                                 </td>
                                 <td>
                                     <div style="font-size: 13px; color: #374151; max-width: 180px;">
-                                        <div style="font-weight: 600; color: #059669;">{{ $q->deliveryAddress->delivery_contact_name }}</div>
-                                        <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">{{ $q->deliveryAddress->delivery_phone }}</div>
+                                        <div style="font-weight: 600; color: #059669;">
+                                            {{ optional($q->deliveryAddress)->delivery_contact_name ?? $q->customer->customer_name }}
+                                        </div>
+                                        <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">
+                                            {{ optional($q->deliveryAddress)->delivery_phone ?? $q->customer->customer_phone }}
+                                        </div>
                                         <div style="font-size: 12px; color: #9ca3af; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
-                                             title="{{ $q->deliveryAddress->delivery_address }}">
-                                            {{ $q->deliveryAddress->delivery_address }}
+                                             title="{{ optional($q->deliveryAddress)->delivery_address ?? $q->customer->customer_address }}">
+                                            {{ optional($q->deliveryAddress)->delivery_address ?? $q->customer->customer_address }}
                                         </div>
                                     </div>
                                 </td>
