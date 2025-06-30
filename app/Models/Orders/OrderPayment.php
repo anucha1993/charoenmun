@@ -10,7 +10,6 @@ class OrderPayment extends Model
     use HasFactory;
     protected $fillable = [
         'order_id',
-        'order_delivery_id',
         'user_id',
         'slip_path',
         'amount',
@@ -29,12 +28,8 @@ class OrderPayment extends Model
         'transfer_at' => 'datetime',
     ];
 
-    public function orderDelivery()
-    {
-        return $this->belongsTo(OrderDeliverysModel::class, 'order_delivery_id');
-    }
     public function order()
-{
-    return $this->belongsTo(OrderModel::class, 'order_id');
-}
+    {
+        return $this->belongsTo(OrderModel::class, 'order_id');
+    }
 }

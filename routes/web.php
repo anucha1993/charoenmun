@@ -23,6 +23,7 @@ use App\Models\Quotations\QuotationModel;
 use App\Livewire\Customers\CustomerCreate;
 use App\Livewire\Orders\OrderDeliveryEdit;
 use App\Livewire\Orders\PaymentSlipUpload;
+use App\Livewire\Orders\OrderPaymentForm;
 
 use App\Models\Orders\OrderDeliverysModel;
 use App\Http\Controllers\RoutingController;
@@ -109,13 +110,12 @@ Route::middleware(['auth'])->group(function () {
      Route::get('deliveries/{delivery}/print', OrderDeliveryPrint::class)->name('deliveries.printer');
 
      //payment
-     Route::get('/order/payment-slip', PaymentSlipUpload::class)->name('order.payment.slip');
      Route::get('/confirm-payments', ConfirmPayments::class)->name('payments.confirm');
 
      //SCANS QR CODE
      Route::get('/scan-invoice', ScanInvoice::class)->name('scan.invoice');
 
-  
+     Route::get('/orders/{order}/payment', OrderPaymentForm::class)->name('orders.payment.livewire');
 });
 
 

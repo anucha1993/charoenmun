@@ -22,7 +22,7 @@ class OrderIndex extends Component
 
     public function render()
     {
-        $orders = OrderModel::with(['customer', 'deliveryAddress'])->latest()->paginate(10);
+        $orders = OrderModel::with(['customer', 'deliveryAddress', 'payments'])->latest()->paginate(10);
 
         // สรุปจำนวน
         $totalOrders = OrderModel::count();

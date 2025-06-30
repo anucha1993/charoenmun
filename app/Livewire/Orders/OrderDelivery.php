@@ -41,7 +41,6 @@ class OrderDelivery extends Component
     public bool $order_delivery_vat_included = false;
     public string $order_delivery_date;
     public ?string $order_delivery_note = null;
-    public ?string $payment_status = 'pending';
     public ?string $order_delivery_status = 'pending';
     public ?int $order_delivery_status_order = 0;
 
@@ -476,7 +475,6 @@ class OrderDelivery extends Component
             'order_delivery_date' => $this->order_delivery_date,
             'delivery_address_id' => $this->selected_delivery_id,
             'order_delivery_status' => $this->order_delivery_status,
-            'payment_status' => $this->payment_status,
             'order_delivery_note' => $this->order_delivery_note,
             'order_delivery_subtotal' => $this->order_delivery_subtotal,
             'order_delivery_vat' => $this->order_delivery_vat,

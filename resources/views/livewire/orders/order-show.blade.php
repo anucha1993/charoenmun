@@ -2,227 +2,296 @@
     {{-- resources/views/livewire/orders/show.blade.php --}}
 
     @php
-        $totalConfirmed = $order->deliveries->flatMap->payments->where('status', 'ชำระเงินแล้ว')->sum('amount');
-        $totalWaiting = $order->deliveries->flatMap->payments->where('status', 'รอยืนยันยอด')->sum('amount');
+        $totalConfirmed = $order->payments->where('status', 'ชำระเงินแล้ว')->sum('amount');
+        $totalWaiting = $order->payments->where('status', 'รอยืนยันยอด')->sum('amount');
     @endphp
     <div class="container py-3">
-        <div class="card">
-            <div class="card-header">
-                <h4>Order / ใบสั่งซื้อ</h4>
-                <p class="float-end">เลขที่: <strong>{{ $order->order_number }}</strong></p>
-                <p>วันที่: <strong>{{ $order->order_date->format('d/m/Y') }}</strong></p>
-                <p class="float-end">ชำระเงินแล้ว: <strong class="text-success">{{ number_format($totalConfirmed) }} บาท</strong></p>
-                <p>รอยืนยันยอด: <strong class="text-warning">{{ number_format($totalWaiting) }} บาท</strong></p>
+        <div class="card shadow-lg border-0" style="border-radius: 18px; background: linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%);">
+            <div class="card-header" style="border-radius: 18px 18px 0 0; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color: white; box-shadow: 0 2px 8px rgba(102,126,234,0.10);">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <h3 style="font-weight:800; letter-spacing:1px; margin-bottom:0;">Order / ใบสั่งซื้อ</h3>
+                        <div style="font-size:16px; color:#e0e7ef;">วันที่: <strong>{{ $order->order_date->format('d/m/Y') }}</strong></div>
+                    </div>
+                    <div class="text-end">
+                        <div style="font-size:16px; color:#fff;">เลขที่: <span style="font-weight:700; color:#3b82f6; background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%); padding:6px 12px; border-radius:6px; border:1px solid #93c5fd;">{{ $order->order_number }}</span></div>
+                        <div style="font-size:16px; color:#a7f3d0;">ชำระเงินแล้ว: <strong>{{ number_format($totalConfirmed) }} บาท</strong></div>
+                        <div style="font-size:16px; color:#fbbf24;">รอยืนยันยอด: <strong>{{ number_format($totalWaiting) }} บาท</strong></div>
+                    </div>
+                </div>สถานะ
             </div>
-            <div class="card-body">
-
-                {{-- หัวใจ --}}
-                <div class="row  float-end">
-
-
-                    <div class="col-12 ">
-                        <span>สถานะ: <strong> {!! order_status_badge($order->order_status) !!}</strong></span><br>
-                        <span>สถานะชำระเงิน: <strong>{!! payment_status_badge($order->payment_status) !!}</strong></span><br>
-                        <span>ภาษีมูลค่าเพิ่ม: <strong> {{ number_format($order->order_vat, 2) }}
-                                บาท</strong></span><br>
-                        <span>ส่วนลด: <strong> {{ number_format($order->order_discount, 2) }} บาท</strong></span><br>
-                        <span>จำนวนเงินทั้งสิ้น: <strong> {{ number_format($order->order_grand_total, 2) }}
-                                บาท</strong></span><br>
-
+            <div class="card-body" style="background: white; border-radius: 0 0 18px 18px;">
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-2">
+                        <div class="p-4 h-100" style="background:linear-gradient(135deg,#f3f4f6 0%,#e0e7ef 100%); border-radius:12px; box-shadow:0 2px 8px rgba(59,130,246,0.06);">
+                            <h5 style="font-weight:700; color:#111827; margin-bottom:8px;"><i class="ri-user-3-line me-1"></i> ข้อมูลลูกค้า</h5>
+                            <div style="font-size:16px; font-weight:700; color:#374151;">{{ $order->customer->customer_name }}</div>
+                            <div style="font-size:14px; color:#6b7280;">{{ $order->customer->customer_address }}</div>
+                            <div style="font-size:13px; color:#9ca3af;">{{ $order->customer->customer_district_name }} {{ $order->customer->customer_amphur_name }} {{ $order->customer->customer_province_name }} {{ $order->customer->customer_zipcode }}</div>
+                            <div style="font-size:14px; color:#6b7280; margin-top:4px;"><i class="ri-phone-line"></i> (+66) {{ $order->customer->customer_phone }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="p-4 h-100" style="background:linear-gradient(135deg,#f3f4f6 0%,#e0e7ef 100%); border-radius:12px; box-shadow:0 2px 8px rgba(59,130,246,0.06);">
+                            <h5 style="font-weight:700; color:#111827; margin-bottom:8px;"><i class="ri-map-pin-line me-1"></i> ที่อยู่จัดส่ง</h5>
+                            @if ($order->deliveryAddress)
+                                <div style="font-size:16px; font-weight:700; color:#059669;">{{ $order->deliveryAddress->delivery_contact_name }} <span style="color:#6b7280;">({{ $order->deliveryAddress->delivery_phone }})</span></div>
+                                <div style="font-size:14px; color:#374151;">{{ $order->deliveryAddress->delivery_number }}</div>
+                                <div style="font-size:13px; color:#9ca3af;">{{ $order->deliveryAddress->delivery_address }}</div>
+                            @else
+                                <div style="font-size:16px; color:#374151;">{{ $order->customer->customer_name }}</div>
+                                <div style="font-size:14px; color:#6b7280;">{{ $order->customer->customer_address }}</div>
+                                <div style="font-size:13px; color:#9ca3af;">{{ $order->customer->customer_district_name }} {{ $order->customer->customer_amphur_name }} {{ $order->customer->customer_province_name }} {{ $order->customer->customer_zipcode }}</div>
+                                <div style="font-size:14px; color:#6b7280; margin-top:4px;"><i class="ri-phone-line"></i> (+66) {{ $order->customer->customer_phone }}</div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-2">
+                        <div class="p-3 h-100 d-flex flex-wrap align-items-center gap-2" style="background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%); border-radius:12px; box-shadow:0 2px 8px rgba(59,130,246,0.04); font-size:15px;">
+                            <div class="mb-2 d-flex flex-wrap align-items-center gap-2">
+                                <span><b>สถานะ:</b> {!! order_status_badge($order->order_status) !!}</span>
+                                {{-- <span class="vr mx-2"></span> --}}
+                                <span><b>ชำระเงิน:</b> {!! payment_status_badge($order->payment_status) !!}</span>
+                            </div>
+                            <div class="mb-2 d-flex flex-wrap align-items-center gap-2">
+                                <span><b>VAT:</b> {{ number_format($order->order_vat, 2) }} บาท</span>
+                                {{-- <span class="vr mx-2"></span> --}}
+                                <span><b>ส่วนลด:</b> {{ number_format($order->order_discount, 2) }} บาท</span>
+                                {{-- <span class="vr mx-2"></span> --}}
+                                <span style="font-weight:700; color:#059669;"><b>สุทธิ:</b> {{ number_format($order->order_grand_total, 2) }} บาท</span>
+                            </div>
+                           
+                         
+                        </div>
                     </div>
 
-                    <div class="col-4 text-end">
-                        {{-- ปุ่มอนุมัติสำหรับ Order สินค้า (ถ้ามี) --}}
+                     <div class="col-md-6 mb-2">
+                        <div class="p-3 h-100 d-flex flex-wrap align-items-center gap-2" style="background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%); border-radius:12px; box-shadow:0 2px 8px rgba(59,130,246,0.04); font-size:15px;">
+                           
+                            <div class="mb-2 d-flex flex-wrap align-items-center gap-2">
+                                <span style="color:#059669;"><b>ชำระเงินแล้ว:</b> <span style="color:#059669; font-weight:700;">{{ number_format($totalConfirmed) }} บาท</span></span>
+                                {{-- <span class="vr mx-2"></span> --}}
+                                <span style="color:#fbbf24;"><b>รอยืนยันยอด:</b> <span style="color:#f59e42; font-weight:700;">{{ number_format($totalWaiting) }} บาท</span></span>
+                            </div>
+                            @if($order->payment_status === 'pending' || $order->payment_status === 'partial' || $order->payment_status === 'waiting_confirmation')
+                                <a href="{{ route('orders.payment.livewire', $order->id) }}" class="btn btn-sm btn-success mt-2">
+                                    แจ้งชำระเงิน
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 text-end align-self-end d-flex align-items-end justify-content-end">
                         @if ($order->status === 'open')
-                            <button wire:click="approveOrder" class="btn btn-primary">อนุมัติ Order</button>
+                            <button wire:click="approveOrder" class="btn btn-primary mt-2"><i class="ri-check-line"></i> อนุมัติ Order</button>
                         @endif
                     </div>
                 </div>
-
-                {{-- ข้อมูลลูกค้า/ที่อยู่จัดส่ง --}}
-                <div class="row ">
-                    <div class="col-6">
-                        <h4>ข้อมูลลูกค้า</h4>
-                        <address>
-                            {{ $order->customer->customer_name }}<br>
-                            {{ $order->customer->customer_address }}<br>
-                            {{ $order->customer->customer_district_name .
-                                ' ' .
-                                $order->customer->customer_amphur_name .
-                                ' ' .
-                                $order->customer->customer_province_name .
-                                ' ' .
-                                $order->customer->customer_zipcode }}<br>
-                            (+66) {{ $order->customer->customer_phone }}
-                        </address>
-                    </div>
-                    <div class="col-6">
-                        <h4>ที่อยู่จัดส่ง</h4>
-                        @if ($order->deliveryAddress)
-                            <address>
-                                {{ $order->deliveryAddress->delivery_contact_name }}
-                                ({{ $order->deliveryAddress->delivery_phone }})<br>
-                                {{ $order->deliveryAddress->delivery_number }}<br>
-                                {{ $order->deliveryAddress->delivery_address }}<br>
-                            </address>
-                        @else
-                            <span class="text-muted">ไม่ได้ระบุที่อยู่จัดส่ง</span>
-                        @endif
+                @if($showPaymentForm)
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="card border-success mb-3" style="max-width: 600px; margin:auto;">
+                            <div class="card-header bg-success text-white">แจ้งชำระเงินสำหรับ Order #{{ $order->order_number }}
+                                <button type="button" class="btn-close float-end" aria-label="Close" wire:click="$set('showPaymentForm', false)"></button>
+                            </div>
+                            <div class="card-body">
+                                <form wire:submit.prevent="submitPayment">
+                                    <div class="mb-2">
+                                        <label>แนบสลิป</label>
+                                        <input type="file" class="form-control" wire:model="slip">
+                                        @if($slip)
+                                            <img src="{{ $slip->temporaryUrl() }}" class="img-thumbnail mt-2" style="max-width:200px;">
+                                        @endif
+                                        @error('slip') <span class="text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>จำนวนเงิน</label>
+                                        <input type="number" class="form-control" wire:model.defer="amount">
+                                        @error('amount') <span class="text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>ชื่อผู้โอน</label>
+                                        <input type="text" class="form-control" wire:model.defer="sender_name">
+                                        @error('sender_name') <span class="text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>วันที่โอน</label>
+                                        <input type="datetime-local" class="form-control" wire:model.defer="transfer_at">
+                                        @error('transfer_at') <span class="text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                    <button type="submit" class="btn btn-success">บันทึก</button>
+                                    <button type="button" class="btn btn-secondary ms-2" wire:click="$set('showPaymentForm', false)">ยกเลิก</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                {{-- ตารางรายการสินค้า (Order Items) --}}
-                <div class="row ">
+                @endif
+                <div class="row mb-3">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table table-sm table-bordered table-hover">
+                            <table class="table table-sm table-bordered table-hover" style="background:white; border-radius:8px; overflow:hidden;">
                                 <thead class="table-light">
-                                    <tr>
+                                    <tr style="background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%);">
                                         <th>#</th>
                                         <th>สินค้า</th>
                                         <th>รายละเอียด</th>
                                         <th>จำนวนสั่ง</th>
+                                        <th>จำนวนที่จัดส่งแล้ว</th>
                                         <th>หน่วย</th>
                                         <th>ราคา/หน่วย</th>
+                                        <th>VAT</th>
+                                        <th>เหตุผล</th>
+                                        <th>หมายเหตุ</th>
                                         <th class="text-end">ยอดรวม</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($order->items as $idx => $item)
                                         <tr>
                                             <td>{{ $idx + 1 }}</td>
-                                            <td ><b>{{ $item->product_name }}</b> </br>
-                                                {{ $item->product_note }}
-                                            </td>
+                                            <td><b>{{ $item->product_name }}</b><br><span style="color:#9ca3af;">{{ $item->product_note }}</span></td>
                                             <td>{{ $item->product_detail }}</td>
+                                            <td>{{ $item->quantity }}</td>
+                                            <td>{{ $item->delivered_qty ?? ($deliveredQtyMap[$item->id] ?? 0) }}</td>
+                                            <td>{{ $item->product_unit }}</td>
+                                            <td>{{ number_format($item->unit_price, 2) }}</td>
+                                            <td class="text-center">@if($item->product_vat) <span class="badge bg-success">มี VAT</span> @else <span class="badge bg-secondary">-</span> @endif</td>
                                             <td>
-                                                @php
-                                                    $delivered = $deliveredQtyMap[$item->product_id] ?? 0;
-                                                @endphp
-                                                {{ $item->quantity }}
-
-                                                @if ($delivered > 0)
-                                                    ({{ $delivered }})
+                                                @if($item->added_reason === 'claim')
+                                                    <span class="badge bg-warning text-dark">เคลม</span>
+                                                @elseif($item->added_reason === 'customer_request')
+                                                    <span class="badge bg-info text-dark">เพิ่มตามคำขอ</span>
+                                                @else
+                                                    <span class="badge bg-light text-dark">-</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $item->product_unit }}</td>
-                                            <td>
-
-                                                {{ number_format($item->unit_price, 2) }}
-
-
-                                            </td>
+                                            <td>{{ $item->added_note }}</td>
                                             <td class="text-end">{{ number_format($item->total, 2) }}</td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-danger btn-sm" wire:click="deleteOrderItem({{ $item->id }})" onclick="return confirm('ยืนยันการลบรายการนี้?')">ลบ</button>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-primary btn-sm" wire:click="addRow">+ เพิ่มสินค้าใหม่</button>
+                            </div>
+                            @if(count($newItems) > 0)
+                                <form wire:submit.prevent="saveNewItems">
+                                    <table class="table table-bordered table-sm mt-2">
+                                        <thead>
+                                            <tr>
+                                                <th>สินค้า</th>
+                                                <th>จำนวน</th>
+                                                <th>ราคา/หน่วย</th>
+                                                <th>VAT</th>
+                                                <th>เหตุผลการเพิ่ม</th>
+                                                <th>หมายเหตุ</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($newItems as $idx => $item)
+                                                <tr>
+                                                    <td style="min-width:100px;">
+                                                        <div class="product-search-container">
+                                                            <input type="text" class="form-control form-control-sm" wire:model.live="newItems.{{ $idx }}.product_search" placeholder="ค้นหาสินค้า..." wire:focus="$set('newItems.{{ $idx }}.product_results_visible', true)" wire:keydown.escape="$set('newItems.{{ $idx }}.product_results_visible', false)">
+                                                            @if (!empty($item['product_results_visible']) && !empty($item['product_results']))
+                                                                <div class="position-absolute w-100 mt-1" style="z-index: 1000;">
+                                                                    <div class="list-group shadow rounded" style="max-height: 300px; overflow-y: auto;">
+                                                                        @foreach ($item['product_results'] as $result)
+                                                                            <a href="javascript: void(0);" class="list-group-item list-group-item-action" wire:click="selectProductForNewItem({{ $idx }}, {{ $result->product_id }})">
+                                                                                <div class="d-flex justify-content-between">
+                                                                                    <div>
+                                                                                        <h6 class="mb-1">{{ $result->product_name }}</h6>
+                                                                                        <small class="text-muted">{{ $result->product_size }} | {{ $result->productWireType?->value ?? '-' }}</small>
+                                                                                    </div>
+                                                                                    <i class="ri-arrow-right-s-line"></i>
+                                                                                </div>
+                                                                            </a>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                        @if($item['selected_from_dropdown'])
+                                                            <span class="badge bg-success mt-1">เลือกแล้ว</span>
+                                                            <button type="button" class="btn btn-link btn-sm p-0 text-danger" wire:click="clearProductSelectionForNewItem({{ $idx }})">ล้าง</button>
+                                                        @endif
+                                                    </td>
+                                                    <td><input type="number" min="1" wire:model="newItems.{{ $idx }}.quantity" class="form-control form-control-sm"></td>
+                                                    <td><input type="number" min="0" step="0.01" wire:model="newItems.{{ $idx }}.unit_price" class="form-control form-control-sm"></td>
+                                                    <td class="text-center"><input type="checkbox" wire:model="newItems.{{ $idx }}.product_vat"></td>
+                                                    <td>
+                                                        <select wire:model="newItems.{{ $idx }}.added_reason" class="form-control form-control-sm">
+                                                            <option value="">เลือกเหตุผล</option>
+                                                            <option value="customer_request">เพิ่มตามคำขอลูกค้า</option>
+                                                            <option value="claim">เพิ่มกรณีเคลม</option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" wire:model="newItems.{{ $idx }}.added_note" class="form-control form-control-sm"></td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-danger btn-sm" wire:click="removeRow({{ $idx }})">ลบ</button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-success btn-sm">บันทึกสินค้าใหม่</button>
+                                    </div>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 </div>
-
-                {{-- สรุปยอดรวม --}}
-                {{-- <div class="row mb-4">
-        <div class="col-sm-6 text-muted">
-            <p>หมายเหตุ: {{ $order->note ?? '-' }}</p>
-        </div>
-        <div class="col-sm-6">
-            <div class="float-end">
-                <p><b>Sub-Total:</b>
-                    <span class="float-end">{{ number_format($order->order_subtotal, 2) }}</span>
-                </p>
-                <p><b>Discount:</b>
-                    <span class="float-end">{{ number_format($order->order_discount, 2) }}</span>
-                </p>
-                <p><b>VAT:</b>
-                    <span class="float-end">{{ number_format($order->order_vat, 2) }}</span>
-                </p>
-                <h5><b>Grand Total:</b>
-                    <span class="float-end">{{ number_format($order->order_grand_total, 2) }}</span>
-                </h5>
-            </div>
-            <div class="clearfix"></div>
-        </div>
-    </div> --}}
-                <div class="row">
+                <div class="row mb-3">
                     <div class="col-12 mb-2">
-                        <h5>รายการจัดส่ง (Order Deliveries)</h5>
+                        <h5 style="font-weight:700; color:#111827;"><i class="ri-truck-line me-1"></i> รายการจัดส่ง (Order Deliveries)</h5>
                     </div>
                     <div class="col-12 mb-3">
-                        <div class="card border-secondary">
+                        <div class="card border-secondary" style="border-radius:10px; box-shadow:0 2px 8px rgba(59,130,246,0.04);">
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-sm table-striped table-hover mb-0"
-                                        style="font-size: 14px">
+                                    <table class="table table-sm table-striped table-hover mb-0" style="font-size:14px; background:white; border-radius:8px; overflow:hidden;">
                                         <thead>
-                                            <tr>
+                                            <tr style="background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%);">
                                                 <th>ลำดับ</th>
                                                 <th>วันที่จัดส่ง</th>
                                                 <th>เลขที่บิลย่อย</th>
                                                 <th>จำนวนเงินทั้งสิ้น</th>
-                                                <th>ชำระเงินแล้ว</th>
-                                                <th>รอยืนยันยอด</th>
                                                 <th>สถานะจัดส่ง</th>
-                                                <th>สถานะชำระเงิน</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($order->deliveries as $key => $delivery)
-                                                @php
-                                                    $confirmed = $delivery->payments
-                                                        ->where('status', 'ชำระเงินแล้ว')
-                                                        ->sum('amount');
-                                                    $waiting = $delivery->payments
-                                                        ->where('status', 'รอยืนยันยอด')
-                                                        ->sum('amount');
-                                                @endphp
-
                                                 <tr>
                                                     <td>{{ $key + 1 }}</td>
                                                     <td>{{ $delivery->order_delivery_date->format('d/m/Y') }}</td>
                                                     <td>{{ $delivery->order_delivery_number }}</td>
-
-                                                    <td>{{ number_format($delivery->order_delivery_grand_total, 2) }}
-                                                    </td>
-
-                                                    <td class="text-succcess">{{ number_format($confirmed, 2) }}</td>
-                                                    <td class="text-warning">{{ number_format($waiting, 2) }}</td>
+                                                    <td>{{ number_format($delivery->order_delivery_grand_total, 2) }}</td>
                                                     <td>{!! order_delivery_status_badge($delivery->order_delivery_status) !!}</td>
-                                                    <td>{!! payment_status_badge($delivery->payment_status) !!}</td>
-                                                    
-                                                    <td>
-                                                        <a href=""> 🚚 การจัดส่ง</a> | 
-                                                        <a href="{{ route('deliveries.printer', $delivery->id) }}"
-                                                            class="text-pink"><i class="mdi mdi-printer"></i> พิมพ์</a>
-                                                        |
-
-                                                        <a href="javascript: void(0);" type="button"
-                                                            data-bs-toggle="modal" data-bs-target="#paymentModal"
-                                                            wire:click="$dispatch('open-payment-modal', { orderId: {{ $order->id }}, deliveryId: {{ $delivery->id }} })">
-                                                            <i class="mdi mdi-cash-multiple "></i> แจ้งชำระเงิน
-                                                        </a>
-                                                        |
-                                                        <a href="{{ route('deliveries.edit', [$delivery->order_id, $delivery->id]) }}"
-                                                            class="text-dark" target="_blank"><i
-                                                                class="mdi mdi-content-save-edit-outline"></i> แก้ไข</a>
-
-                                                        |
-                                                        <a href="" class="text-danger"><i
-                                                                class="mdi mdi-trash-can"></i> ลบ</a>
-
+                                                    <td style="font-size: 18px">
+                                                      
+                                                        <a href="{{ route('deliveries.printer', $delivery->id) }}" class="text-pink" title="พิมพ์"><i class="mdi mdi-printer"></i></a> |
+                                                        <a href="{{ route('deliveries.edit', [$delivery->order_id, $delivery->id]) }}" class="text-dark" target="_blank" title="แก้ไข"><i class="mdi mdi-content-save-edit-outline"></i></a> |
+                                                        <a href="" class="text-danger" title="ลบ"><i class="mdi mdi-trash-can"></i></a>
                                                     </td>
+                                                </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
                                 </div>
-
                             </div>
                         </div>
                     </div>
-
-
-                    {{-- ถ้ายังสามารถสร้าง Delivery รอบใหม่ได้ (ยังไม่ delivered ครบ) --}}
                     @if ($order->order_status === 'open')
                         <div class="col-12">
                             <button wire:click="createNewDelivery" class="btn btn-primary">
@@ -232,8 +301,6 @@
                     @endif
                 </div>
             </div>
-
-
         </div>
     </div>
 
@@ -276,71 +343,24 @@
         </div>
     </div>
 
-
-
-
-    <livewire:orders.payment-modal />
-</div>
-
-{{-- <script>
-    document.addEventListener("livewire:init", () => {
-        Livewire.on("show-payment-modal", () => {
-            const modal = new bootstrap.Modal(document.getElementById("paymentModal"));
-            modal.show();
-        });
-    });
-</script> --}}
-
-{{-- <script>
-    document.addEventListener("livewire:init", () => {
-        Livewire.on("close-payment-modal", () => {
-            const modal = new bootstrap.Modal(document.getElementById("paymentModal"));
-            modal.hide();
-        });
-    });
-</script> --}}
-
-
-<script>
-    document.addEventListener('livewire:load', () => {
-        Livewire.on('close-payment-modal', () => {
-            console.log('close-payment-modal received'); // ตรวจสอบว่า event ถึงจริงไหม
-            const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
-            if (modal) modal.hide();
-        });
-    });
-</script>
-
-<script>
-    function openPrintPreview(deliveryId) {
-        const selected = [];
-
-        for (let i = 0; i <= 2; i++) {
-            const checkbox = document.getElementById('showPrice' + i);
-            if (checkbox && checkbox.checked) {
-                selected.push(i);
+    <script>
+        function openPrintPreview(deliveryId) {
+            const selected = [];
+            for (let i = 0; i <= 2; i++) {
+                const checkbox = document.getElementById('showPrice' + i);
+                if (checkbox && checkbox.checked) {
+                    selected.push(i);
+                }
             }
+            // สร้าง query string เช่น show_price[]=0&show_price[]=1
+            const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
+            // สร้าง URL ไปยัง route delivery/print
+            const printUrl = `{{ url('deliveries') }}/${deliveryId}/print?${query}`;
+            // เปิดในแท็บใหม่
+            window.open(printUrl, '_blank');
+            // ปิด modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
+            if (modal) modal.hide();
         }
-
-        // สร้าง query string เช่น show_price[]=0&show_price[]=1
-        const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
-
-        // สร้าง URL ไปยัง route delivery/print
-        const printUrl = `{{ url('deliveries') }}/${deliveryId}/print?${query}`;
-
-        // เปิดในแท็บใหม่
-        window.open(printUrl, '_blank');
-
-        // ปิด modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
-        if (modal) modal.hide();
-    }
-</script>
-
-
-
-{{-- <script>
-    window.addEventListener('open-print', event => {
-        window.open(event.detail.url, '_blank');
-    });
-</script> --}}
+    </script>
+</div>

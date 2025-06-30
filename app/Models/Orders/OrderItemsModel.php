@@ -24,6 +24,8 @@ class OrderItemsModel extends Model
         'product_weight',
         'product_vat',
         'product_note',
+        'added_reason', // เพิ่ม field นี้
+        'added_note',   // เพิ่ม field นี้
         'product_calculation',
         'quantity',
         'unit_price',

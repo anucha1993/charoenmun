@@ -65,19 +65,13 @@ class OrderModel extends Model
     public function updatePaymentStatus(): void
     {
         $total = $this->order_grand_total;
-    
-        $deliveries = $this->deliveries()->with('payments')->get();
-    
-        $confirmedAmount = $deliveries
-            ->flatMap(fn($d) => $d->payments)
+        $payments = $this->payments()->get();
+        $confirmedAmount = $payments
             ->where('status', 'ชำระเงินแล้ว')
             ->sum('amount');
-    
-        $hasPendingSlip = $deliveries
-            ->flatMap(fn($d) => $d->payments)
+        $hasPendingSlip = $payments
             ->where('status', 'รอยืนยันยอด')
             ->isNotEmpty();
-    
         if ($confirmedAmount > $total) {
             $this->payment_status = 'overpayment';
         } elseif ($confirmedAmount == $total) {
@@ -89,10 +83,12 @@ class OrderModel extends Model
         } else {
             $this->payment_status = 'pending';
         }
-    
         $this->save();
     }
-    
+    public function payments()
+    {
+        return $this->hasMany(OrderPayment::class, 'order_id');
+    }
 
 
 }
