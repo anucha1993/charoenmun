@@ -5,6 +5,7 @@ namespace App\Livewire\Quotations;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Layout;
 use App\Enums\QuotationStatus;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Orders\OrderModel;
@@ -21,6 +22,7 @@ use App\Models\customers\deliveryAddressModel;
 /**
  * Livewire Component : สร้าง / แก้ไข ใบเสนอราคา
  */
+#[Layout('layouts.horizontal', ['title' => 'Quotations'])]
 class QuotationsForm extends Component
 {
     /* ──────────────── State หลัก ──────────────── */
@@ -129,9 +131,10 @@ class QuotationsForm extends Component
                     'product_vat' => (bool) ($i->product_vat ?? false),
 
                     // ✅ เพิ่มบรรทัดนี้:
-                    'product_search' => $i->product_name, // แสดงชื่อใน input
+                    'product_search' => $i->product_name . ' ' . ($product->productWireType?->value ?? ''), // แสดงชื่อใน input
                     'product_results' => [],
                     'product_results_visible' => false,
+                    'selected_from_dropdown' => true, // ✅ ข้อมูลจาก DB ถือว่าเป็นการเลือกที่ถูกต้อง
                 ];
             })
             ->toArray();
@@ -155,17 +158,76 @@ class QuotationsForm extends Component
         ];
     }
 
+    /**
+     * Validate product selection - ป้องกันการเพิ่มสินค้าเองโดยไม่เลือกจาก dropdown
+     */
+    protected function validateProductSelection(): bool
+    {
+        $hasError = false;
+        
+        foreach ($this->items as $index => $item) {
+            // ข้ามแถวที่ว่างเปล่า
+            if (empty($item['product_search']) && empty($item['product_id'])) {
+                continue;
+            }
+            
+            // ✅ หลักการใหม่: ถ้ามีข้อความในช่องค้นหา แต่ไม่มี product_id หรือไม่ได้เลือกจาก dropdown
+            if (!empty($item['product_search']) && (
+                empty($item['product_id']) || 
+                empty($item['selected_from_dropdown'])
+            )) {
+                // ตรวจสอบว่าข้อความที่พิมพ์ตรงกับสินค้าที่มีในระบบหรือไม่
+                $exactMatch = ProductModel::where('product_name', 'like', "%{$item['product_search']}%")->first();
+                
+                if (!$exactMatch) {
+                    $this->addError("items.{$index}.product_search", 'ไม่พบสินค้าที่ค้นหา กรุณาเลือกสินค้าจากรายการที่แสดง');
+                    $hasError = true;
+                } else if (empty($item['product_id'])) {
+                    $this->addError("items.{$index}.product_search", 'กรุณาเลือกสินค้าจากรายการที่แสดง');
+                    $hasError = true;
+                }
+                continue;
+            }
+            
+            // ถ้ามี product_id ให้ตรวจสอบว่าสินค้าจริงหรือไม่
+            if (!empty($item['product_id'])) {
+                $product = ProductModel::find($item['product_id']);
+                if (!$product) {
+                    $this->addError("items.{$index}.product_id", 'สินค้าที่เลือกไม่ถูกต้องหรือไม่มีอยู่ในระบบ');
+                    $hasError = true;
+                }
+            }
+        }
+        
+        return !$hasError;
+    }
+
     public function updated($name, $value)
     {
         // ตรวจสอบ field ว่าเป็น product_search
         if (preg_match('/items\.(\d+)\.product_search/', $name, $matches)) {
             $index = $matches[1];
 
-            $this->items[$index]['product_results'] = ProductModel::with('productWireType:id,value')
-                ->where('product_name', 'like', "%{$value}%")
-                ->take(10)
-                ->get(['product_id', 'product_name', 'product_size', 'product_wire_type']);
-            $this->items[$index]['product_results_visible'] = true;
+            // ✅ อนุญาตให้ค้นหาได้ปกติ - รีเซ็ต product_id เมื่อเริ่มพิมพ์ใหม่
+            if (!empty($value)) {
+                // เคลียร์ product_id เมื่อเริ่มพิมพ์ใหม่ (เพื่อให้ต้องเลือกจาก dropdown)
+                if (isset($this->items[$index]['product_id']) && !empty($this->items[$index]['product_id'])) {
+                    $this->items[$index]['selected_from_dropdown'] = false;
+                }
+
+                // ค้นหาสินค้าตาม input
+                $results = ProductModel::with('productWireType:id,value')
+                    ->where('product_name', 'like', "%{$value}%")
+                    ->take(10)
+                    ->get(['product_id', 'product_name', 'product_size', 'product_wire_type']);
+                
+                $this->items[$index]['product_results'] = $results;
+                $this->items[$index]['product_results_visible'] = $results->isNotEmpty();
+            } else {
+                // ถ้าลบข้อความหมด ให้เคลียร์ dropdown
+                $this->items[$index]['product_results'] = [];
+                $this->items[$index]['product_results_visible'] = false;
+            }
         }
     }
 
@@ -178,16 +240,47 @@ class QuotationsForm extends Component
         $this->items[$index]['product_size'] = $product->product_size;
         $this->items[$index]['product_wire_type'] = $product->productWireType?->value ?? null;
 
+        // ✅ เพิ่มการบันทึกว่าเป็นการเลือกจาก dropdown (ไม่ใช่พิมพ์เอง)
+        $this->items[$index]['selected_from_dropdown'] = true;
+        
         $this->items[$index]['product_results'] = [];
         $this->items[$index]['product_results_visible'] = false;
 
         $this->updatedItems($productId, "items.{$index}.product_id");
     }
 
+    /**
+     * ✅ Method เพื่อ clear product selection
+     */
+    public function clearProductSelection($index)
+    {
+        $this->items[$index]['product_id'] = null;
+        $this->items[$index]['product_search'] = '';
+        $this->items[$index]['product_name'] = '';
+        $this->items[$index]['product_type'] = '';
+        $this->items[$index]['product_unit'] = '';
+        $this->items[$index]['product_detail'] = null;
+        $this->items[$index]['product_length'] = null;
+        $this->items[$index]['product_weight'] = null;
+        $this->items[$index]['unit_price'] = 0;
+        $this->items[$index]['selected_from_dropdown'] = false;
+        $this->items[$index]['product_results'] = [];
+        $this->items[$index]['product_results_visible'] = false;
+        
+        $this->calculateTotals();
+    }
+
     public function save()
     {
         // $this->calculateTotals();
         $this->refreshVat();
+        
+        // ✅ เพิ่ม validation สำหรับป้องกันการเพิ่มสินค้าเอง
+        if (!$this->validateProductSelection()) {
+            $this->dispatch('notify', type: 'error', message: 'กรุณาเลือกสินค้าจากรายการที่กำหนดเท่านั้น');
+            return;
+        }
+        
         $this->validate(); // กรณีลบ items ทั้งหมด จะไม่ error แล้ว (ตามข้อ 1)
         logger('after refresh', $this->items);
         DB::transaction(function () {
@@ -299,6 +392,8 @@ class QuotationsForm extends Component
             'product_vat' => false,
             'product_results' => collect(),
             'product_results_visible' => false,
+            'product_search' => '', // ✅ เพิ่ม field สำหรับ search
+            'selected_from_dropdown' => false, // ✅ เพิ่ม flag สำหรับตรวจสอบการเลือก
         ];
     }
 
@@ -535,7 +630,7 @@ class QuotationsForm extends Component
     public function render()
     {
         $products = ProductModel::all();
-        return view('livewire.quotations.quotations-form', compact('products'))->layout('layouts.horizontal', ['title' => 'Quotations']);
+        return view('livewire.quotations.quotations-form', compact('products'));
     }
 
     /// convert Quotations To orers

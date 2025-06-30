@@ -13,7 +13,7 @@
             background: white;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
+            overflow: visible;
         }
         
         .page-header {
@@ -63,6 +63,8 @@
         .form-section {
             padding: 20px 32px;
             border-bottom: 1px solid #f1f5f9;
+            position: relative;
+            overflow: visible;
         }
         
         .form-section:last-child {
@@ -253,6 +255,8 @@
             border-radius: 8px;
             padding: 16px;
             margin-top: 6px;
+            position: relative;
+            overflow: visible;
         }
         
         .product-table {
@@ -261,7 +265,7 @@
             border-spacing: 0;
             background: white;
             border-radius: 8px;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
         
@@ -285,10 +289,12 @@
         
         .product-table tbody tr {
             transition: all 0.2s ease;
+            position: relative;
         }
         
         .product-table tbody tr:hover {
             background: #f8fafc;
+            z-index: 1;
         }
         
         .product-table .form-control {
@@ -393,6 +399,72 @@
             font-size: 32px;
             margin-bottom: 8px;
             opacity: 0.5;
+        }
+        
+        /* Product Search Dropdown */
+        .product-search-container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .product-search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 4px;
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .product-search-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .product-search-item:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: inherit;
+            text-decoration: none;
+            transform: translateX(2px);
+        }
+        
+        .product-search-item:last-child {
+            border-bottom: none;
+        }
+        
+        .product-search-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .product-search-detail {
+            font-size: 12px;
+            color: #64748b;
         }
         
         /* Responsive Design */
@@ -692,36 +764,88 @@
                                             <span class="badge bg-light text-dark"><?php echo e($i + 1); ?></span>
                                         </td>
                                         <td>
-                                            <div class="position-relative" wire:ignore.self>
-                                                <input type="text" class="form-control mb-2"
-                                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+                                            <div class="product-search-container">
+                                                <div class="d-flex gap-2 mb-2">
+                                                    <input type="text" class="form-control <?php $__errorArgs = ['items.' . $i . '.product_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?> <?php $__errorArgs = ['items.' . $i . '.product_search'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                                        <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
-                                                    placeholder="🔍 ค้นหาสินค้า..."
-                                                    wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.product_search"
-                                                    wire:keydown.escape="$set('items.<?php echo e($i); ?>.product_results', [])"
-                                                    wire:focus="$set('items.<?php echo e($i); ?>.product_results_visible', true)"
-                                                    wire:key="search-<?php echo e($i); ?>" />
+                                                        placeholder="🔍 ค้นหาสินค้า..."
+                                                        wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.product_search"
+                                                        wire:keydown.escape="$set('items.<?php echo e($i); ?>.product_results_visible', false)"
+                                                        wire:focus="$set('items.<?php echo e($i); ?>.product_results_visible', true)"
+                                                        wire:key="search-<?php echo e($i); ?>" />
+                                                    
+                                                    <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_id'])): ?>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                            wire:click="clearProductSelection(<?php echo e($i); ?>)"
+                                                            title="เคลียร์การเลือกสินค้า"
+                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
+                                                            <i class="ri-close-line"></i>
+                                                        </button>
+                                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                </div>
+                                                
+                                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['items.' . $i . '.product_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                    <div class="invalid-feedback d-block">
+                                                        <small class="text-danger"><?php echo e($message); ?></small>
+                                                    </div>
+                                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                                                
+                                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['items.' . $i . '.product_search'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                    <div class="invalid-feedback d-block">
+                                                        <small class="text-danger"><?php echo e($message); ?></small>
+                                                    </div>
+                                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                 
                                                 <input type="text" class="form-control"
                                                     wire:model="items.<?php echo e($i); ?>.product_note"
                                                     placeholder="💬 หมายเหตุ">
 
-                                                <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_results_visible'])): ?>
-                                                    <div class="position-absolute w-100 mt-1" style="z-index: 1000;">
-                                                        <div class="list-group shadow rounded" style="max-height: 300px; overflow-y: auto;">
-                                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $item['product_results']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $result): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                                <a href="javascript: void(0);" class="list-group-item list-group-item-action"
-                                                                    wire:click="selectProduct(<?php echo e($i); ?>, <?php echo e($result->product_id); ?>, <?php echo \Illuminate\Support\Js::from($result->product_name)->toHtml() ?>)">
-                                                                    <div class="d-flex justify-content-between">
-                                                                        <div>
-                                                                            <h6 class="mb-1"><?php echo e($result->product_name); ?></h6>
-                                                                            <small class="text-muted"><?php echo e($result->product_size); ?> | <?php echo e($result->productWireType?->value ?? '-'); ?></small>
+                                                <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_results_visible']) && !empty($item['product_results'])): ?>
+                                                    <div class="product-search-dropdown">
+                                                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $item['product_results']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $result): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <div class="product-search-item"
+                                                                wire:click="selectProduct(<?php echo e($i); ?>, <?php echo e($result->product_id); ?>, <?php echo \Illuminate\Support\Js::from($result->product_name)->toHtml() ?>)">
+                                                                <div class="d-flex justify-content-between align-items-start">
+                                                                    <div>
+                                                                        <div class="product-search-title"><?php echo e($result->product_name); ?></div>
+                                                                        <div class="product-search-detail">
+                                                                            <?php echo e($result->product_size); ?> | <?php echo e($result->productWireType?->value ?? '-'); ?>
+
                                                                         </div>
-                                                                        <i class="ri-arrow-right-s-line"></i>
                                                                     </div>
-                                                                </a>
-                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                                                        </div>
+                                                                    <i class="ri-arrow-right-s-line" style="color: #9ca3af;"></i>
+                                                                </div>
+                                                            </div>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                                     </div>
                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             </div>
@@ -1014,6 +1138,95 @@ if (isset($__slots)) unset($__slots);
                     $dropdown.val(deliveryId).trigger('change');
                 }
             }, 500);
+        });
+
+        // Handle product search dropdown
+        document.addEventListener('click', function(e) {
+            // Hide all product search dropdowns when clicking outside
+            if (!e.target.closest('.product-search-container')) {
+                document.querySelectorAll('.product-search-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+                
+                // Also update Livewire state
+                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                if (livewireComponent) {
+                    // Find all visible dropdowns and hide them in Livewire state
+                    const visibleDropdowns = document.querySelectorAll('.product-search-dropdown[style*="display: block"], .product-search-dropdown:not([style*="display: none"])');
+                    visibleDropdowns.forEach((dropdown, index) => {
+                        // Get the row index from the dropdown's parent
+                        const row = dropdown.closest('tr');
+                        const rowIndex = Array.from(row.parentNode.children).indexOf(row);
+                        if (livewireComponent.items && livewireComponent.items[rowIndex]) {
+                            livewireComponent.call('$set', `items.${rowIndex}.product_results_visible`, false);
+                        }
+                    });
+                }
+            }
+        });
+
+        // Handle escape key to close dropdowns
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.product-search-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+                
+                // Also update Livewire state
+                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                if (livewireComponent && livewireComponent.items) {
+                    livewireComponent.items.forEach((item, index) => {
+                        if (item.product_results_visible) {
+                            livewireComponent.call('$set', `items.${index}.product_results_visible`, false);
+                        }
+                    });
+                }
+            }
+        });
+
+        // ✅ ป้องกันการพิมพ์สินค้าที่ไม่มีในระบบ - อนุญาตให้ค้นหาได้ปกติ
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('[wire\\:model*="product_search"]')) {
+                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                if (livewireComponent) {
+                    // ดึงหมายเลขแถวจาก wire:model
+                    const match = e.target.getAttribute('wire:model').match(/items\.(\d+)\.product_search/);
+                    if (match) {
+                        const rowIndex = parseInt(match[1]);
+                        const item = livewireComponent.items[rowIndex];
+                        
+                        // เคลียร์ product_id เมื่อเริ่มพิมพ์ใหม่ (เพื่อให้ต้องเลือกจาก dropdown ใหม่)
+                        if (e.target.value && item.product_id && !item.selected_from_dropdown) {
+                            livewireComponent.call('$set', `items.${rowIndex}.product_id`, null);
+                        }
+                    }
+                }
+            }
+        });
+
+        // ✅ ป้องกันการ paste ข้อมูลเอง - อนุญาตให้ paste เพื่อค้นหาได้
+        document.addEventListener('paste', function(e) {
+            if (e.target.matches('[wire\\:model*="product_search"]')) {
+                // อนุญาตให้ paste แต่เคลียร์ product_id เพื่อให้ต้องเลือกจาก dropdown ใหม่
+                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                if (livewireComponent) {
+                    const match = e.target.getAttribute('wire:model').match(/items\.(\d+)\.product_search/);
+                    if (match) {
+                        const rowIndex = parseInt(match[1]);
+                        setTimeout(() => {
+                            livewireComponent.call('$set', `items.${rowIndex}.product_id`, null);
+                            livewireComponent.call('$set', `items.${rowIndex}.selected_from_dropdown`, false);
+                        }, 100);
+                    }
+                }
+            }
+        });
+
+        // Ensure dropdowns are visible when search results are available
+        document.addEventListener('livewire:morph-updated', function() {
+            document.querySelectorAll('.product-search-dropdown').forEach(dropdown => {
+                dropdown.style.display = 'block';
+            });
         });
     </script>
 </div><?php /**PATH C:\laragon\www\charoenmun\resources\views/livewire/quotations/quotations-form.blade.php ENDPATH**/ ?>
