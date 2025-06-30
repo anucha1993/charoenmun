@@ -144,11 +144,8 @@
                                     @if ($selectedDelivery)
                                         <b>ชื่อผู้ติดต่อ</b> {{ $selectedDelivery->delivery_contact_name }}
                                         ({{ $selectedDelivery->delivery_phone }}) </br>
-                                        <b> ที่อยู่ : </b>{{ $selectedDelivery->delivery_number }}
-                                        {{ $selectedDelivery->delivery_district_name }}
-                                        {{ $selectedDelivery->delivery_amphur_name }}
-                                        {{ $selectedDelivery->delivery_province_name }}
-                                        {{ $selectedDelivery->delivery_zipcode }}
+                                        <b> ที่อยู่ : </b>{{ $selectedDelivery->delivery_number }} </br>
+                                        {{ $selectedDelivery->delivery_address }}
 
                                         <a href="javascript: void(0);"
                                             onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: {{ $delivery->id }} })">

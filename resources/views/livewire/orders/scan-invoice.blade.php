@@ -53,10 +53,7 @@
                                 ({{ $order->deliveryAddress->delivery_phone }})</p>
                             <p class="mb-1">{{ $order->deliveryAddress->delivery_number }}</p>
                             <p>
-                                {{ $order->deliveryAddress->delivery_district_name }},
-                                {{ $order->deliveryAddress->delivery_amphur_name }},
-                                {{ $order->deliveryAddress->delivery_province_name }}
-                                {{ $order->deliveryAddress->delivery_zipcode }}
+                                {{ $order->deliveryAddress->delivery_address }}
                             </p>
                         @else
                             <span class="text-muted">ไม่ได้ระบุที่อยู่จัดส่ง</span>

@@ -17,6 +17,7 @@ class deliveryAddressModel extends Model
     protected $fillable = [
         'customer_id',
         'delivery_number',
+        'delivery_address',  // เพิ่มฟิลด์ที่อยู่แบบ textarea
         'delivery_province',
         'delivery_district', 
         'delivery_amphur',
@@ -25,12 +26,12 @@ class deliveryAddressModel extends Model
         'delivery_phone',
     ];
 
-    // ★ บอกให้ Eloquent สร้าง 3 attribute ชื่อเหล่านี้เวลา toArray()/JSON
-    protected $appends = [
-        'delivery_province_name',
-        'delivery_amphur_name',
-        'delivery_district_name',
-    ];
+    // ★ ลบ appends ที่ไม่ใช้แล้ว
+    // protected $appends = [
+    //     'delivery_province_name',
+    //     'delivery_amphur_name',
+    //     'delivery_district_name',
+    // ];
      public function customer() { return $this->belongsTo(customerModel::class); }
 
      /* province */

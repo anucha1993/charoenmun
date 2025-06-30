@@ -280,11 +280,8 @@
                                     <b>ชื่อลูกค้า : {{ $address['delivery_contact_name'] ?? '-' }}
                                         ({{ $address['delivery_phone'] ?? '-' }})
                                     </b> </br>
-                                    เลขที่ {{ $address['delivery_number'] ?? '-' }}
-                                    {{ $address['delivery_district_name'] ?? '-' }}
-                                    {{ $address['delivery_amphur_name'] ?? '-' }}
-                                    {{ $address['delivery_province_name'] ?? '-' }}
-                                    {{ $address['delivery_zipcode'] ?? '-' }}
+                                    เลขที่ {{ $address['delivery_number'] ?? '-' }} </br>
+                                    {{ $address['delivery_address'] ?? '-' }}
                                     </br>
                                     <button type="button" class="btn btn-sm btn-info"
                                         wire:click="openDeliveryModal({{ $index }})">แก้ไข</button>
@@ -375,56 +372,11 @@
                                 placeholder="เลขที่/หมู่/ซอย">
                         </div>
 
-                        <!-- จังหวัด -->
+                        <!-- ที่อยู่จัดส่ง -->
                         <div class="mb-2">
-                            <label for="">จังหวัด</label>
-                            <select class="form-select" wire:model.live="deliveryForm.delivery_province" required>
-                                <option value="">-- เลือกจังหวัด --</option>
-                                @foreach ($deliveryProvinces as $code => $name)
-                                    <option value="{{ $code }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- อำเภอ -->
-                        <div class="mb-2">
-                            <label for="">อำเภอ/เขต</label>
-                            <select class="form-select" wire:model.live="deliveryForm.delivery_amphur"
-                                @disabled(!$deliveryAmphures) required>
-                                <option value="">-- เลือกอำเภอ --</option>
-                                @foreach ($deliveryAmphures as $code => $name)
-                                    <option value="{{ $code }}"
-                                        @if ($deliveryForm['delivery_amphur'] == $code) selected @endif>
-                                        {{ $name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- ตำบล -->
-                        <div class="mb-2">
-                            <label for="">ตำบล/แขวง</label>
-                            <select class="form-select" wire:model.live="deliveryForm.delivery_district"
-                                @disabled(!$deliveryDistricts) required>
-                                <option value="">-- เลือกตำบล --</option>
-
-                                 @foreach ($deliveryDistricts as $code => $name)
-                                    <option value="{{ $code }}"
-                                        @if ($deliveryForm['delivery_district'] == $code) selected @endif>
-                                        {{ $name }}
-                                    </option>
-                                @endforeach
-
-                           
-                            </select>
-                        </div>
-
-                        <!-- รหัสไปรษณีย์ -->
-                        <div class="mb-2">
-                            <label for="">รหัสไปรษณีย์ <span class="text-primary"
-                                    style="font-size:11px">*พิมพ์เพื่อค้นหา</span></label>
-                            <input type="text" wire:model.live.debounce.500ms="deliveryForm.delivery_zipcode"
-                                class="form-control">
+                            <label for="delivery_address" class="form-label">ที่อยู่จัดส่ง</label>
+                            <textarea class="form-control" wire:model="deliveryForm.delivery_address" 
+                                rows="3" placeholder="กรอกที่อยู่จัดส่งแบบเต็ม (จังหวัด อำเภอ ตำบล รหัสไปรษณีย์)"></textarea>
                         </div>
 
 

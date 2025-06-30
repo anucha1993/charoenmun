@@ -124,13 +124,7 @@
                                 {{ $delivery->deliveryAddress->delivery_contact_name }}
                                 ({{ $delivery->deliveryAddress->delivery_phone }})<br>
                                 {{ $delivery->deliveryAddress->delivery_number }}<br>
-                                {{ $delivery->deliveryAddress->delivery_district_name .
-                                    ' ' .
-                                    $delivery->deliveryAddress->delivery_amphur_name .
-                                    ' ' .
-                                    $delivery->deliveryAddress->delivery_province_name .
-                                    ' ' .
-                                    $delivery->deliveryAddress->delivery_zipcode }}<br>
+                                {{ $delivery->deliveryAddress->delivery_address }}<br>
 
                             </address>
                         @else

@@ -63,13 +63,7 @@
                                 {{ $order->deliveryAddress->delivery_contact_name }}
                                 ({{ $order->deliveryAddress->delivery_phone }})<br>
                                 {{ $order->deliveryAddress->delivery_number }}<br>
-                                {{ $order->deliveryAddress->delivery_district_name .
-                                    ' ' .
-                                    $order->deliveryAddress->delivery_amphur_name .
-                                    ' ' .
-                                    $order->deliveryAddress->delivery_province_name .
-                                    ' ' .
-                                    $order->deliveryAddress->delivery_zipcode }}<br>
+                                {{ $order->deliveryAddress->delivery_address }}<br>
                             </address>
                         @else
                             <span class="text-muted">ไม่ได้ระบุที่อยู่จัดส่ง</span>

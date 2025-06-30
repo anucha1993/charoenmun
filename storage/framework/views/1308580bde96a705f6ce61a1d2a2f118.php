@@ -4,28 +4,28 @@
         font-family: 'THSarabunNew';
         font-style: normal;
         font-weight: normal;
-        src: url('<?php echo e(storage_path("fonts/THSarabunNew.ttf")); ?>') format("truetype");
+        src: url('<?php echo e(asset("fonts/THSarabunNew.ttf")); ?>') format("truetype");
     }
 
     @font-face {
         font-family: 'THSarabunNew';
         font-style: normal;
         font-weight: bold;
-        src: url('<?php echo e(storage_path("fonts/THSarabunNew Bold.ttf")); ?>') format("truetype");
+        src: url('<?php echo e(asset("fonts/THSarabunNew Bold.ttf")); ?>') format("truetype");
     }
 
     @font-face {
         font-family: 'THSarabunNew';
         font-style: italic;
         font-weight: normal;
-        src: url('<?php echo e(storage_path("fonts/THSarabunNew Italic.ttf")); ?>') format("truetype");
+        src: url('<?php echo e(asset("fonts/THSarabunNew Italic.ttf")); ?>') format("truetype");
     }
 
     @font-face {
         font-family: 'THSarabunNew';
         font-style: italic;
         font-weight: bold;
-        src: url('<?php echo e(storage_path("fonts/THSarabunNew BoldItalic.ttf")); ?>') format("truetype");
+        src: url('<?php echo e(asset("fonts/THSarabunNew BoldItalic.ttf")); ?>') format("truetype");
     }
 
     body {
@@ -39,7 +39,7 @@
         $loopIndex = 1;
     ?>
 
-    <?php $__currentLoopData = $quotation->items->chunk(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $quotation->items->chunk(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <div class="card row text-black" style="margin-top: 0px">
             <div class="card-body">
                 <!-- Invoice Detail-->
@@ -67,7 +67,7 @@
                     <div class="col-sm-6">
                         <div class="float-start">
                             <p><b>บริษัท เจริญมั่น คอนกรีต จำกัด(สำนักงานใหญ่)</b></p>
-                            <p class=" fs-13" style="margin-top: -10px">ที่อยู่ 99/35 หมู่ 9 ตำบลละหาร อำเภอบางบัวทอง
+                            <p class=" fs-20" style="margin-top: -10px">ที่อยู่ 99/35 หมู่ 9 ตำบลละหาร อำเภอบางบัวทอง
                                 จังหวัดนนทบุรี 11110 โทร
                                 082-4789197 </br>
                                 เลขประจำตัวผู้เสียภาษี 0125560015546
@@ -78,11 +78,11 @@
                     </div><!-- end col -->
                     <div class="col-sm-4 offset-sm-2">
                         <div class="mt-0 float-sm-end">
-                            <p class="fs-13"><strong>วันที่เสนอราคา: </strong> &nbsp;&nbsp;&nbsp;
+                            <p class="fs-20"><strong>วันที่เสนอราคา: </strong> &nbsp;&nbsp;&nbsp;
                                 <?php echo e(date('d/m/Y', strtotime($quotation->quote_date))); ?></p>
-                            <p class="fs-13"><strong>เลขที่ใบเสนอราคา </strong> &nbsp;&nbsp;&nbsp;
+                            <p class="fs-20"><strong>เลขที่ใบเสนอราคา </strong> &nbsp;&nbsp;&nbsp;
                                 <?php echo e($quotation->quote_number); ?></p>
-                            <p class="fs-13"><strong>ชื่อผู้ขาย (Sale) </strong> <span
+                            <p class="fs-20"><strong>ชื่อผู้ขาย (Sale) </strong> <span
                                     class="float-end"><?php echo e($quotation->sale->name); ?></span></p>
                         </div>
                     </div><!-- end col -->
@@ -91,7 +91,7 @@
 
                 <div class="row mt-1 ">
                     <div class="col-6">
-                        <h6 class="fs-14">ข้อมูลลูกค้า</h6>
+                        <h6 class="fs-20">ข้อมูลลูกค้า</h6>
                         <address>
                             <?php echo e($quotation->customer->customer_name); ?><br>
                             <?php echo e($quotation->customer->customer_address); ?><br>
@@ -108,19 +108,12 @@
                     </div> <!-- end col-->
 
                     <div class="col-6">
-                        <h6 class="fs-14">ที่อยู่จัดส่ง</h6>
+                        <h6 class="fs-20">ที่อยู่จัดส่ง</h6>
                         <address>
                             <?php echo e($quotation->deliveryAddress->delivery_contact_name); ?>
 
                             (<?php echo e($quotation->deliveryAddress->delivery_phone); ?>)<br>
-                            <?php echo e($quotation->deliveryAddress->delivery_number); ?><br>
-                            <?php echo e($quotation->deliveryAddress->delivery_district_name .
-                                ' ' .
-                                $quotation->deliveryAddress->delivery_amphur_name .
-                                ' ' .
-                                $quotation->deliveryAddress->delivery_province_name .
-                                ' ' .
-                                $quotation->deliveryAddress->delivery_zipcode); ?><br>
+                            <?php echo e($quotation->deliveryAddress->delivery_address); ?><br>
 
                         </address>
                     </div> <!-- end col-->
@@ -144,7 +137,7 @@
 
                                 <tbody>
                                     
-                                    <?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
                                             <td><?php echo e($loopIndex++); ?></td>
                                             <td><?php echo e($item->quantity); ?></td>
@@ -156,7 +149,7 @@
                                             <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
                                             <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                         </tr>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
 
 
                                 </tbody>
@@ -170,7 +163,7 @@
                 <div class="row ">
                     <div class="col-sm-6">
                         <div class="clearfix pt-3">
-                            <h6 class="text-muted fs-14">หมายเหตุ:</h6>
+                            <h6 class="text-muted fs-20">หมายเหตุ:</h6>
                             <small>
                                 <?php echo e($quotation->quote_note); ?>
 
@@ -224,7 +217,7 @@
             </div> <!-- end card-body-->
         </div> <!-- end card -->
 
-  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
 <!-- end row -->
 </div>
 

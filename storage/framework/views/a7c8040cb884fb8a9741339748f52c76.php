@@ -1,186 +1,575 @@
 <div>
-    <br>
-    <br>
-    <!-- end page title -->
+    <style>
+        /* Clean & Modern Design - Flowaccount Inspired */
+        .page-container {
+            background: #f7f9fc;
+            min-height: 100vh;
+            padding: 16px;
+        }
+        
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 32px 40px;
+            position: relative;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .page-header > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .page-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+        }
+        
+        .form-section {
+            padding: 20px 32px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        .company-info {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .form-grid-date {
+            display: grid;
+            grid-template-columns: 280px 1fr auto;
+            gap: 16px;
+            align-items: end;
+            margin-bottom: 16px;
+        }
+        
+        .customer-section {
+            background: #fafbfc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .customer-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .customer-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .form-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .form-group {
+            margin-bottom: 14px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        
+        .input-group-modern {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        
+        .input-group-modern .form-control,
+        .input-group-modern .form-select {
+            flex: 1;
+        }
+        
+        .form-control, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .btn {
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-outline {
+            background: white;
+            border-color: #e5e7eb;
+            color: #6b7280;
+        }
+        
+        .btn-outline:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: transparent;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 6px;
+        }
+        
+        .product-section {
+            background: #fafbfc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 6px;
+        }
+        
+        .product-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+        .product-table th {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 12px 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .product-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        
+        .product-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .product-table tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        .product-table .form-control {
+            padding: 8px 10px;
+            font-size: 14px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .summary-section {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            align-items: start;
+        }
+        
+        .notes-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 16px;
+        }
+        
+        .summary-box {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 18px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .summary-total {
+            font-weight: 700;
+            font-size: 17px;
+            color: #059669;
+            border-top: 2px solid #d1d5db;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+        
+        .customer-info {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+        
+        .customer-info:hover {
+            border-color: #d1d5db;
+        }
+        
+        .customer-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .customer-detail {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+        
+        .action-buttons {
+            padding: 20px 32px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+        }
+        
+        .action-buttons .btn {
+            margin: 0 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 6px;
+            padding: 12px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 24px 16px;
+            color: #9ca3af;
+        }
+        
+        .empty-state i {
+            font-size: 32px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-grid,
+            .form-grid-date,
+            .customer-row,
+            .summary-section {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .form-grid-date {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-container {
+                padding: 8px;
+            }
+            
+            .form-section {
+                padding: 16px 20px;
+            }
+            
+            .page-header {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                padding: 20px;
+            }
+            
+            .product-table {
+                font-size: 12px;
+            }
+            
+            .product-table th,
+            .product-table td {
+                padding: 8px 4px;
+            }
+            
+            .section-title {
+                font-size: 18px;
+            }
+            
+            .customer-name {
+                font-size: 15px;
+            }
+            
+            .customer-detail {
+                font-size: 13px;
+            }
+        }
+    </style>
 
-    <?php use App\Enums\QuotationStatus; ?>
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <form wire:submit.prevent="save">
-                    <div class="card-body">
+    <div class="page-container">
+        <div class="content-wrapper">
+            
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="page-title">
+                            <!--[if BLOCK]><![endif]--><?php if($this->isCreate): ?> 
+                                <i class="ri-add-circle-line me-3"></i>สร้างใบเสนอราคา 
+                            <?php else: ?> 
+                                <i class="ri-edit-line me-3"></i>แก้ไขใบเสนอราคา 
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                        </h1>
+                        <p class="page-subtitle">จัดการข้อมูลใบเสนอราคา รวดเร็วและแม่นยำ</p>
+                    </div>
+                    <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="status-badge"><?php echo e($quotation->quote_number); ?></div>
+                            <?php echo quote_status_badge($quotation->quote_status); ?>
 
-                        <!-- Invoice Logo-->
-                        <div class="clearfix">
-                            <div class="float-start mb-0">
-                                <img src="/images/logo-crrtm.png" alt="dark logo" height="100">
-                            </div>
-
-
-                            <div class="float-end">
-                                <div class="text-center">
-                                    <h4 class="m-0 d-print-none">Quotation / ใบเสนอราคา</h4>
-                                    <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
-                                        <img src="<?php echo e(route('qr.quotation', $quotation->id)); ?>" alt="QR"
-                                            style="height:100px;">
-
-                                        <h4 class="m-0 d-print-none"><?php echo e($quotation->quote_number); ?></h4>
-                                        <?php echo quote_status_badge($quotation->quote_status); ?>
-
-                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
-
-                                </div>
-
-                            </div>
                         </div>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                </div>
+            </div>
 
-                        <!-- Invoice Detail-->
-                        <div class="row">
-                            <div class="col-sm-4">
-                                <div class="float mt-3 mb-3">
-                                    <p>
-                                        <b>บริษัท เจริญมั่น คอนกรีต จำกัด(สำนักงานใหญ่)</b>
-                                    </p>
-                                    ที่อยู่ 99/35 หมู่ 9 ตำบลละหาร อำเภอบางบัวทอง จังหวัดนนทบุรี 11110
-                                    </br> โทร 082-4789197 เลขประจำตัวผู้เสียภาษี 0125560015546
-                                </div>
-
-
-
-                            </div><!-- end col -->
-                            
-                            <div class="col-sm-5 offset-sm-2">
-                                <div class="mt-3 float-sm-end">
-
-
-                                    <!--[if BLOCK]><![endif]--><?php if($quotation && $quote_status === 'wait'): ?>
-                                        <button type="button" class="btn btn-sm btn-info mb-1 float-end"
-                                            wire:click="approveQuotation(<?php echo e($quotation->id); ?>)"
-                                            onclick="return confirm('ยืนยันการอนุมัติใบเสนอราคา เลขที่ <?php echo e($quotation->quote_number); ?> ?') || event.stopImmediatePropagation()">
-                                            อนุมัติใบเสนอราคา
-                                        </button>
-                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
-                                    <div class="mb-1">
-                                        <div class="input-group flex-nowrap">
-                                            <span class="input-group-text" id="basic-addon1">วันที่ออกเอกสาร :</span>
-                                            <input type="date" class="form-control col-form-label-lg"
-                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
-
-                                                wire:model="quote_date" aria-describedby="basic-addon1">
-                                        </div>
+            <form wire:submit.prevent="save" id="quotation-form">
+                
+                <div class="form-section">
+                    <div class="company-info">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <img src="/images/logo-crrtm.png" alt="Logo" height="60" class="me-4">
+                                    <div>
+                                        <h5 class="mb-2" style="color: #1e293b; font-weight: 700;">บริษัท เจริญมั่น คอนกรีต จำกัด</h5>
+                                        <p class="mb-1 text-muted">99/35 หมู่ 9 ตำบลละหาร อำเภอบางบัวทอง จังหวัดนนทบุรี 11110</p>
+                                        <p class="mb-0 text-muted">📞 082-4789197 | 🆔 เลขประจำตัวผู้เสียภาษี 0125560015546</p>
                                     </div>
-
                                 </div>
-                            </div><!-- end col -->
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
+                                    <img src="<?php echo e(route('qr.quotation', $quotation->id)); ?>" alt="QR Code" style="height:80px; border-radius: 8px;">
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                            </div>
                         </div>
-                        <!-- end row -->
-                        
-                        <div class="row mt-1">
-                            <div class="col-6">
-                                <h6 class="fs-14">ข้อมูลลูกค้า / Billing Address</h6>
-                                <div>
-                                    <a href="#" onclick="Livewire.dispatch('create-customer')">+ เพิ่มลูกค้า</a>
+                    </div>
 
+                    
+                    <div class="form-grid-date">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="ri-calendar-line me-2"></i>วันที่ออกใบเสนอราคา
+                            </label>
+                            <input type="date" class="form-control"
+                                   <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
+                                   wire:model="quote_date">
+                        </div>
+                        <div></div>
+                        <!--[if BLOCK]><![endif]--><?php if($quotation && $quote_status === 'wait'): ?>
+                            <div>
+                                <button type="button" class="btn btn-success"
+                                        wire:click="approveQuotation(<?php echo e($quotation->id); ?>)"
+                                        onclick="return confirm('ยืนยันการอนุมัติใบเสนอราคา เลขที่ <?php echo e($quotation->quote_number); ?> ?')">
+                                    <i class="ri-check-line me-2"></i>อนุมัติใบเสนอราคา
+                                </button>
+                            </div>
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                    </div>
+                </div>
+
+                
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="ri-user-heart-line"></i>ข้อมูลลูกค้าและการจัดส่ง
+                    </div>
+                    
+                    <div class="customer-section">
+                        <div class="customer-row">
+                            
+                            <div class="customer-column">
+                                <div class="d-flex align-items-center gap-2 mb-0">
+                                    <i class="ri-user-line" style="color: #667eea;"></i>
+                                    <h2 class="mb-0" style="font-weight: 600; color: #374151; font-size: 18px;">ข้อมูลลูกค้า</h2>
                                 </div>
-                                <div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">เลือกลูกค้า</label>
+                                    <div class="input-group-modern">
+                                        <select id="customerSelect" class="form-select"
+                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
+                                            <option value="">-- เลือกลูกค้า --</option>
+                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($c->id); ?>" <?php if($c->id == $customer_id): echo 'selected'; endif; ?>>
+                                                    <?php echo e($c->customer_name); ?>
 
-                                    <select id="customerSelect" class="form-control"
-                                        <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
-                                        <option value="">-- เลือกลูกค้า --</option>
-                                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <option value="<?php echo e($c->id); ?>" <?php if($c->id == $customer_id): echo 'selected'; endif; ?>>
-                                                <?php echo e($c->customer_name); ?></option>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                                    </select>
-
+                                                </option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                        </select>
+                                        <button type="button" class="btn btn-outline btn-icon" 
+                                                onclick="Livewire.dispatch('create-customer')"
+                                                title="เพิ่มลูกค้าใหม่">
+                                            <i class="ri-add-line"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <address class="mt-2">
+                                <div class="customer-info">
                                     <!--[if BLOCK]><![endif]--><?php if($selectedCustomer): ?>
-                                        <b> ชื่อร้านค้า/ชื่อลูกค้า :</b> <?php echo e($selectedCustomer->customer_contract_name); ?>
-
-                                        (<?php echo e($selectedCustomer->customer_phone); ?>)<br>
-                                        <b> ที่อยู่ :</b> <?php echo e($selectedCustomer->customer_address); ?>
-
-                                        <?php echo e($selectedCustomer->customer_district_name); ?>
-
-                                        <?php echo e($selectedCustomer->customer_amphur_name); ?>
-
-                                        <?php echo e($selectedCustomer->customer_province_name); ?>
-
-                                        <?php echo e($selectedCustomer->customer_zipcode); ?><br>
-                                        <b> เลขประจำตัวผู้เสียภาษี :</b> <?php echo e($selectedCustomer->customer_taxid); ?>
-
-                                        <!--[if BLOCK]><![endif]--><?php if($customer_id): ?>
-                                            <a href="javascript: void(0);"
-                                                onclick="Livewire.dispatch('edit-customer', { id: <?php echo e($customer_id); ?> })">
-                                                แก้ไข
-                                            </a>
-                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                    <?php else: ?>
-                                        <span class="text-muted">กรุณาเลือกลูกค้า</span>
-                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                </address>
-
-                            </div> <!-- end col-->
-
-
-                            <div class="col-6">
-                                <h6 class="fs-14">ข้อมูลจัดส่ง / Shipping Address</h6>
-                                <div>
-                                    <!--[if BLOCK]><![endif]--><?php if($selectedCustomer): ?>
-                                        <a href="#" wire:click.prevent="openDeliveryModal(<?php echo e($customer_id); ?>)">+
-                                            เพิ่มที่อยู่จัดส่ง</a>
-                                    <?php else: ?>
-                                        <span class="text-danger">กรุณาเลือกลูกค้า</span>
-                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                </div>
-
-
-
-                                <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
-                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?> class="form-select">
-                                    <option value="">-- เลือกที่อยู่จัดส่ง --</option>
-                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customerDelivery; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $delivery): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                         <option value="<?php echo e($delivery->id); ?>" <?php if($delivery->id == $selected_delivery_id): ?> selected <?php endif; ?>>
-                                            <?php echo e($delivery->delivery_contact_name); ?> - <?php echo e($delivery->delivery_phone); ?>
-
-                                        </option>
-                                       
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                                </select>
-
-
-
-                                <address class="mt-2">
-                                    <!--[if BLOCK]><![endif]--><?php if($selectedDelivery): ?>
-                                        <b>ชื่อผู้ติดต่อ</b> <?php echo e($selectedDelivery->delivery_contact_name); ?>
-
-                                        (<?php echo e($selectedDelivery->delivery_phone); ?>) </br>
-                                        <b> ที่อยู่ : </b><?php echo e($selectedDelivery->delivery_number); ?>
-
-                                        <?php echo e($selectedDelivery->delivery_district_name); ?>
-
-                                        <?php echo e($selectedDelivery->delivery_amphur_name); ?>
-
-                                        <?php echo e($selectedDelivery->delivery_province_name); ?>
-
-                                        <?php echo e($selectedDelivery->delivery_zipcode); ?>
-
-
-                                        <a href="javascript: void(0);"
-                                            onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: <?php echo e($delivery->id); ?> })">
-                                            แก้ไข
-                                        </a>
-                                    <?php else: ?>
-                                        <!--[if BLOCK]><![endif]--><?php if($selectedCustomer): ?>
-                                            <b> ชื่อร้านค้า/ชื่อลูกค้า : </b>
-                                            <?php echo e($selectedCustomer->customer_contract_name); ?>
-
-                                            (<?php echo e($selectedCustomer->customer_phone); ?>)<br>
-                                            <b> ที่อยู่ :</b> <?php echo e($selectedCustomer->customer_address); ?>
+                                        <div class="d-flex justify-content-between align-items-start mb-0">
+                                            <div class="customer-name"><?php echo e($selectedCustomer->customer_contract_name); ?></div>
+                                            <!--[if BLOCK]><![endif]--><?php if($customer_id): ?>
+                                                <button type="button" class="btn btn-sm btn-outline"
+                                                        onclick="Livewire.dispatch('edit-customer', { id: <?php echo e($customer_id); ?> })"
+                                                        title="แก้ไขข้อมูลลูกค้า">
+                                                    <i class="ri-edit-line"></i>
+                                                </button>
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                        </div>
+                                        <div class="customer-detail">📞 <?php echo e($selectedCustomer->customer_phone); ?></div>
+                                        <div class="customer-detail">📍 <?php echo e($selectedCustomer->customer_address); ?>
 
                                             <?php echo e($selectedCustomer->customer_district_name); ?>
 
@@ -188,290 +577,346 @@
 
                                             <?php echo e($selectedCustomer->customer_province_name); ?>
 
-                                            <?php echo e($selectedCustomer->customer_zipcode); ?><br>
-                                            <b> เลขประจำตัวผู้เสียภาษี :</b> <?php echo e($selectedCustomer->customer_taxid); ?>
+                                            <?php echo e($selectedCustomer->customer_zipcode); ?></div>
+                                        <div class="customer-detail">🏢 <?php echo e($selectedCustomer->customer_taxid); ?></div>
+                                    <?php else: ?>
+                                        <div class="empty-state">
+                                            <i class="ri-user-add-line"></i>
+                                            <p class="mb-0">กรุณาเลือกลูกค้า</p>
+                                        </div>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                </div>
+                            </div>
 
+                            
+                            <div class="customer-column">
+                                <div class="d-flex align-items-center gap-2 mb-0">
+                                    <i class="ri-truck-line" style="color: #667eea;"></i>
+                                    <h6 class="mb-0" style="font-weight: 600; color: #374151; font-size: 18px;">ที่อยู่จัดส่ง</h6>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">เลือกที่อยู่จัดส่ง</label>
+                                    <div class="input-group-modern">
+                                        <select wire:model.live="selected_delivery_id" class="form-select"
+                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
+                                            <option value="">-- เลือกที่อยู่จัดส่ง --</option>
+                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customerDelivery; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $delivery): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($delivery->id); ?>" <?php if($delivery->id == $selected_delivery_id): ?> selected <?php endif; ?>>
+                                                    <?php echo e($delivery->delivery_contact_name); ?> - <?php echo e($delivery->delivery_phone); ?>
+
+                                                </option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                        </select>
+                                        <!--[if BLOCK]><![endif]--><?php if($selectedCustomer): ?>
+                                            <button type="button" class="btn btn-outline btn-icon" 
+                                                    wire:click.prevent="openDeliveryModal(<?php echo e($customer_id); ?>)"
+                                                    title="เพิ่มที่อยู่จัดส่ง">
+                                                <i class="ri-add-line"></i>
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-outline btn-icon" disabled title="เลือกลูกค้าก่อน">
+                                                <i class="ri-add-line"></i>
+                                            </button>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    </div>
+                                </div>
+
+                                <div class="customer-info">
+                                    <!--[if BLOCK]><![endif]--><?php if($selectedDelivery): ?>
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="customer-name"><?php echo e($selectedDelivery->delivery_contact_name); ?></div>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                    onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: <?php echo e($selectedDelivery->id); ?> })"
+                                                    title="แก้ไขที่อยู่จัดส่ง">
+                                                <i class="ri-edit-line"></i>
+                                            </button>
+                                        </div>
+                                        <div class="customer-detail">📞 <?php echo e($selectedDelivery->delivery_phone); ?></div>
+                                        <div class="customer-detail">📍 <?php echo e($selectedDelivery->delivery_address); ?></div>
+                                    <?php else: ?>
+                                        <!--[if BLOCK]><![endif]--><?php if($selectedCustomer): ?>
+                                            <div class="warning-box">
+                                                <div class="customer-detail text-warning"><strong>⚠️ ใช้ที่อยู่ลูกค้า</strong></div>
+                                                <div class="customer-name"><?php echo e($selectedCustomer->customer_contract_name); ?></div>
+                                                <div class="customer-detail">📞 <?php echo e($selectedCustomer->customer_phone); ?></div>
+                                                <div class="customer-detail">📍 <?php echo e($selectedCustomer->customer_address); ?>
+
+                                                    <?php echo e($selectedCustomer->customer_district_name); ?>
+
+                                                    <?php echo e($selectedCustomer->customer_amphur_name); ?>
+
+                                                    <?php echo e($selectedCustomer->customer_province_name); ?>
+
+                                                    <?php echo e($selectedCustomer->customer_zipcode); ?></div>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="empty-state">
+                                                <i class="ri-truck-line"></i>
+                                                <p class="mb-0">เลือกลูกค้าเพื่อดูที่อยู่จัดส่ง</p>
+                                            </div>
                                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                </address>
-                            </div> <!-- end col-->
-                        </div>
-                        <!-- end row -->
-
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="table">
-                                    <table class="table table-sm table-centered table-hover table-borderless mb-0 mt-3">
-                                        <thead class="border-top border-bottom bg-light-subtle border-light">
-                                            <tr>
-                                                <th>#</th>
-                                                <th>รายการสินค้า</th>
-                                                <th>รายละเอียดสินค้า</th>
-                                                <th>Vat</th>
-                                                <th>ความยาว</th>
-                                                
-                                                
-                                                <th>จำนวน</th>
-                                                <th>หน่วยนับ</th>
-                                                <th>ราคา/หน่วย</th>
-                                                <th class="text-end">รวมทั้งสิ้น</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-
-
-
-                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <tr class="align-top" wire:key="row-<?php echo e($i); ?>">
-                                                    <td class="align-top"><?php echo e($i + 1); ?></td>
-                                                    <td style="min-width: 350px;">
-
-                                                        <div class="position-relative" wire:ignore.self>
-                                                            <input type="text"
-                                                                class="form-control form-control-sm mb-1 text-black"
-                                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
-
-                                                                placeholder="ค้นหาสินค้า..."
-                                                                wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.product_search"
-                                                                wire:keydown.escape="$set('items.<?php echo e($i); ?>.product_results', [])"
-                                                                wire:focus="$set('items.<?php echo e($i); ?>.product_results_visible', true)"
-                                                                wire:key="search-<?php echo e($i); ?>"
-                                                                 />
-
-                                                            <input type="text"
-                                                                wire:model="items.<?php echo e($i); ?>.product_note"
-                                                                class="form-control form-control-sm"
-                                                                placeholder="หมายเหตุ">
-
-                                                            <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_results_visible'])): ?>
-                                                                <ul class="list-group position-absolute shadow"
-                                                                    style="max-height: 400px; overflow-y: auto; z-index: 999999;">
-                                                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $item['product_results']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $result): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                                        <a href="javascript: void(0);">
-                                                                            <li class="list-group-item list-group-item-action"
-                                                                                wire:click="selectProduct(<?php echo e($i); ?>, <?php echo e($result->product_id); ?>, <?php echo \Illuminate\Support\Js::from($result->product_name)->toHtml() ?>)">
-                                                                                <?php echo e($result->product_name); ?>
-
-                                                                                (<?php echo e($result->product_size); ?>)
-                                                                                <?php echo e($result->productWireType?->value ?? '-'); ?>
-
-                                                                            </li>
-                                                                        </a>
-                                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                                                                </ul>
-                                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                                        </div>
-
-
-                                                        
-
-
-
-                                                    </td>
-
-
-                                                    <td style="min-width:200px;">
-                                                        <!--[if BLOCK]><![endif]--><?php if($item['product_calculation'] != 1): ?>
-                                                            <span>ความหนา:</span>
-                                                            <input type="number" step="0.01"
-                                                                wire:model.debounce.300ms="items.<?php echo e($i); ?>.product_calculation"
-                                                                class="form-control form-control-sm"
-                                                                style="display:inline-block; width:80px; vertical-align:middle;"
-                                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?> />
-                                                        <?php else: ?>
-                                                            <?php echo $item['product_detail'] ?? ''; ?>
-
-                                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                                    </td>
-                                                    <td>
-                                                        <input type="checkbox"
-                                                            wire:model.live="items.<?php echo e($i); ?>.product_vat"
-                                                            wire:change="refreshVat">
-
-                                                    </td>
-
-
-                                                    <td style="width: 110px">
-
-                                                        <input type="text"
-                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
-
-                                                            wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.product_length"
-                                                            class="form-control form-control-sm">
-                                                    </td>
-                                                    
-
-                                                    <td style="display: none">
-
-                                                        <input type="number"
-                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
-
-                                                            wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.product_weight"
-                                                            class="form-control form-control-sm" />
-                                                    </td>
-
-
-                                                    <td style="width: 110px">
-                                                        <input type="number" min="1"
-                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
-
-                                                            wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.quantity"
-                                                            class="form-control form-control-sm" />
-                                                    </td>
-
-                                                    <td style="width: 100px">
-                                                        <input type="text"
-                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
-
-                                                            wire:model.live="items.<?php echo e($i); ?>.product_unit"
-                                                            class="form-control form-control-sm"
-                                                            style="background-color: aliceblue" readonly>
-                                                    </td>
-                                                    <td style="width: 200px" class="text-end">
-
-                                                        <input type="number" min="0" step="0.01"
-                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
-
-                                                            wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.unit_price"
-                                                            class="form-control form-control-sm text-end" />
-
-                                                    </td>
-
-                                                    <td class="text-end">
-                                                        <?php echo e(number_format($item['total'], 2)); ?>
-
-                                                    </td>
-                                                    <td>
-                                                        <!--[if BLOCK]><![endif]--><?php if(!$quotation?->quote_status == 'success'): ?>
-                                                            <a href="javascript: void(0);"
-                                                                wire:click="removeItem(<?php echo e($i); ?>)"><i
-                                                                    class="mdi mdi-trash-can text-danger"
-                                                                    style="font-size: 25px"></i></a>
-                                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-
-                                        </tbody>
-                                    </table>
-                                    <button type="button" class="btn btn-outline-success btn-sm mt-2"
-                                        wire:click="addEmptyItem">
-                                        ➕ เพิ่มรายการสินค้า
-                                    </button>
-                                </div> <!-- end table-responsive-->
-                            </div> <!-- end col -->
-                        </div>
-                        <!-- end row -->
-
-
-
-                        <hr>
-
-                        <div class="form-check mt-2" style="z-index: -9999999999; ">
-                            <input class="form-check-input" type="checkbox" wire:model.live="quote_enable_vat"
-                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?> id="enableVatCheck">
-                            <label class="form-check-label" for="enableVatCheck">
-                                คำนวณ VAT 7%
-                            </label>
-                        </div>
-
-                        
-
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="clearfix pt-3">
-                                    <h6 class="text-muted fs-14">Notes:</h6>
-                                    <small>
-                                        <textarea wire:model="quote_note" class="form-control" cols="3" rows="3"
-                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>></textarea>
-                                    </small>
-
                                 </div>
-                            </div> <!-- end col -->
-                            <div class="col-sm-6">
-                                <div class="row">
-
-                                    <div class="col-md-10">
-                                        <p><b class="float-end">จำนวนเงินรวม:</b></p>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <span class="float-end"><?php echo e(number_format($quote_subtotal, 2)); ?></span>
-                                    </div>
-                                    <div class="col-md-10">
-                                        <p><b class="float-end">ส่วนลด:</b></p>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <span class="float-end">
-                                            <input type="number" wire:model.live.debounce.300ms="quote_discount"
-                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
-
-                                                class="form-control text-end form-control-sm" min="0"
-                                                step="0.01">
-                                        </span>
-                                    </div>
-                                    <div class="col-md-10">
-                                        <p><b class="float-end">ภาษีมูลค่าเพิ่ม:</b></p>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <span class="float-end"><?php echo e(number_format($quote_vat, 2)); ?></span>
-                                    </div>
-                                    <div class="col-md-10">
-                                        <p><b class="float-end">จำนวนเงินทั้งสิ้น:</b></p>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <span class="float-end"><?php echo e(number_format($quote_grand_total, 2)); ?></span>
-                                    </div>
-
-                                </div>
-
-                                <div class="clearfix"></div>
-                            </div> <!-- end col -->
-                        </div>
-                        <!-- end row-->
-
-
-                        <div class="d-print-none mt-4">
-                            <div class="text-center">
-                                <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
-                                    <a href="<?php echo e(route('quotations.print', $quotation_id)); ?>" class="btn btn-danger">
-                                        <i class="ri-printer-line"></i> Print
-                                    </a> &nbsp; &nbsp;
-                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
-
-
-                                <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
-                                    <button type="submit" class="btn btn-primary"
-                                        <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
-                                        บันทึก
-                                    </button>
-                                <?php else: ?>
-                                    <button type="submit" class="btn btn-info">
-                                        สร้างใบเสนอราคา
-                                    </button>
-                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
-
                             </div>
                         </div>
-                </form>
-                <!-- end buttons -->
+                    </div>
+                </div>
 
-            </div> <!-- end card-body-->
-        </div> <!-- end card -->
-    </div> <!-- end col-->
-</div>
+                
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="ri-shopping-cart-line"></i>รายการสินค้า
+                    </div>
+                    
+                    <div class="product-section">
+                        <table class="product-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">#</th>
+                                    <th style="width: 280px;">รายการสินค้า</th>
+                                    <th style="width: 120px;">รายละเอียด</th>
+                                    <th style="width: 60px;">VAT</th>
+                                    <th style="width: 90px;">ความยาว</th>
+                                    <th style="width: 80px;">จำนวน</th>
+                                    <th style="width: 70px;">หน่วย</th>
+                                    <th style="width: 100px;">ราคา/หน่วย</th>
+                                    <th style="width: 100px;">รวม</th>
+                                    <th style="width: 50px;">ลบ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <tr wire:key="row-<?php echo e($i); ?>">
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark"><?php echo e($i + 1); ?></span>
+                                        </td>
+                                        <td>
+                                            <div class="position-relative" wire:ignore.self>
+                                                <input type="text" class="form-control mb-2"
+                                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
+                                                    placeholder="🔍 ค้นหาสินค้า..."
+                                                    wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.product_search"
+                                                    wire:keydown.escape="$set('items.<?php echo e($i); ?>.product_results', [])"
+                                                    wire:focus="$set('items.<?php echo e($i); ?>.product_results_visible', true)"
+                                                    wire:key="search-<?php echo e($i); ?>" />
+                                                
+                                                <input type="text" class="form-control"
+                                                    wire:model="items.<?php echo e($i); ?>.product_note"
+                                                    placeholder="💬 หมายเหตุ">
 
+                                                <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_results_visible'])): ?>
+                                                    <div class="position-absolute w-100 mt-1" style="z-index: 1000;">
+                                                        <div class="list-group shadow rounded" style="max-height: 300px; overflow-y: auto;">
+                                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $item['product_results']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $result): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                <a href="javascript: void(0);" class="list-group-item list-group-item-action"
+                                                                    wire:click="selectProduct(<?php echo e($i); ?>, <?php echo e($result->product_id); ?>, <?php echo \Illuminate\Support\Js::from($result->product_name)->toHtml() ?>)">
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <div>
+                                                                            <h6 class="mb-1"><?php echo e($result->product_name); ?></h6>
+                                                                            <small class="text-muted"><?php echo e($result->product_size); ?> | <?php echo e($result->productWireType?->value ?? '-'); ?></small>
+                                                                        </div>
+                                                                        <i class="ri-arrow-right-s-line"></i>
+                                                                    </div>
+                                                                </a>
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <!--[if BLOCK]><![endif]--><?php if($item['product_calculation'] != 1): ?>
+                                                <input type="number" step="0.01" class="form-control"
+                                                    wire:model.debounce.300ms="items.<?php echo e($i); ?>.product_calculation"
+                                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
+                                                    placeholder="ความหนา" />
+                                            <?php else: ?>
+                                                <div class="text-muted small text-center">
+                                                    <?php echo $item['product_detail'] ?? '-'; ?>
 
+                                                </div>
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="form-check d-flex justify-content-center">
+                                                <input class="form-check-input" type="checkbox"
+                                                    wire:model.live="items.<?php echo e($i); ?>.product_vat"
+                                                    wire:change="refreshVat">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control text-center"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
-<!-- Spinner จะแสดงอัตโนมัติขณะ Livewire ทำงาน -->
+                                                wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.product_length"
+                                                placeholder="ยาว">
+                                        </td>
+                                        <td>
+                                            <input type="number" min="1" class="form-control text-center"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
+                                                wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.quantity"
+                                                placeholder="จำนวน" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control text-center"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
+                                                wire:model.live="items.<?php echo e($i); ?>.product_unit"
+                                                readonly style="background: #f8fafc; font-size: 12px;">
+                                        </td>
+                                        <td>
+                                            <input type="number" min="0" step="0.01" class="form-control text-end"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
-<?php
+                                                wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.unit_price"
+                                                placeholder="0.00" />
+                                        </td>
+                                        <td class="text-end">
+                                            <strong style="color: #059669; font-size: 15px;">
+                                                ฿<?php echo e(number_format($item['total'], 2)); ?>
+
+                                            </strong>
+                                        </td>
+                                        <td class="text-center">
+                                            <!--[if BLOCK]><![endif]--><?php if(!$quotation?->quote_status == 'success'): ?>
+                                                <button type="button" class="btn btn-sm btn-outline" 
+                                                    style="color: #ef4444; border-color: #fecaca;"
+                                                    wire:click="removeItem(<?php echo e($i); ?>)"
+                                                    title="ลบรายการ">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                        </td>
+                                    </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                            </tbody>
+                        </table>
+
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-primary"
+                                wire:click="addEmptyItem">
+                                <i class="ri-add-line me-2"></i>เพิ่มรายการสินค้า
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="ri-calculator-line"></i>สรุปยอดเงินและหมายเหตุ
+                    </div>
+                    
+                    <div class="summary-section">
+                        <div class="notes-card">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="ri-sticky-note-line" style="color: #667eea;"></i>
+                                <h6 class="mb-0" style="font-weight: 600; color: #374151; font-size: 15px;">หมายเหตุและข้อมูลเพิ่มเติม</h6>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check mb-2" style="padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                    <input class="form-check-input" type="checkbox" 
+                                        wire:model.live="quote_enable_vat"
+                                        <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?> 
+                                        id="enableVatCheck">
+                                    <label class="form-check-label" for="enableVatCheck" style="font-weight: 600; font-size: 14px;">
+                                        <i class="ri-percent-line me-2"></i>คำนวณ VAT 7%
+                                    </label>
+                                </div>
+                                
+                                <label class="form-label">
+                                    <i class="ri-file-text-line me-2"></i>หมายเหตุ
+                                </label>
+                                <textarea wire:model="quote_note" 
+                                    class="form-control" 
+                                    rows="4" 
+                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
+                                    placeholder="💬 หมายเหตุเพิ่มเติม เช่น เงื่อนไขการชำระเงิน, การจัดส่ง, การรับประกัน..."
+                                    style="resize: vertical; font-size: 14px;"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="summary-box">
+                            <div class="text-center mb-2">
+                                <div class="d-flex align-items-center justify-content-center gap-2">
+                                    <i class="ri-money-dollar-circle-line" style="color: #667eea;"></i>
+                                    <h6 style="font-weight: 700; color: #1e293b; margin: 0; font-size: 15px;">สรุปยอดเงิน</h6>
+                                </div>
+                            </div>
+                                
+                                <div class="summary-row">
+                                    <span><i class="ri-shopping-bag-line me-2"></i>จำนวนเงินรวม:</span>
+                                    <span style="font-weight: 600;">฿<?php echo e(number_format($quote_subtotal, 2)); ?></span>
+                                </div>
+                                
+                                <div class="summary-row">
+                                    <span><i class="ri-coupon-line me-2"></i>ส่วนลด:</span>
+                                    <div style="width: 130px;">
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" 
+                                                wire:model.live.debounce.300ms="quote_discount"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
+                                                class="form-control text-end" 
+                                                min="0" 
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                style="font-size: 13px; padding: 6px 8px;">
+                                            <span class="input-group-text" style="font-size: 13px;">บาท</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="summary-row">
+                                    <span><i class="ri-percent-line me-2"></i>ภาษีมูลค่าเพิ่ม (7%):</span>
+                                    <span style="font-weight: 600;">฿<?php echo e(number_format($quote_vat, 2)); ?></span>
+                                </div>
+                                
+                                <div class="summary-row summary-total">
+                                    <span><i class="ri-money-dollar-box-line me-2"></i>จำนวนเงินทั้งสิ้น:</span>
+                                    <span>฿<?php echo e(number_format($quote_grand_total, 2)); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            
+            <div class="action-buttons">
+                <div class="d-flex justify-content-center gap-3">
+                    <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
+                        <a href="<?php echo e(route('quotations.print', $quotation_id)); ?>" 
+                           class="btn btn-outline">
+                            <i class="ri-printer-line me-2"></i>พิมพ์ใบเสนอราคา
+                        </a>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+                    <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
+                        <button type="submit" 
+                                class="btn btn-primary"
+                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
+                                form="quotation-form">
+                            <i class="ri-save-line me-2"></i>บันทึกการแก้ไข
+                        </button>
+                    <?php else: ?>
+                        <button type="submit" class="btn btn-primary" form="quotation-form">
+                            <i class="ri-add-circle-line me-2"></i>สร้างใบเสนอราคา
+                        </button>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                </div>
+            </div>
+        </div>
+        
+        
+        <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -487,7 +932,7 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-<?php
+        <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -504,130 +949,71 @@ unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
 
-
-<div>
-
-</div>
-
-
-<script>
-    document.addEventListener("livewire:updated", () => {
-        console.log("Livewire updated spinner block");
-    });
-</script>
-
-
-<script>
-    document.addEventListener('open-delivery-modal', () => {
-        const modal = new bootstrap.Modal(document.getElementById('bs-example-modal-lg'));
-        modal.show();
-    });
-    document.addEventListener('close-delivery-modal', () => {
-        const modalEl = document.getElementById('bs-example-modal-lg');
-        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-        modal.hide();
-
-        // เคลียร์ backdrop และ class ที่ค้าง
-        setTimeout(() => {
-            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-            document.body.classList.remove('modal-open');
-            document.body.style = '';
-        }, 300); // รอ animation จบก่อนค่อยเคลียร์
-    });
-</script>
-
-
-
-
-
-
-
-
-
-<script>
-    document.addEventListener('livewire:update', () => {
-        $('#customerSelect').select2();
-        $('.select2').select2();
-
-    });
-</script>
-
-
-<script>
-    document.addEventListener('delivery-created-success', function(e) {
-        const detail = e.detail?.[0] ?? {};
-        const deliveryId = parseInt(detail.deliveryId);
-
-        const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-
-        setTimeout(() => {
-            const $dropdown = $("select[name='selected_delivery_id']");
-            const found = $dropdown.find(`option[value='${deliveryId}']`).length > 0;
-
-            console.log('🔍 Looking for delivery ID:', deliveryId, 'Found:', found);
-
-            if (found) {
-                console.log('✅ Selecting delivery...');
-                $dropdown.val(deliveryId).trigger('change'); // or .trigger('change.select2') if Select2
-
-            } else {
-                console.warn('❌ deliveryId not found in dropdown yet');
-            }
-        }, 500);
-    });
-</script>
-
-<script>
-    document.addEventListener('customer-created-success', function(e) {
-        const detail = e.detail?.[0] ?? {};
-        const customerId = parseInt(detail.customerId);
-        console.log('✅ Parsed ID:', customerId);
-
-        const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-
-        // ✅ เรียก refreshCustomers → รอ render เสร็จ → ค่อย select
-        livewireComponent.call('refreshCustomers').then(() => {
-            // ✅ รอ 300ms เพื่อให้ Blade render dropdown ใหม่เสร็จ
-            setTimeout(() => {
-                // ✅ ตรวจว่าลูกค้าใหม่ปรากฏใน dropdown แล้วหรือยัง
-                const found = $(`#customerSelect option[value="${customerId}"]`).length > 0;
-
-                if (found) {
-                    console.log('✅ New customer found in <select>. Now selecting...');
-                    $('#customerSelect').val(customerId).trigger('change');
-                    livewireComponent.call('setCustomerId', customerId);
-                } else {
-                    console.warn('❌ New customer not found in <select> yet.');
-                }
-            }, 300); // เพิ่ม delay ให้แน่ใจว่า Blade render เสร็จ
+        
+        <script>
+        document.addEventListener('open-delivery-modal', () => {
+            const modal = new bootstrap.Modal(document.getElementById('bs-example-modal-lg'));
+            modal.show();
         });
-    });
-</script>
-
-
-<script>
-    document.addEventListener('open-customer-modal', () => {
-        new bootstrap.Modal(document.getElementById('customerModal')).show();
-    });
-    document.addEventListener('close-customer-modal', () => {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('customerModal'));
-        if (modal) {
+        
+        document.addEventListener('close-delivery-modal', () => {
+            const modalEl = document.getElementById('bs-example-modal-lg');
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
             modal.hide();
-        }
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let select = $('#customerSelect');
-        select.select2();
-
-        select.on('change', function() {
-            let selectedId = $(this).val();
-            const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute(
-                'wire:id'));
-            livewireComponent.call('setCustomerId', selectedId);
+            setTimeout(() => {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style = '';
+            }, 300);
         });
-    });
-</script>
-<?php /**PATH C:\laragon\www\charoenmun\resources\views/livewire/quotations/quotations-form.blade.php ENDPATH**/ ?>
+
+        document.addEventListener('open-customer-modal', () => {
+            new bootstrap.Modal(document.getElementById('customerModal')).show();
+        });
+        
+        document.addEventListener('close-customer-modal', () => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('customerModal'));
+            if (modal) modal.hide();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            let select = $('#customerSelect');
+            select.select2();
+            select.on('change', function() {
+                let selectedId = $(this).val();
+                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                livewireComponent.call('setCustomerId', selectedId);
+            });
+        });
+
+        document.addEventListener('customer-created-success', function(e) {
+            const detail = e.detail?.[0] ?? {};
+            const customerId = parseInt(detail.customerId);
+            const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+            
+            livewireComponent.call('refreshCustomers').then(() => {
+                setTimeout(() => {
+                    const found = $(`#customerSelect option[value="${customerId}"]`).length > 0;
+                    if (found) {
+                        $('#customerSelect').val(customerId).trigger('change');
+                        livewireComponent.call('setCustomerId', customerId);
+                    }
+                }, 300);
+            });
+        });
+
+        document.addEventListener('delivery-created-success', function(e) {
+            const detail = e.detail?.[0] ?? {};
+            const deliveryId = parseInt(detail.deliveryId);
+            const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+            
+            setTimeout(() => {
+                const $dropdown = $("select[name='selected_delivery_id']");
+                const found = $dropdown.find(`option[value='${deliveryId}']`).length > 0;
+                if (found) {
+                    $dropdown.val(deliveryId).trigger('change');
+                }
+            }, 500);
+        });
+    </script>
+</div><?php /**PATH C:\laragon\www\charoenmun\resources\views/livewire/quotations/quotations-form.blade.php ENDPATH**/ ?>
