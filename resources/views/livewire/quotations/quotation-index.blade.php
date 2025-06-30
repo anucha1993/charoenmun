@@ -620,7 +620,7 @@
                                 </td>
                                 <td>
                                     <div class="seller-info">
-                                        <div class="seller-avatar"></div>
+                                      
                                         <div>
                                             <div style="font-weight: 600; color: #111827;">{{ $q->sale->name }}</div>
                                             <div style="font-size: 11px; color: #6b7280;">Sale</div>
