@@ -5,7 +5,7 @@
         $totalConfirmed = $order->payments->where('status', 'ชำระเงินแล้ว')->sum('amount');
         $totalWaiting = $order->payments->where('status', 'รอยืนยันยอด')->sum('amount');
     ?>
-    <div class="container py-3">
+    <div class=" py-3">
         <div class="card shadow-lg border-0"
             style="border-radius: 18px; background: linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%);">
             <div class="card-header"
@@ -92,12 +92,16 @@
                                 <span><b>ชำระเงิน:</b> <?php echo payment_status_badge($order->payment_status); ?></span>
                             </div>
                             <div class="mb-2 d-flex flex-wrap align-items-center gap-2">
-                                <span><b>VAT:</b> <span class="text-primary"><?php echo e(number_format($order->order_vat, 2)); ?></span> บาท
+                                <span><b>ยอดรวมก่อนหักส่วนลด:</b> <span class="text-dark"><?php echo e(number_format($order_subtotal_before_discount, 2)); ?></span> บาท
                                 </span>
-                                <span><b>ส่วนลด:</b> <span class="text-danger"><?php echo e(number_format($order->order_discount, 2)); ?></span>
+                                <span><b>ส่วนลด:</b> <span class="text-danger"><?php echo e(number_format($order_discount, 2)); ?></span>
                                     บาท</span>
-                                <span style="font-weight:700; color:#059669;"><b>สุทธิ:</b> <span
-                                        class="text-success"><?php echo e(number_format($order->order_grand_total, 2)); ?></span> บาท</span>
+                                <span><b>ยอดสุทธิหลังหักส่วนลด:</b> <span class="text-primary"><?php echo e(number_format($order_subtotal, 2)); ?></span> บาท</span>
+                                <span><b>ภาษีมูลค่าเพิ่ม (VAT 7%):</b> <span class="text-primary"><?php echo e(number_format($order_vat, 2)); ?></span> บาท
+                                </span>
+                                
+                                <span style="font-weight:700; color:#059669;"><b>จำนวนเงินทั้งสิ้น:</b> <span
+                                        class="text-success"><?php echo e(number_format($order_grand_total, 2)); ?></span> บาท</span>
                             </div>
 
 
@@ -233,6 +237,8 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                         <th>จำนวนสั่ง</th>
                                         <th>จำนวนที่จัดส่งแล้ว</th>
                                         <th>หน่วย</th>
+                                        <th>ความหนา</th>
+                                        <th>ความยาว:เมตร</th>
                                         <th>ราคา/หน่วย</th>
                                         <th>VAT</th>
                                         <th>เหตุผล</th>
@@ -251,6 +257,8 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                             <td><?php echo e($item->quantity); ?></td>
                                             <td><?php echo e($item->delivered_qty ?? ($deliveredQtyMap[$item->id] ?? 0)); ?></td>
                                             <td><?php echo e($item->product_unit); ?></td>
+                                            <td><?php echo e($item->product_calculation !== 1 ? $item->product_calculation : 0); ?></td>
+                                            <td><?php echo e($item->product_length); ?></td>
                                             <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
                                             <td class="text-center">
                                                 <!--[if BLOCK]><![endif]--><?php if($item->product_vat): ?>
@@ -268,8 +276,23 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                     <span class="badge bg-light text-dark">-</span>
                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             </td>
-                                            <td><?php echo e($item->added_note); ?></td>
-                                            <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
+                                            <td><?php echo e($item->added_note ?? '-'); ?></td>
+                                            <td class="text-end">
+                                                <?php
+                                                    $qty = (float)($item->quantity ?? 0);
+                                                    $unit = (float)($item->unit_price ?? 0);
+                                                    $calc = (isset($item->product_calculation) && $item->product_calculation !== '' && $item->product_calculation !== null) ? (float)$item->product_calculation : 1;
+                                                    $len = (isset($item->product_length) && $item->product_length !== '' && $item->product_length !== null) ? (float)$item->product_length : 1;
+                                                    // ใช้การคำนวณแบบเดิมสำหรับ existing items
+                                                    $factor = ($calc != 1) ? $calc : $len;
+                                                    if (!$factor || $factor <= 0) $factor = 1;
+                                                    $rowSubtotal = $qty * $unit * $factor;
+                                                    $rowVat = (!empty($item->product_vat)) ? round($rowSubtotal * 0.07, 2) : 0;
+                                                    $rowTotal = $rowSubtotal + $rowVat;
+                                                ?>
+                                                <div><?php echo e(number_format($rowSubtotal, 2)); ?></div>
+                                               
+                                            </td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-danger btn-sm"
                                                     wire:click="deleteOrderItem(<?php echo e($item->id); ?>)"
@@ -384,13 +407,15 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                     </td>
                                                     <td><input type="text"
                                                             wire:model="newItems.<?php echo e($idx); ?>.added_note"
-                                                            class="form-control form-control-sm"></td>
+                                                            class="form-control form-control-sm" placeholder="หมายเหตุ"></td>
                                                     <td class="text-end align-middle">
                                                         <?php
                                                             $qty = (float)($item['quantity'] ?? 0);
                                                             $unit = (float)($item['unit_price'] ?? 0);
                                                             $calc = (isset($item['product_calculation']) && $item['product_calculation'] !== '' && $item['product_calculation'] !== null) ? (float)$item['product_calculation'] : 1;
-                                                            $total = $qty * $unit * $calc;
+                                                            $len = (isset($item['product_length']) && $item['product_length'] !== '' && $item['product_length'] !== null) ? (float)$item['product_length'] : 1;
+                                                            // สูตรที่ถูกต้อง: ราคา/หน่วย × ความหนา × ความยาว × จำนวน
+                                                            $total = $unit * $calc * $len * $qty;
                                                         ?>
                                                         <span><?php echo e(number_format($total, 2)); ?></span>
                                                     </td>

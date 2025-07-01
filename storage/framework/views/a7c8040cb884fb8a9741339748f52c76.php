@@ -973,40 +973,41 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                     <h6 style="font-weight: 700; color: #1e293b; margin: 0; font-size: 15px;">สรุปยอดเงิน</h6>
                                 </div>
                             </div>
-                                
-                                <div class="summary-row">
-                                    <span><i class="ri-shopping-bag-line me-2"></i>จำนวนเงินรวม:</span>
-                                    <span style="font-weight: 600;">฿<?php echo e(number_format($quote_subtotal, 2)); ?></span>
-                                </div>
-                                
-                                <div class="summary-row">
-                                    <span><i class="ri-coupon-line me-2"></i>ส่วนลด:</span>
-                                    <div style="width: 130px;">
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" 
-                                                wire:model.live.debounce.300ms="quote_discount"
-                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+                            <div class="summary-row">
+                                <span><i class="ri-shopping-bag-line me-2"></i>ยอดรวมก่อนหักส่วนลด:</span>
+                                <span style="font-weight: 600; color: #888;">฿<?php echo e(number_format($quote_subtotal_before_discount, 2)); ?></span>
+                            </div>
+                            <div class="summary-row">
+                                <span><i class="ri-coupon-line me-2"></i>ส่วนลด:</span>
+                                <div style="width: 130px;">
+                                    <div class="input-group input-group-sm">
+                                        <input type="number"
+                                            wire:model.live.debounce.300ms="quote_discount"
+                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
 
-                                                class="form-control text-end" 
-                                                min="0" 
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                style="font-size: 13px; padding: 6px 8px;">
-                                            <span class="input-group-text" style="font-size: 13px;">บาท</span>
-                                        </div>
+                                            class="form-control text-end"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            style="font-size: 13px; padding: 6px 8px;">
+                                        <span class="input-group-text" style="font-size: 13px;">บาท</span>
                                     </div>
                                 </div>
-                                
-                                <div class="summary-row">
-                                    <span><i class="ri-percent-line me-2"></i>ภาษีมูลค่าเพิ่ม (7%):</span>
-                                    <span style="font-weight: 600;">฿<?php echo e(number_format($quote_vat, 2)); ?></span>
-                                </div>
-                                
-                                <div class="summary-row summary-total">
-                                    <span><i class="ri-money-dollar-box-line me-2"></i>จำนวนเงินทั้งสิ้น:</span>
-                                    <span>฿<?php echo e(number_format($quote_grand_total, 2)); ?></span>
-                                </div>
                             </div>
+                            <div class="summary-row">
+                                <span><i class="ri-shopping-bag-line me-2"></i>ยอดสุทธิหลังหักส่วนลด:</span>
+                                <span style="font-weight: 600; color: #059669;">฿<?php echo e(number_format($quote_subtotal_before_discount - $quote_discount, 2)); ?></span>
+                            </div>
+                            <div class="summary-row">
+                                <span><i class="ri-percent-line me-2"></i>ภาษีมูลค่าเพิ่ม (7%):</span>
+                                <span style="font-weight: 600;">฿<?php echo e(number_format($quote_vat, 2)); ?></span>
+                            </div>
+                            <div class="summary-row summary-total">
+                                <span><i class="ri-money-dollar-box-line me-2"></i>จำนวนเงินทั้งสิ้น:</span>
+                                <span>฿<?php echo e(number_format(($quote_subtotal_before_discount - $quote_discount) + $quote_vat, 2)); ?></span>
+                            </div>
+
+                           
                         </div>
                     </div>
                 </div>

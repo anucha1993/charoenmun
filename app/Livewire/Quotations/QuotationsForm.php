@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\products\ProductModel;
 use App\Models\Orders\OrderItemsModel;
 use App\Models\customers\customerModel;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Quotations\QuotationModel;
 use App\Models\customers\deliveryAddressModel;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Livewire Component : สร้าง / แก้ไข ใบเสนอราคา
@@ -63,6 +63,8 @@ class QuotationsForm extends Component
     /* ตัวแปรเก็บโมเดล (ถ้ามี) */
     public ?QuotationModel $quotation = null;
 
+    public float $quote_subtotal_before_discount = 0;
+
     public function mount(?int $id = null): void
     {
         /* default: วันนี้ */
@@ -91,6 +93,7 @@ class QuotationsForm extends Component
 
         $this->customers = customerModel::all();
         $this->customerDelivery = $this->customer_id ? deliveryAddressModel::where('customer_id', $this->customer_id)->get() : collect();
+        $this->calculateTotals(); // <-- เพิ่มตรงนี้
     }
 
     /* เติม state จากโมเดล (ใช้ได้ทั้ง mount & refresh) */
@@ -139,7 +142,7 @@ class QuotationsForm extends Component
             })
             ->toArray();
 
-        $this->calculateTotals();
+        $this->calculateTotals(); // <-- เพิ่มตรงนี้
     }
 
     /* ─────────────────── Validation ─────────────────── */
@@ -204,6 +207,10 @@ class QuotationsForm extends Component
 
     public function updated($name, $value)
     {
+        // ตรวจสอบ field ว่าเป็น product_search
+        if (preg_match('/items\.(\d+)\.(product_search|unit_price|quantity|product_calculation|product_length|product_vat)/', $name, $matches)) {
+            $this->calculateTotals();
+        }
         // ตรวจสอบ field ว่าเป็น product_search
         if (preg_match('/items\.(\d+)\.product_search/', $name, $matches)) {
             $index = $matches[1];
@@ -483,7 +490,6 @@ class QuotationsForm extends Component
         $subtotal = collect($this->items)->sum(function ($i) {
             $q = (float) ($i['quantity'] ?? 0);
             $up = (float) ($i['unit_price'] ?? 0);
-            // เลือกใช้ product_calculation หรือ product_length ตาม logic
             if (isset($i['product_calculation']) && $i['product_calculation'] != 1) {
                 $factor = (float) ($i['product_calculation'] ?? 1);
             } else {
@@ -491,6 +497,7 @@ class QuotationsForm extends Component
             }
             return $q * $up * $factor;
         });
+        $this->quote_subtotal_before_discount = $subtotal;
 
         // 2) หักส่วนลด
         $netSubtotal = max(0, $subtotal - $this->quote_discount);
@@ -504,9 +511,9 @@ class QuotationsForm extends Component
         }
 
         // 4) คำนวณยอดที่นำมาคิด VAT (เฉพาะรายการที่ product_vat == true)
-        $vatableBase = collect($this->items)
+        $vatItems = collect($this->items)
             ->filter(fn($i) => !empty($i['product_vat']))
-            ->sum(function ($i) {
+            ->map(function ($i) {
                 $q = (float) ($i['quantity'] ?? 0);
                 $up = (float) ($i['unit_price'] ?? 0);
                 if (isset($i['product_calculation']) && $i['product_calculation'] != 1) {
@@ -516,20 +523,31 @@ class QuotationsForm extends Component
                 }
                 return $q * $up * $factor;
             });
+        $vatableBase = $vatItems->sum();
+
+        // 4.1 เฉลี่ยส่วนลดไปยังสินค้าที่มี VAT ตามสัดส่วน
+        $vatDiscount = 0;
+        $vatableBaseAfterDiscount = $vatableBase;
+        if ($subtotal > 0 && $this->quote_discount > 0 && $vatableBase > 0) {
+            // ใช้ round() เปรียบเทียบ float เพื่อความแม่นยำ
+            if (round($vatableBase, 2) == round($subtotal, 2)) {
+                $vatDiscount = $this->quote_discount;
+                $vatableBaseAfterDiscount = max(0, $subtotal - $this->quote_discount);
+            } else {
+                $vatDiscount = $this->quote_discount * ($vatableBase / $subtotal);
+                $vatableBaseAfterDiscount = max(0, $vatableBase - $vatDiscount);
+            }
+        }
 
         // 5) ถ้า VAT รวมในราคา (VAT-In)
         if ($this->quote_vat_included) {
-            // แยก VAT ออกจากส่วนที่มีกำหนด VAT
-            $netVatable = round($vatableBase / 1.07, 2);
-            $vatAmount = round($vatableBase - $netVatable, 2);
-
-            // ยอดรวมสินค้าต้องหักส่วนลดแล้ว และหัก VAT-Included ออก
+            $netVatable = round($vatableBaseAfterDiscount / 1.07, 2);
+            $vatAmount = round($vatableBaseAfterDiscount - $netVatable, 2);
             $this->quote_subtotal = round($netSubtotal - $vatAmount, 2);
             $this->quote_vat = $vatAmount;
             $this->quote_grand_total = round($this->quote_subtotal + $vatAmount, 2);
         } else {
-            // VAT แยกนอก
-            $vatAmount = round($vatableBase * 0.07, 2);
+            $vatAmount = round($vatableBaseAfterDiscount * 0.07, 2);
             $this->quote_subtotal = $netSubtotal;
             $this->quote_vat = $vatAmount;
             $this->quote_grand_total = round($netSubtotal + $vatAmount, 2);
@@ -539,22 +557,21 @@ class QuotationsForm extends Component
     /* เรียกเมื่อผู้ใช้เปลี่ยนส่วนลด */
     public function updatedQuoteDiscount()
     {
-        // ✔ ใช้ได้
         $this->calculateTotals();
     }
 
     /* เปิด-ปิด “คำนวณ VAT 7 %” */
     public function updatedQuoteEnableVat($value): void
     {
-        // ← ชื่อ method ต้องมี Quote
-        $this->refreshVat(); // คิดยอดครบในนี้ตัวเดียว
+        $this->refreshVat();
+        $this->calculateTotals();
     }
 
     /* เปิด-ปิด “VAT รวมในราคา” */
     public function updatedQuoteVatIncluded($value): void
     {
-        // ← ชื่อใหม่ (Quote-Vat-Included)
         $this->refreshVat();
+        $this->calculateTotals();
     }
 
     /* ถูกเรียกจาก checkbox แต่ละแถว   wire:change="refreshVat" */
