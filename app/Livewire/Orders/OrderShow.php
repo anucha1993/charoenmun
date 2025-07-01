@@ -25,6 +25,13 @@ class OrderShow extends Component
     public $addRowReason = null;
     public $addRowNote = '';
 
+    public $order_subtotal = 0;
+    public $order_vat = 0;
+    public $order_discount = 0;
+    public $order_grand_total = 0;
+    public $order_enable_vat = false;
+    public $order_vat_included = false;
+
     public function mount(OrderModel $order)
     {
         $this->order = $order->load(['customer', 'deliveryAddress', 'items', 'deliveries.deliveryItems', 'payments']);
@@ -36,6 +43,15 @@ class OrderShow extends Component
             ->groupBy('order_items.id')
             ->pluck('delivered', 'order_item_id')
             ->toArray();
+        // ดึงค่าตั้งต้นจาก order model
+        $this->order_subtotal = $order->order_subtotal ?? 0;
+        $this->order_vat = $order->order_vat ?? 0;
+        $this->order_discount = $order->order_discount ?? 0;
+        $this->order_grand_total = $order->order_grand_total ?? 0;
+        $this->order_enable_vat = $order->order_enable_vat ?? false;
+        $this->order_vat_included = $order->order_vat_included ?? false;
+        // คำนวณยอดรวมล่าสุดจาก items ปัจจุบัน
+        $this->calculateTotals();
     }
     public function render()
     {
@@ -197,9 +213,58 @@ class OrderShow extends Component
         $this->newItems[$index]['product_type'] = $product ? $product->product_type : '';
         $this->newItems[$index]['product_unit'] = $product ? $product->product_unit : '';
         $this->newItems[$index]['product_detail'] = $product ? ($product->product_size ?? $product->product_note ?? '') : '';
+        $this->newItems[$index]['product_calculation'] = $product ? $product->product_calculation : null;
         $this->newItems[$index]['selected_from_dropdown'] = true;
         $this->newItems[$index]['product_results'] = [];
         $this->newItems[$index]['product_results_visible'] = false;
+    }
+
+    public function calculateTotals()
+    {
+        // 1) คำนวณยอดรวมก่อน VAT (ทั้งสินค้ารวมกัน)
+        $subtotal = collect($this->order->items)->sum(function ($i) {
+            $q = (float) ($i->quantity ?? 0);
+            $up = (float) ($i->unit_price ?? 0);
+            $len = max(1, (float) ($i->product_length ?? 1));
+            $th = max(1, (float) ($i->product_calculation ?? 1));
+            return $q * $up * $len * $th;
+        });
+
+        // 2) หักส่วนลด (ถ้ามี)
+        $netSubtotal = max(0, $subtotal - ($this->order->order_discount ?? 0));
+
+        // 3) ถ้าไม่เปิด VAT → เสร็จ
+        if (!($this->order->order_enable_vat ?? false)) {
+            $this->order_subtotal = $netSubtotal;
+            $this->order_vat = 0;
+            $this->order_grand_total = $netSubtotal;
+            return;
+        }
+
+        // 4) คำนวณยอดที่นำมาคิด VAT (เฉพาะรายการที่ product_vat == true)
+        $vatableBase = collect($this->order->items)
+            ->filter(fn($i) => !empty($i->product_vat))
+            ->sum(function ($i) {
+                $q = (float) ($i->quantity ?? 0);
+                $up = (float) ($i->unit_price ?? 0);
+                $len = max(1, (float) ($i->product_length ?? 1));
+                $th = max(1, (float) ($i->product_calculation ?? 1));
+                return $q * $up * $len * $th;
+            });
+
+        // 5) ถ้า VAT รวมในราคา (VAT-In)
+        if ($this->order->order_vat_included ?? false) {
+            $netVatable = round($vatableBase / 1.07, 2);
+            $vatAmount = round($vatableBase - $netVatable, 2);
+            $this->order_subtotal = round($netSubtotal - $vatAmount, 2);
+            $this->order_vat = $vatAmount;
+            $this->order_grand_total = round($this->order_subtotal + $vatAmount, 2);
+        } else {
+            $vatAmount = round($vatableBase * 0.07, 2);
+            $this->order_subtotal = $netSubtotal;
+            $this->order_vat = $vatAmount;
+            $this->order_grand_total = round($netSubtotal + $vatAmount, 2);
+        }
     }
 
     public function saveNewItems()
@@ -224,6 +289,52 @@ class OrderShow extends Component
         }
         $this->newItems = [];
         $this->order = $this->order->fresh(['items']);
+        $this->calculateTotals(); // <-- เพิ่ม trigger คำนวณยอดรวม
         session()->flash('success', 'เพิ่มสินค้าใหม่เรียบร้อย');
+    }
+
+    public function deleteOrderItem($itemId)
+    {
+        $item = \App\Models\Orders\OrderItemsModel::find($itemId);
+        if ($item && $item->order_id == $this->order->id) {
+            $item->delete();
+            // refresh order items
+            $this->order = $this->order->fresh(['items']);
+            $this->calculateTotals(); // <-- เพิ่ม trigger คำนวณยอดรวม
+            // refresh deliveredQtyMap
+            $this->deliveredQtyMap = \App\Models\Orders\OrderDeliveryItems::query()
+                ->join('order_items', 'order_delivery_items.order_item_id', '=', 'order_items.id')
+                ->where('order_items.order_id', $this->order->id)
+                ->select('order_items.id as order_item_id', \DB::raw('SUM(order_delivery_items.quantity) as delivered'))
+                ->groupBy('order_items.id')
+                ->pluck('delivered', 'order_item_id')
+                ->toArray();
+            session()->flash('success', 'ลบรายการสินค้าเรียบร้อย');
+        } else {
+            session()->flash('error', 'ไม่พบรายการสินค้านี้');
+        }
+    }
+
+    public function deleteDelivery($deliveryId)
+    {
+        $delivery = \App\Models\Orders\OrderDeliverysModel::find($deliveryId);
+        if ($delivery && $delivery->order_id == $this->order->id) {
+            // ลบรายการสินค้าที่เกี่ยวข้องกับรอบจัดส่งนี้ก่อน (ถ้ามี)
+            \App\Models\Orders\OrderDeliveryItems::where('order_delivery_id', $deliveryId)->delete();
+            $delivery->delete();
+            // refresh order deliveries
+            $this->order = $this->order->fresh(['deliveries.deliveryItems']);
+            // refresh deliveredQtyMap
+            $this->deliveredQtyMap = \App\Models\Orders\OrderDeliveryItems::query()
+                ->join('order_items', 'order_delivery_items.order_item_id', '=', 'order_items.id')
+                ->where('order_items.order_id', $this->order->id)
+                ->select('order_items.id as order_item_id', \DB::raw('SUM(order_delivery_items.quantity) as delivered'))
+                ->groupBy('order_items.id')
+                ->pluck('delivered', 'order_item_id')
+                ->toArray();
+            session()->flash('success', 'ลบรอบจัดส่งเรียบร้อย');
+        } else {
+            session()->flash('error', 'ไม่พบรอบจัดส่งนี้');
+        }
     }
 }

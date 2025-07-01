@@ -483,9 +483,13 @@ class QuotationsForm extends Component
         $subtotal = collect($this->items)->sum(function ($i) {
             $q = (float) ($i['quantity'] ?? 0);
             $up = (float) ($i['unit_price'] ?? 0);
-            $len = max(1, (float) ($i['product_length'] ?? 1));
-            $th = max(1, (float) ($i['product_calculation'] ?? 1));
-            return $q * $up * $len * $th;
+            // เลือกใช้ product_calculation หรือ product_length ตาม logic
+            if (isset($i['product_calculation']) && $i['product_calculation'] != 1) {
+                $factor = (float) ($i['product_calculation'] ?? 1);
+            } else {
+                $factor = (float) ($i['product_length'] ?? 1);
+            }
+            return $q * $up * $factor;
         });
 
         // 2) หักส่วนลด
@@ -505,9 +509,12 @@ class QuotationsForm extends Component
             ->sum(function ($i) {
                 $q = (float) ($i['quantity'] ?? 0);
                 $up = (float) ($i['unit_price'] ?? 0);
-                $len = max(1, (float) ($i['product_length'] ?? 1));
-                $th = max(1, (float) ($i['product_calculation'] ?? 1));
-                return $q * $up * $len * $th;
+                if (isset($i['product_calculation']) && $i['product_calculation'] != 1) {
+                    $factor = (float) ($i['product_calculation'] ?? 1);
+                } else {
+                    $factor = (float) ($i['product_length'] ?? 1);
+                }
+                return $q * $up * $factor;
             });
 
         // 5) ถ้า VAT รวมในราคา (VAT-In)

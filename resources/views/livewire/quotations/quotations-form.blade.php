@@ -810,10 +810,10 @@
                                         </td>
                                         <td>
                                             @if ($item['product_calculation'] != 1)
-                                                <input type="number" step="0.01" class="form-control"
-                                                    wire:model.debounce.300ms="items.{{ $i }}.product_calculation"
+                                                <input type="number" step="0.01" class="form-control text-center"
+                                                    wire:model.live.debounce.300ms="items.{{ $i }}.product_calculation"
                                                     {{ $quote_status === 'success' ? 'disabled' : '' }}
-                                                    placeholder="ความหนา" />
+                                                    placeholder="ความหนา/จำนวนที่ใช้คำนวณ" />
                                             @else
                                                 <div class="text-muted small text-center">
                                                     {!! $item['product_detail'] ?? '-' !!}
@@ -853,7 +853,7 @@
                                         </td>
                                         <td class="text-end">
                                             <strong style="color: #059669; font-size: 15px;">
-                                                ฿{{ number_format($item['total'], 2) }}
+                                                ฿{{ number_format(($item['unit_price'] ?? 0) * ($item['product_calculation'] ?? 1) * ($item['quantity'] ?? 0), 2) }}
                                             </strong>
                                         </td>
                                         <td class="text-center">
