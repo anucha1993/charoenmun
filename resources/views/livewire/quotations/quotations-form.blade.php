@@ -232,6 +232,19 @@
             transform: translateY(-1px);
         }
         
+        .btn-outline-danger {
+            background: white;
+            border-color: #fecaca;
+            color: #ef4444;
+        }
+        
+        .btn-outline-danger:hover {
+            background: #fef2f2;
+            border-color: #f87171;
+            color: #dc2626;
+            transform: translateY(-1px);
+        }
+        
         .btn-success {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             border-color: transparent;
@@ -579,11 +592,16 @@
                         </div>
                         <div></div>
                         @if ($quotation && $quote_status === 'wait')
-                            <div>
+                            <div class="d-flex gap-2">
                                 <button type="button" class="btn btn-success"
                                         wire:click="approveQuotation({{ $quotation->id }})"
                                         onclick="return confirm('ยืนยันการอนุมัติใบเสนอราคา เลขที่ {{ $quotation->quote_number }} ?')">
                                     <i class="ri-check-line me-2"></i>อนุมัติใบเสนอราคา
+                                </button>
+                                <button type="button" class="btn btn-outline-danger"
+                                        wire:click="rejectQuotation({{ $quotation->id }})"
+                                        onclick="return confirm('ยืนยันการไม่อนุมัติใบเสนอราคา เลขที่ {{ $quotation->quote_number }} ?')">
+                                    <i class="ri-close-line me-2"></i>ไม่อนุมัติใบเสนอราคา
                                 </button>
                             </div>
                         @endif
@@ -994,20 +1012,65 @@
 
         {{-- Scripts --}}
         <script>
+        // ✅ Helper function สำหรับทำความสะอาด modal อย่างสมบูรณ์
+        function cleanupModal(modalId) {
+            const modalEl = document.getElementById(modalId);
+            if (!modalEl) return;
+
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            }
+
+            // ทำความสะอาดอย่างสมบูรณ์หลังปิด modal
+            setTimeout(() => {
+                // ลบ backdrop ทั้งหมด
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                
+                // รีเซ็ต body styles และ classes
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+                document.body.style.removeProperty('margin-right');
+                
+                // รีเซ็ต modal classes
+                modalEl.classList.remove('show');
+                modalEl.style.removeProperty('display');
+                modalEl.style.removeProperty('padding-right');
+                modalEl.setAttribute('aria-hidden', 'true');
+                modalEl.removeAttribute('aria-modal');
+                
+                // บังคับให้หน้าเลื่อนได้
+                document.documentElement.style.removeProperty('overflow');
+                document.documentElement.style.removeProperty('padding-right');
+                
+                // เคลียร์ style attribute ทั้งหมดถ้าเป็นค่าเริ่มต้น
+                if (document.body.style.length === 0) {
+                    document.body.removeAttribute('style');
+                }
+                if (document.documentElement.style.length === 0) {
+                    document.documentElement.removeAttribute('style');
+                }
+            }, 350); // เพิ่มเวลาให้มากขึ้นเล็กน้อย
+        }
+
         document.addEventListener('open-delivery-modal', () => {
             const modal = new bootstrap.Modal(document.getElementById('bs-example-modal-lg'));
             modal.show();
         });
         
         document.addEventListener('close-delivery-modal', () => {
-            const modalEl = document.getElementById('bs-example-modal-lg');
-            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            modal.hide();
-            setTimeout(() => {
-                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                document.body.classList.remove('modal-open');
-                document.body.style = '';
-            }, 300);
+            cleanupModal('bs-example-modal-lg');
+        });
+
+        // เพิ่มการจัดการเมื่อสร้างที่อยู่จัดส่งสำเร็จ
+        document.addEventListener('delivery-address-created', () => {
+            cleanupModal('bs-example-modal-lg');
+        });
+
+        // เพิ่มการจัดการเมื่อแก้ไขที่อยู่จัดส่งสำเร็จ
+        document.addEventListener('delivery-address-updated', () => {
+            cleanupModal('bs-example-modal-lg');
         });
 
         document.addEventListener('open-customer-modal', () => {
@@ -1015,8 +1078,17 @@
         });
         
         document.addEventListener('close-customer-modal', () => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('customerModal'));
-            if (modal) modal.hide();
+            cleanupModal('customerModal');
+        });
+
+        // เพิ่มการจัดการเมื่อสร้างลูกค้าสำเร็จ
+        document.addEventListener('customer-created', () => {
+            cleanupModal('customerModal');
+        });
+
+        // เพิ่มการจัดการเมื่อแก้ไขลูกค้าสำเร็จ
+        document.addEventListener('customer-updated', () => {
+            cleanupModal('customerModal');
         });
 
         document.addEventListener('DOMContentLoaded', function() {
