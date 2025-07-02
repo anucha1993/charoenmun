@@ -243,7 +243,13 @@ class OrderShow extends Component
         
         // คำนวณจาก items ที่มีอยู่แล้ว
         foreach ($this->order->items as $item) {
-            $itemTotal = $item->quantity * $item->unit_price;
+            // สูตรที่ถูกต้อง: ราคา/หน่วย × ความหนา × ความยาว × จำนวน
+            $qty = (float)($item->quantity ?? 0);
+            $unit = (float)($item->unit_price ?? 0);
+            $calc = (isset($item->product_calculation) && $item->product_calculation !== '' && $item->product_calculation !== null) ? (float)$item->product_calculation : 1;
+            $len = (isset($item->product_length) && $item->product_length !== '' && $item->product_length !== null) ? (float)$item->product_length : 1;
+            
+            $itemTotal = $unit * $calc * $len * $qty;
             $subtotal += $itemTotal;
             
             if ($item->product_vat && $this->order_enable_vat && !$this->order_vat_included) {
@@ -254,7 +260,13 @@ class OrderShow extends Component
         // คำนวณจาก newItems ที่กำลังจะเพิ่ม
         foreach ($this->newItems as $newItem) {
             if (!empty($newItem['product_id']) && !empty($newItem['quantity']) && !empty($newItem['unit_price'])) {
-                $itemTotal = $newItem['quantity'] * $newItem['unit_price'];
+                // สูตรที่ถูกต้อง: ราคา/หน่วย × ความหนา × ความยาว × จำนวน
+                $qty = (float)($newItem['quantity'] ?? 0);
+                $unit = (float)($newItem['unit_price'] ?? 0);
+                $calc = (isset($newItem['product_calculation']) && $newItem['product_calculation'] !== '' && $newItem['product_calculation'] !== null) ? (float)$newItem['product_calculation'] : 1;
+                $len = (isset($newItem['product_length']) && $newItem['product_length'] !== '' && $newItem['product_length'] !== null) ? (float)$newItem['product_length'] : 1;
+                
+                $itemTotal = $unit * $calc * $len * $qty;
                 $subtotal += $itemTotal;
                 
                 if (isset($newItem['product_vat']) && $newItem['product_vat'] && $this->order_enable_vat && !$this->order_vat_included) {

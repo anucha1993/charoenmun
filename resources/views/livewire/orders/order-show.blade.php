@@ -245,10 +245,8 @@
                                                     $unit = (float)($item->unit_price ?? 0);
                                                     $calc = (isset($item->product_calculation) && $item->product_calculation !== '' && $item->product_calculation !== null) ? (float)$item->product_calculation : 1;
                                                     $len = (isset($item->product_length) && $item->product_length !== '' && $item->product_length !== null) ? (float)$item->product_length : 1;
-                                                    // ใช้การคำนวณแบบเดิมสำหรับ existing items
-                                                    $factor = ($calc != 1) ? $calc : $len;
-                                                    if (!$factor || $factor <= 0) $factor = 1;
-                                                    $rowSubtotal = $qty * $unit * $factor;
+                                                    // สูตรที่ถูกต้อง: ราคา/หน่วย × ความหนา × ความยาว × จำนวน
+                                                    $rowSubtotal = $unit * $calc * $len * $qty;
                                                     $rowVat = (!empty($item->product_vat)) ? round($rowSubtotal * 0.07, 2) : 0;
                                                     $rowTotal = $rowSubtotal + $rowVat;
                                                 @endphp
@@ -375,8 +373,10 @@
                                                             $len = (isset($item['product_length']) && $item['product_length'] !== '' && $item['product_length'] !== null) ? (float)$item['product_length'] : 1;
                                                             // สูตรที่ถูกต้อง: ราคา/หน่วย × ความหนา × ความยาว × จำนวน
                                                             $total = $unit * $calc * $len * $qty;
+                                                            // Debug information to verify calculation
+                                                            $debug = "Unit: {$unit}, Calc: {$calc}, Len: {$len}, Qty: {$qty}, Total: {$total}";
                                                         @endphp
-                                                        <span>{{ number_format($total, 2) }}</span>
+                                                        <span title="{{ $debug }}">{{ number_format($total, 2) }}</span>
                                                     </td>
 
                                                     <td>
@@ -629,6 +629,34 @@
             const printUrl = `{{ url('deliveries') }}/${deliveryId}/print?${query}`;
             // เปิดในแท็บใหม่
             window.open(printUrl, '_blank');
+            // ปิด modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
+            if (modal) modal.hide();
+        }
+
+        function applyPriceAndRedirect() {
+            if (!currentDeliveryId) {
+                alert('กรุณาเลือกบิลย่อยก่อน');
+                return;
+            }
+            
+            const selected = [];
+            for (let i = 0; i <= 2; i++) {
+                const checkbox = document.getElementById('showPrice' + i);
+                if (checkbox && checkbox.checked) {
+                    selected.push(i);
+                }
+            }
+            
+            // สร้าง query string เช่น show_price[]=0&show_price[]=1
+            const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
+            
+            // สร้าง URL ไปยัง route delivery/print
+            const printUrl = `{{ url('deliveries') }}/${currentDeliveryId}/print?${query}`;
+            
+            // เปิดในแท็บใหม่
+            window.open(printUrl, '_blank');
+            
             // ปิด modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
             if (modal) modal.hide();
