@@ -65,26 +65,63 @@
                         <label class="btn btn-outline-primary" for="modeApi">ตรวจสอบสลิป</label>
                         <input type="radio" class="btn-check" name="mode" id="modeManual" wire:model.live="mode" value="manual">
                         <label class="btn btn-outline-secondary" for="modeManual">แมนนวลสลิป</label>
+                        <input type="radio" class="btn-check" name="mode" id="modePocket" wire:model.live="payment_type" value="pocket_money">
+                        <label class="btn btn-outline-success" for="modePocket">Pocket Money</label>
                     </div>
+                    
+                    @if ($payment_type === 'pocket_money')
+                        <div class="alert alert-info">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong><i class="mdi mdi-wallet"></i> ยอด Pocket Money คงเหลือ:</strong>
+                                    <span class="h5 text-success">{{ number_format($customerPocketMoney, 2) }} บาท</span>
+                                </div>
+                                @if ($customerPocketMoney <= 0)
+                                    <span class="badge bg-danger">ไม่เพียงพอ</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                     <div wire:loading wire:target="slip" class="text-center my-3">
                         <div class="spinner-border text-primary" role="status"></div>
                         <div class="mt-2">กำลังตรวจสอบสลิป...</div>
                     </div>
                     <form wire:submit.prevent="submit" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="slip" class="form-label">แนบสลิปการโอน</label>
-                            <input type="file" wire:model="slip" id="slip" accept="image/*" class="form-control">
-                            @error('slip')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
+                        @if ($payment_type === 'pocket_money')
+                            {{-- การชำระด้วย Pocket Money --}}
+                            <div class="mb-3">
+                                <label class="form-label">จำนวนเงินที่ต้องการใช้จาก Pocket Money</label>
+                                <div class="input-group">
+                                    <input type="number" 
+                                           class="form-control" 
+                                           wire:model.defer="manual.amount" 
+                                           placeholder="0.00"
+                                           min="1"
+                                           max="{{ $customerPocketMoney }}"
+                                           step="0.01">
+                                    <span class="input-group-text">บาท</span>
+                                </div>
+                                @error('manual.amount')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                                <small class="text-muted">สูงสุด: {{ number_format($customerPocketMoney, 2) }} บาท</small>
+                            </div>
+                        @else
+                            {{-- การชำระแบบปกติ (สลิป) --}}
+                            <div class="mb-3">
+                                <label for="slip" class="form-label">แนบสลิปการโอน</label>
+                                <input type="file" wire:model="slip" id="slip" accept="image/*" class="form-control">
+                                @error('slip')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
                         @if ($preview)
                             <div class="mb-3">
                                 <label class="form-label">สลิปที่อัปโหลด:</label><br>
                                 <img src="{{ $preview }}" class="img-fluid border" style="max-height: 300px;">
                             </div>
                         @endif
-                        @if ($mode === 'manual')
+                        @if ($mode === 'manual' && $payment_type !== 'pocket_money')
                             <div class="mb-3">
                                 <label>ประเภทการชำระ</label>
                                 <select class="form-select" wire:model.live="payment_type">
@@ -115,7 +152,7 @@
                                     <input type="datetime-local" class="form-control" wire:model.defer="manual.transfer_at">
                                 </div>
                             @endif
-                        @else
+                        @elseif ($mode === 'api' && $payment_type !== 'pocket_money')
                             @if ($slipData)
                                 <div class="border p-2 rounded bg-light mb-3">
                                     <div class="mb-2">
@@ -129,9 +166,18 @@
                                 </div>
                             @endif
                         @endif
+                        @endif
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('orders.show', $order->id) }}" class="btn btn-secondary">ย้อนกลับ</a>
-                            <button type="submit" class="btn btn-success">บันทึก</button>
+                            <button type="submit" 
+                                    class="btn {{ $payment_type === 'pocket_money' ? 'btn-success' : 'btn-primary' }}"
+                                    @if($payment_type === 'pocket_money' && $customerPocketMoney <= 0) disabled @endif>
+                                @if($payment_type === 'pocket_money')
+                                    <i class="mdi mdi-wallet me-2"></i>ชำระด้วย Pocket Money
+                                @else
+                                    บันทึก
+                                @endif
+                            </button>
                         </div>
                     </form>
                 </div>

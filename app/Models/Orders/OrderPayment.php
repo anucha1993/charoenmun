@@ -12,6 +12,7 @@ class OrderPayment extends Model
         'order_id',
         'user_id',
         'slip_path',
+        'payment_type',
         'amount',
         'reference_id',
         'trans_ref',

@@ -906,7 +906,7 @@
                                         </td>
                                         <td class="text-end">
                                             <strong style="color: #059669; font-size: 15px;">
-                                                ฿{{ number_format(($item['unit_price'] ?? 0) * ($item['product_calculation'] ?? 1) * ($item['quantity'] ?? 0), 2) }}
+                                                ฿{{ number_format(($item['unit_price'] ?? 0) * ($item['product_calculation'] ?? 1) * ($item['product_length'] ?? 1) * ($item['quantity'] ?? 0), 2) }}
                                             </strong>
                                         </td>
                                         <td class="text-center">

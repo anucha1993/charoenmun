@@ -954,7 +954,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                         </td>
                                         <td class="text-end">
                                             <strong style="color: #059669; font-size: 15px;">
-                                                ฿<?php echo e(number_format(($item['unit_price'] ?? 0) * ($item['product_calculation'] ?? 1) * ($item['quantity'] ?? 0), 2)); ?>
+                                                ฿<?php echo e(number_format(($item['unit_price'] ?? 0) * ($item['product_calculation'] ?? 1) * ($item['product_length'] ?? 1) * ($item['quantity'] ?? 0), 2)); ?>
 
                                             </strong>
                                         </td>

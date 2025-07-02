@@ -20,6 +20,7 @@ class OrderPaymentForm extends Component
     public $preview = null;
     public $loading = false;
     public string $mode = 'api'; // 'api' หรือ 'manual'
+    public string $payment_type = 'transfer'; // 'transfer', 'cash', 'pocket_money'
     public array $manual = [
         'bank_name' => '',
         'account_no' => '',
@@ -32,13 +33,15 @@ class OrderPaymentForm extends Component
     public $paidAmount = 0;
     public $outstanding = 0;
     public $grandTotal = 0;
+    public $customerPocketMoney = 0;
 
     public function mount(OrderModel $order)
     {
-        $this->order = $order;
+        $this->order = $order->load('customer');
         $this->grandTotal = $order->order_grand_total;
         $this->paidAmount = $order->payments()->where('status', 'ชำระเงินแล้ว')->sum('amount');
         $this->outstanding = max(0, $this->grandTotal - $this->paidAmount);
+        $this->customerPocketMoney = $order->customer ? $order->customer->customer_pocket_money : 0;
     }
 
     public function getPaymentStats()
@@ -102,56 +105,113 @@ class OrderPaymentForm extends Component
         $this->loading = false;
     }
 
+    public function updatedPaymentType($value)
+    {
+        if ($value === 'pocket_money') {
+            $this->mode = 'manual';
+            // เคลียร์ข้อมูลเก่า
+            $this->manual = [
+                'bank_name' => '',
+                'account_no' => '',
+                'sender_name' => '',
+                'receiver_name' => '',
+                'receiver_account_no' => '',
+                'transfer_at' => '',
+                'amount' => 0,
+            ];
+        }
+    }
+
+    public function updatedMode($value)
+    {
+        if ($value !== 'manual' && $this->payment_type === 'pocket_money') {
+            $this->payment_type = 'transfer';
+        }
+    }
+
     public function submit()
     {
-        $this->validate([
-            'slip' => 'required|image|max:2048',
-        ]);
-        if ($this->mode === 'manual') {
+        // Validation ตามประเภทการชำระ
+        if ($this->payment_type === 'pocket_money') {
             $this->validate([
+                'manual.amount' => 'required|numeric|min:1|max:' . $this->customerPocketMoney,
+            ], [
+                'manual.amount.max' => 'จำนวนเงินเกินวงเงิน Pocket Money ที่มี (' . number_format($this->customerPocketMoney, 2) . ' บาท)',
+            ]);
+            
+            if ($this->customerPocketMoney <= 0) {
+                session()->flash('error', 'ลูกค้าไม่มียอด Pocket Money');
+                return;
+            }
+        } elseif ($this->mode === 'manual' && in_array($this->payment_type, ['transfer', 'cash'])) {
+            $this->validate([
+                'slip' => 'required|image|max:2048',
                 'manual.amount' => 'required|numeric|min:1',
-                'manual.sender_name' => 'required|string',
-                'manual.transfer_at' => 'required|date',
+                'manual.sender_name' => $this->payment_type === 'transfer' ? 'required|string' : '',
+                'manual.transfer_at' => $this->payment_type === 'transfer' ? 'required|date' : '',
             ]);
         } else {
+            $this->validate([
+                'slip' => 'required|image|max:2048',
+            ]);
             if (empty($this->slipData)) {
                 session()->flash('error', 'กรุณาแนบสลิปให้ถูกต้องก่อนบันทึก');
                 return;
             }
         }
-        $storedPath = $this->slip->store('payments', 'public');
-        if ($this->mode === 'manual') {
-            OrderPayment::create([
-                'order_id' => $this->order->id,
-                'user_id' => Auth::id(),
-                'slip_path' => $storedPath,
-                'amount' => $this->manual['amount'] ?? 0,
-                'sender_name' => $this->manual['sender_name'] ?? '',
-                'bank_name' => $this->manual['bank_name'] ?? '',
-                'sender_account_no' => $this->manual['account_no'] ?? '',
-                'receiver_name' => $this->manual['receiver_name'] ?? '',
-                'receiver_account_no' => $this->manual['receiver_account_no'] ?? '',
-                'reference_id' => null,
-                'trans_ref' => null,
-                'transfer_at' => $this->manual['transfer_at'] ?? now(),
-                'status' => 'รอยืนยันยอด',
-            ]);
+
+        // สร้าง payment record
+        $paymentData = [
+            'order_id' => $this->order->id,
+            'user_id' => Auth::id(),
+            'payment_type' => $this->payment_type,
+            'amount' => 0,
+            'status' => 'รอยืนยันยอด',
+        ];
+
+        if ($this->payment_type === 'pocket_money') {
+            // การชำระด้วย Pocket Money
+            $paymentData['amount'] = $this->manual['amount'];
+            $paymentData['sender_name'] = $this->order->customer->customer_contract_name ?? $this->order->customer->customer_name;
+            $paymentData['receiver_name'] = 'Pocket Money';
+            $paymentData['transfer_at'] = now();
+            $paymentData['slip_path'] = null; // ไม่ต้องมีสลิป
+            $paymentData['status'] = 'ชำระเงินแล้ว'; // อนุมัติทันที
+            
+            // หักยอด Pocket Money
+            $this->order->customer->decrement('customer_pocket_money', $this->manual['amount']);
+            
         } else {
-            OrderPayment::create([
-                'order_id' => $this->order->id,
-                'user_id' => Auth::id(),
-                'slip_path' => $storedPath,
-                'amount' => $this->slipData['amount'],
-                'sender_name' => $this->slipData['sender_name'] ?? '',
-                'receiver_name' => $this->slipData['receiver_name'] ?? '',
-                'reference_id' => $this->slipData['reference_id'] ?? null,
-                'trans_ref' => $this->slipData['trans_ref'] ?? null,
-                'bank_name' => $this->slipData['bank_name'] ?? null,
-                'transfer_at' => $this->slipData['transfer_at'] ?? now(),
-                'status' => 'รอยืนยันยอด',
-            ]);
+            // การชำระแบบปกติ (transfer/cash)
+            $storedPath = $this->slip->store('payments', 'public');
+            $paymentData['slip_path'] = $storedPath;
+            
+            if ($this->mode === 'manual') {
+                $paymentData['amount'] = $this->manual['amount'] ?? 0;
+                $paymentData['sender_name'] = $this->manual['sender_name'] ?? '';
+                $paymentData['bank_name'] = $this->manual['bank_name'] ?? '';
+                $paymentData['sender_account_no'] = $this->manual['account_no'] ?? '';
+                $paymentData['receiver_name'] = $this->manual['receiver_name'] ?? '';
+                $paymentData['receiver_account_no'] = $this->manual['receiver_account_no'] ?? '';
+                $paymentData['transfer_at'] = $this->manual['transfer_at'] ?? now();
+            } else {
+                $paymentData['amount'] = $this->slipData['amount'];
+                $paymentData['sender_name'] = $this->slipData['sender_name'] ?? '';
+                $paymentData['receiver_name'] = $this->slipData['receiver_name'] ?? '';
+                $paymentData['reference_id'] = $this->slipData['reference_id'] ?? null;
+                $paymentData['trans_ref'] = $this->slipData['trans_ref'] ?? null;
+                $paymentData['bank_name'] = $this->slipData['bank_name'] ?? null;
+                $paymentData['transfer_at'] = $this->slipData['transfer_at'] ?? now();
+            }
         }
-        session()->flash('success', 'แจ้งชำระเงินเรียบร้อยแล้ว');
+
+        OrderPayment::create($paymentData);
+        
+        $message = $this->payment_type === 'pocket_money' 
+            ? 'ชำระเงินด้วย Pocket Money เรียบร้อยแล้ว' 
+            : 'แจ้งชำระเงินเรียบร้อยแล้ว';
+            
+        session()->flash('success', $message);
         return redirect()->route('orders.show', $this->order->id);
     }
 

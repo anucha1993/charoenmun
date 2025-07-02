@@ -79,6 +79,11 @@
                             <i class="ri-money-dollar-box-line"></i>อนุมัติยอด
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="<?php echo e(route('deliveries.calendar')); ?>">
+                            <i class="ri-calendar-event-line"></i>ปฏิทินจัดส่งสินค้า
+                        </a>
+                    </li>
                        
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-layouts" role="button"

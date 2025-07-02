@@ -3,6 +3,7 @@
 namespace App\Models\Orders;
 
 use App\Models\User;
+use App\Enums\TruckType;
 use App\Models\Orders\OrderModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Orders\OrderDeliveryItems;
@@ -24,6 +25,10 @@ class OrderDeliverysModel extends Model
         'payment_status', // สถานะการชำระเงิน 0 = รอชำระ , 1 = ชำระเงินครบแล้ว , 2 = ชำระเงินมัดจำ
         'order_delivery_status_order', //สถานะการส่งทั้งหมดของ order ว่าบิลไหนจัดส่งครบเป็นบิลสุดท้าย  1 = ส่งครบแล้ว , 0 = ''
         'order_delivery_note',
+        'total_weight_kg',
+        'recommended_truck_type',
+        'selected_truck_type',
+        'truck_note',
         'created_by',
         'updated_by',
         'order_delivery_subtotal',
@@ -36,6 +41,9 @@ class OrderDeliverysModel extends Model
 
     protected $casts = [
         'order_delivery_date' => 'date',
+        'recommended_truck_type' => TruckType::class,
+        'selected_truck_type' => TruckType::class,
+        'total_weight_kg' => 'decimal:2',
     ];
 
     public function order()
@@ -89,6 +97,102 @@ class OrderDeliverysModel extends Model
     $this->save();
 }
 
-    
-    
+/**
+     * คำนวณน้ำหนักรวมของการจัดส่งนี้ (kg)
+     */
+    public function calculateTotalWeight(): float
+    {
+        $totalWeight = 0;
+        
+        foreach ($this->deliveryItems as $deliveryItem) {
+            $orderItem = $deliveryItem->orderItem;
+            if ($orderItem && $orderItem->product_weight) {
+                // น้ำหนัก = น้ำหนัก/หน่วย × จำนวนที่จัดส่ง × ความหนา × ความยาว
+                $weight = (float)$orderItem->product_weight;
+                $quantity = (float)$deliveryItem->quantity;
+                $calculation = (float)($orderItem->product_calculation ?? 1);
+                $length = (float)($orderItem->product_length ?? 1);
+                
+                $totalWeight += $weight * $quantity * $calculation * $length;
+            }
+        }
+        
+        return round($totalWeight, 2);
+    }
+
+    /**
+     * อัปเดตน้ำหนักและแนะนำประเภทรถ
+     */
+    public function updateWeightAndTruckRecommendation(): void
+    {
+        $this->total_weight_kg = $this->calculateTotalWeight();
+        $this->recommended_truck_type = TruckType::getRecommendedTruck($this->total_weight_kg);
+        
+        // ถ้ายังไม่เลือกรถ ให้ใช้รถที่แนะนำ
+        if (!$this->selected_truck_type) {
+            $this->selected_truck_type = $this->recommended_truck_type;
+        }
+        
+        $this->save();
+    }
+
+    /**
+     * ตรวจสอบว่าน้ำหนักเกินขีดจำกัดของรถที่เลือกหรือไม่
+     */
+    public function isOverweight(): bool
+    {
+        if (!$this->selected_truck_type) {
+            return false;
+        }
+        
+        $capacity = $this->selected_truck_type->capacity();
+        return $this->total_weight_kg > $capacity['max'];
+    }
+
+    /**
+     * ได้รถประเภทอื่นที่สามารถรับน้ำหนักนี้ได้
+     */
+    public function getAlternativeTrucks(): array
+    {
+        $alternatives = [];
+        
+        foreach (TruckType::getAllTrucks() as $truckType) {
+            $capacity = $truckType->capacity();
+            if ($this->total_weight_kg >= $capacity['min'] && $this->total_weight_kg <= $capacity['max']) {
+                $alternatives[] = $truckType;
+            }
+        }
+        
+        return $alternatives;
+    }
+
+    /**
+     * คำนวณจำนวนรอบที่ต้องขนส่ง (ถ้าน้ำหนักเกิน)
+     */
+    public function calculateRequiredTrips(): int
+    {
+        if (!$this->selected_truck_type) {
+            return 1;
+        }
+        
+        $capacity = $this->selected_truck_type->capacity();
+        return (int)ceil($this->total_weight_kg / $capacity['max']);
+    }
+
+    /**
+     * ข้อมูลสรุปการขนส่ง
+     */
+    public function getTransportSummary(): array
+    {
+        return [
+            'total_weight_kg' => $this->total_weight_kg,
+            'total_weight_ton' => round($this->total_weight_kg / 1000, 2),
+            'recommended_truck' => $this->recommended_truck_type,
+            'selected_truck' => $this->selected_truck_type,
+            'is_overweight' => $this->isOverweight(),
+            'required_trips' => $this->calculateRequiredTrips(),
+            'alternative_trucks' => $this->getAlternativeTrucks(),
+        ];
+    }
+
 }

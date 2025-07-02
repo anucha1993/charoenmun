@@ -469,7 +469,7 @@ class QuotationsForm extends Component
                         'product_note' => $row['product_note'],
                         'quantity' => $row['quantity'],
                         'unit_price' => $row['unit_price'],
-                        'total' => (float)($row['quantity'] ?? 0) * (float)($row['unit_price'] ?? 0) * (float)($row['product_calculation'] ?? 1),
+                        'total' => $this->calculateItemTotal($row),
                         'product_vat' => $row['product_vat'] ? 1 : 0,
                     ],
                 );
@@ -493,6 +493,44 @@ class QuotationsForm extends Component
         return redirect()->route('quotations.index');
     }
 
+    /**
+     * Helper method to calculate item total consistently across the application
+     */
+    private function calculateItemTotal(array $item): float
+    {
+        $quantity = (float)($item['quantity'] ?? 0);
+        $unitPrice = (float)($item['unit_price'] ?? 0);
+        $calculation = (float)($item['product_calculation'] ?? 1);
+        $length = (float)($item['product_length'] ?? 1);
+        
+        // คูณด้วยความยาวเสมอ ไม่ว่า product_calculation จะเป็นเท่าไร
+        return $unitPrice * $calculation * $length * $quantity;
+    }
+
+    /**
+     * ฟังก์ชันทดสอบการคำนวณ - เรียกใช้เพื่อตรวจสอบผลลัพธ์
+     */
+    public function testCalculation(): void
+    {
+        // สร้างข้อมูลทดสอบตามตัวอย่าง
+        $testItem = [
+            'product_id' => 1,
+            'product_name' => 'แผ่นพื้นสำเร็จรูป ลาด 4 เส้น',
+            'quantity' => 5,
+            'unit_price' => 250,
+            'product_calculation' => 0.35,
+            'product_length' => 2,
+            'total' => 0
+        ];
+
+        // คำนวณและพิมพ์ผลลัพธ์
+        $total = $this->calculateItemTotal($testItem);
+        
+        // แสดงผลในหน้าเพจโดยใช้ notify
+        $message = "การคำนวณทดสอบ: {$testItem['unit_price']} x {$testItem['product_calculation']} x {$testItem['product_length']} x {$testItem['quantity']} = {$total}";
+        $this->dispatch('notify', type: 'info', message: $message);
+    }
+    
     /* ─────────── Running Number : QTyyMM#### ─────────── */
     private function generateRunningNumber(): string
     {
@@ -556,11 +594,7 @@ class QuotationsForm extends Component
 
         // ─── คำนวณยอดรวมใหม่ทุกครั้ง
         foreach ($this->items as &$item) {
-            $quantity = (float) ($item['quantity'] ?? 0);
-            $unitPrice = (float) ($item['unit_price'] ?? 0);
-            $calculation = (float) ($item['product_calculation'] ?? 1);
-            
-            $item['total'] = $quantity * $unitPrice * $calculation;
+            $item['total'] = $this->calculateItemTotal($item);
         }
 
         $this->calculateTotals();
@@ -585,14 +619,7 @@ class QuotationsForm extends Component
     {
         // 1) คำนวณยอดรวมก่อน VAT (ทั้งสินค้ารวมกัน)
         $subtotal = collect($this->items)->sum(function ($i) {
-            $q = (float) ($i['quantity'] ?? 0);
-            $up = (float) ($i['unit_price'] ?? 0);
-            if (isset($i['product_calculation']) && $i['product_calculation'] != 1) {
-                $factor = (float) ($i['product_calculation'] ?? 1);
-            } else {
-                $factor = (float) ($i['product_length'] ?? 1);
-            }
-            return $q * $up * $factor;
+            return $this->calculateItemTotal($i);
         });
         $this->quote_subtotal_before_discount = $subtotal;
 
@@ -611,14 +638,7 @@ class QuotationsForm extends Component
         $vatItems = collect($this->items)
             ->filter(fn($i) => !empty($i['product_vat']))
             ->map(function ($i) {
-                $q = (float) ($i['quantity'] ?? 0);
-                $up = (float) ($i['unit_price'] ?? 0);
-                if (isset($i['product_calculation']) && $i['product_calculation'] != 1) {
-                    $factor = (float) ($i['product_calculation'] ?? 1);
-                } else {
-                    $factor = (float) ($i['product_length'] ?? 1);
-                }
-                return $q * $up * $factor;
+                return $this->calculateItemTotal($i);
             });
         $vatableBase = $vatItems->sum();
 

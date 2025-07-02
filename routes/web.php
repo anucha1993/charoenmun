@@ -107,7 +107,10 @@ Route::middleware(['auth'])->group(function () {
     //deluvery 
     Route::get('orders/{order}/deliveries/create', OrderDelivery::class)->name('deliveries.create')->whereNumber('order');
     Route::get('orders/{order}/deliveries/{delivery}/edit', OrderDelivery::class)->name('deliveries.edit')->whereNumber('order')->whereNumber('delivery');
-     Route::get('deliveries/{delivery}/print', OrderDeliveryPrint::class)->name('deliveries.printer');
+    Route::get('deliveries/{delivery}/print', OrderDeliveryPrint::class)->name('deliveries.printer');
+    
+    // Delivery Calendar
+    Route::get('/delivery-calendar', App\Livewire\Deliveries\DeliveryCalendar::class)->name('deliveries.calendar');
 
      //payment
      Route::get('/confirm-payments', ConfirmPayments::class)->name('payments.confirm');
@@ -152,3 +155,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
     Route::get('{any}', [RoutingController::class, 'root'])->name('any');
 });
+
+// ทดสอบ truck icons
+Route::get('/test-truck-icons', function () {
+    return view('test-truck-icons');
+})->name('test.truck.icons');
+
+// Demo truck icons แบบสวยงาม
+Route::get('/demo-truck-icons', function () {
+    return view('truck-icons-demo');
+})->name('demo.truck.icons');

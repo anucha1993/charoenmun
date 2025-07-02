@@ -66,33 +66,77 @@
                         <label class="btn btn-outline-primary" for="modeApi">ตรวจสอบสลิป</label>
                         <input type="radio" class="btn-check" name="mode" id="modeManual" wire:model.live="mode" value="manual">
                         <label class="btn btn-outline-secondary" for="modeManual">แมนนวลสลิป</label>
+                        <input type="radio" class="btn-check" name="mode" id="modePocket" wire:model.live="payment_type" value="pocket_money">
+                        <label class="btn btn-outline-success" for="modePocket">Pocket Money</label>
                     </div>
+                    
+                    <!--[if BLOCK]><![endif]--><?php if($payment_type === 'pocket_money'): ?>
+                        <div class="alert alert-info">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong><i class="mdi mdi-wallet"></i> ยอด Pocket Money คงเหลือ:</strong>
+                                    <span class="h5 text-success"><?php echo e(number_format($customerPocketMoney, 2)); ?> บาท</span>
+                                </div>
+                                <!--[if BLOCK]><![endif]--><?php if($customerPocketMoney <= 0): ?>
+                                    <span class="badge bg-danger">ไม่เพียงพอ</span>
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                            </div>
+                        </div>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                     <div wire:loading wire:target="slip" class="text-center my-3">
                         <div class="spinner-border text-primary" role="status"></div>
                         <div class="mt-2">กำลังตรวจสอบสลิป...</div>
                     </div>
                     <form wire:submit.prevent="submit" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="slip" class="form-label">แนบสลิปการโอน</label>
-                            <input type="file" wire:model="slip" id="slip" accept="image/*" class="form-control">
-                            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['slip'];
+                        <!--[if BLOCK]><![endif]--><?php if($payment_type === 'pocket_money'): ?>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">จำนวนเงินที่ต้องการใช้จาก Pocket Money</label>
+                                <div class="input-group">
+                                    <input type="number" 
+                                           class="form-control" 
+                                           wire:model.defer="manual.amount" 
+                                           placeholder="0.00"
+                                           min="1"
+                                           max="<?php echo e($customerPocketMoney); ?>"
+                                           step="0.01">
+                                    <span class="input-group-text">บาท</span>
+                                </div>
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['manual.amount'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                                <span class="text-danger"><?php echo e($message); ?></span>
-                            <?php unset($message);
+                                    <span class="text-danger"><?php echo e($message); ?></span>
+                                <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
-                        </div>
+                                <small class="text-muted">สูงสุด: <?php echo e(number_format($customerPocketMoney, 2)); ?> บาท</small>
+                            </div>
+                        <?php else: ?>
+                            
+                            <div class="mb-3">
+                                <label for="slip" class="form-label">แนบสลิปการโอน</label>
+                                <input type="file" wire:model="slip" id="slip" accept="image/*" class="form-control">
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['slip'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="text-danger"><?php echo e($message); ?></span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                            </div>
                         <!--[if BLOCK]><![endif]--><?php if($preview): ?>
                             <div class="mb-3">
                                 <label class="form-label">สลิปที่อัปโหลด:</label><br>
                                 <img src="<?php echo e($preview); ?>" class="img-fluid border" style="max-height: 300px;">
                             </div>
                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                        <!--[if BLOCK]><![endif]--><?php if($mode === 'manual'): ?>
+                        <!--[if BLOCK]><![endif]--><?php if($mode === 'manual' && $payment_type !== 'pocket_money'): ?>
                             <div class="mb-3">
                                 <label>ประเภทการชำระ</label>
                                 <select class="form-select" wire:model.live="payment_type">
@@ -123,7 +167,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                     <input type="datetime-local" class="form-control" wire:model.defer="manual.transfer_at">
                                 </div>
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                        <?php else: ?>
+                        <?php elseif($mode === 'api' && $payment_type !== 'pocket_money'): ?>
                             <!--[if BLOCK]><![endif]--><?php if($slipData): ?>
                                 <div class="border p-2 rounded bg-light mb-3">
                                     <div class="mb-2">
@@ -137,9 +181,18 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         <div class="d-flex justify-content-between">
                             <a href="<?php echo e(route('orders.show', $order->id)); ?>" class="btn btn-secondary">ย้อนกลับ</a>
-                            <button type="submit" class="btn btn-success">บันทึก</button>
+                            <button type="submit" 
+                                    class="btn <?php echo e($payment_type === 'pocket_money' ? 'btn-success' : 'btn-primary'); ?>"
+                                    <?php if($payment_type === 'pocket_money' && $customerPocketMoney <= 0): ?> disabled <?php endif; ?>>
+                                <!--[if BLOCK]><![endif]--><?php if($payment_type === 'pocket_money'): ?>
+                                    <i class="mdi mdi-wallet me-2"></i>ชำระด้วย Pocket Money
+                                <?php else: ?>
+                                    บันทึก
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                            </button>
                         </div>
                     </form>
                 </div>

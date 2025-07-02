@@ -442,6 +442,10 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                         <h5 style="font-weight:700; color:#111827;"><i class="ri-truck-line me-1"></i> รายการจัดส่ง
                             (Order Deliveries)</h5>
                     </div>
+                    
+                    
+                    
+                    
                     <div class="col-12 mb-3">
                         <div class="card border-secondary"
                             style="border-radius:10px; box-shadow:0 2px 8px rgba(59,130,246,0.04);">
@@ -454,6 +458,8 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                 <th>ลำดับ</th>
                                                 <th>วันที่จัดส่ง</th>
                                                 <th>เลขที่บิลย่อย</th>
+                                                <th>น้ำหนักรวม</th>
+                                                <th><i class="ri-truck-line me-1"></i>ประเภทรถ</th>
                                                 <th>จำนวนเงินทั้งสิ้น</th>
                                                 <th>สถานะจัดส่ง</th>
                                                 <th>Actions</th>
@@ -465,6 +471,53 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                     <td><?php echo e($key + 1); ?></td>
                                                     <td><?php echo e($delivery->order_delivery_date->format('d/m/Y')); ?></td>
                                                     <td><?php echo e($delivery->order_delivery_number); ?></td>
+                                                    <td>
+                                                        <!--[if BLOCK]><![endif]--><?php if($delivery->total_weight_kg > 0): ?>
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="ri-weight-line me-2 text-muted"></i>
+                                                                <span class="fw-bold"><?php echo weight_display($delivery->total_weight_kg); ?></span>
+                                                            </div>
+                                                            <!--[if BLOCK]><![endif]--><?php if($delivery->isOverweight()): ?>
+                                                                <small class="text-danger">
+                                                                    <i class="ri-alert-line"></i> เกินขีดจำกัด
+                                                                </small>
+                                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                        <?php else: ?>
+                                                            <span class="text-muted">ไม่ระบุ</span>
+                                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                    </td>
+                                                    <td>
+                                                        <div class="truck-info">
+                                                           
+                                                            <!--[if BLOCK]><![endif]--><?php if($delivery->selected_truck_type): ?>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="me-2" style="font-size: 1.2em;">
+                                                                        <?php echo e(truck_type_icon($delivery->selected_truck_type)); ?>
+
+                                                                    </span>
+                                                                    <div>
+                                                                        <small class="text-muted">เลือกใช้:</small>
+                                                                        <?php echo truck_type_badge($delivery->selected_truck_type); ?>
+
+                                                                        <!--[if BLOCK]><![endif]--><?php if($delivery->total_weight_kg > 0): ?>
+                                                                            <?php echo weight_status_badge($delivery->total_weight_kg, $delivery->selected_truck_type); ?>
+
+                                                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                                    </div>
+                                                                </div>
+                                                            <?php else: ?>
+                                                                <span class="text-muted">ไม่ได้เลือก</span>
+                                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                            <!--[if BLOCK]><![endif]--><?php if($delivery->calculateRequiredTrips() > 1): ?>
+                                                                <div class="mt-1">
+                                                                    <small class="badge bg-warning">
+                                                                        <i class="ri-truck-line me-1"></i>
+                                                                        ต้องใช้ <?php echo e($delivery->calculateRequiredTrips()); ?> รอบ
+                                                                    </small>
+                                                                </div>
+                                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                        </div>
+                                                    </td>
                                                     <td><?php echo e(number_format($delivery->order_delivery_grand_total, 2)); ?>
 
                                                     </td>

@@ -401,6 +401,72 @@
                         <h5 style="font-weight:700; color:#111827;"><i class="ri-truck-line me-1"></i> รายการจัดส่ง
                             (Order Deliveries)</h5>
                     </div>
+                    
+                    {{-- สรุปข้อมูลการขนส่ง --}}
+                    {{-- @php $transportSummary = $this->getOrderTransportSummary(); @endphp
+                    @if($transportSummary['total_order_weight_kg'] > 0)
+                        <div class="col-12 mb-3">
+                            <div class="card border-info" style="border-radius:8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
+                                <div class="card-body py-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-3">
+                                            <div class="d-flex align-items-center">
+                                                <i class="ri-weight-line me-2 text-info" style="font-size: 1.2em;"></i>
+                                                <div>
+                                                    <small class="text-muted">น้ำหนักรวมทั้งออเดอร์</small>
+                                                    <div class="fw-bold text-info">{!! weight_display($transportSummary['total_order_weight_kg']) !!}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="d-flex align-items-center">
+                                                @if($transportSummary['recommended_truck_for_full_order'])
+                                                    <span class="me-2" style="font-size: 1.5em;">
+                                                        {{ truck_type_icon($transportSummary['recommended_truck_for_full_order']) }}
+                                                    </span>
+                                                @else
+                                                    <i class="ri-truck-line me-2 text-success" style="font-size: 1.2em;"></i>
+                                                @endif
+                                                <div>
+                                                    <small class="text-muted">รถที่แนะนำ</small>
+                                                    <div>{!! truck_type_badge($transportSummary['recommended_truck_for_full_order'], true) !!}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="d-flex align-items-center">
+                                                <i class="ri-list-check me-2 text-warning" style="font-size: 1.2em;"></i>
+                                                <div>
+                                                    <small class="text-muted">จำนวนรอบจัดส่ง</small>
+                                                    <div class="fw-bold">{{ $transportSummary['deliveries_count'] }} รอบ</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @if($transportSummary['overweight_deliveries'] > 0)
+                                                <div class="d-flex align-items-center">
+                                                    <i class="ri-alert-line me-2 text-danger" style="font-size: 1.2em;"></i>
+                                                    <div>
+                                                        <small class="text-muted">รอบที่น้ำหนักเกิน</small>
+                                                        <div class="fw-bold text-danger">{{ $transportSummary['overweight_deliveries'] }} รอบ</div>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <div class="d-flex align-items-center">
+                                                    <i class="ri-check-line me-2 text-success" style="font-size: 1.2em;"></i>
+                                                    <div>
+                                                        <small class="text-muted">สถานะ</small>
+                                                        <div class="fw-bold text-success">น้ำหนักเหมาะสม</div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif --}}
+                    
                     <div class="col-12 mb-3">
                         <div class="card border-secondary"
                             style="border-radius:10px; box-shadow:0 2px 8px rgba(59,130,246,0.04);">
@@ -413,6 +479,8 @@
                                                 <th>ลำดับ</th>
                                                 <th>วันที่จัดส่ง</th>
                                                 <th>เลขที่บิลย่อย</th>
+                                                <th>น้ำหนักรวม</th>
+                                                <th><i class="ri-truck-line me-1"></i>ประเภทรถ</th>
                                                 <th>จำนวนเงินทั้งสิ้น</th>
                                                 <th>สถานะจัดส่ง</th>
                                                 <th>Actions</th>
@@ -424,6 +492,50 @@
                                                     <td>{{ $key + 1 }}</td>
                                                     <td>{{ $delivery->order_delivery_date->format('d/m/Y') }}</td>
                                                     <td>{{ $delivery->order_delivery_number }}</td>
+                                                    <td>
+                                                        @if($delivery->total_weight_kg > 0)
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="ri-weight-line me-2 text-muted"></i>
+                                                                <span class="fw-bold">{!! weight_display($delivery->total_weight_kg) !!}</span>
+                                                            </div>
+                                                            @if($delivery->isOverweight())
+                                                                <small class="text-danger">
+                                                                    <i class="ri-alert-line"></i> เกินขีดจำกัด
+                                                                </small>
+                                                            @endif
+                                                        @else
+                                                            <span class="text-muted">ไม่ระบุ</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <div class="truck-info">
+                                                           
+                                                            @if($delivery->selected_truck_type)
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="me-2" style="font-size: 1.2em;">
+                                                                        {{ truck_type_icon($delivery->selected_truck_type) }}
+                                                                    </span>
+                                                                    <div>
+                                                                        <small class="text-muted">เลือกใช้:</small>
+                                                                        {!! truck_type_badge($delivery->selected_truck_type) !!}
+                                                                        @if($delivery->total_weight_kg > 0)
+                                                                            {!! weight_status_badge($delivery->total_weight_kg, $delivery->selected_truck_type) !!}
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            @else
+                                                                <span class="text-muted">ไม่ได้เลือก</span>
+                                                            @endif
+                                                            @if($delivery->calculateRequiredTrips() > 1)
+                                                                <div class="mt-1">
+                                                                    <small class="badge bg-warning">
+                                                                        <i class="ri-truck-line me-1"></i>
+                                                                        ต้องใช้ {{ $delivery->calculateRequiredTrips() }} รอบ
+                                                                    </small>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    </td>
                                                     <td>{{ number_format($delivery->order_delivery_grand_total, 2) }}
                                                     </td>
                                                     <td>{!! order_delivery_status_badge($delivery->order_delivery_status) !!}</td>
