@@ -414,8 +414,10 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                             $len = (isset($item['product_length']) && $item['product_length'] !== '' && $item['product_length'] !== null) ? (float)$item['product_length'] : 1;
                                                             // สูตรที่ถูกต้อง: ราคา/หน่วย × ความหนา × ความยาว × จำนวน
                                                             $total = $unit * $calc * $len * $qty;
+                                                            // Debug information to verify calculation
+                                                            $debug = "Unit: {$unit}, Calc: {$calc}, Len: {$len}, Qty: {$qty}, Total: {$total}";
                                                         ?>
-                                                        <span><?php echo e(number_format($total, 2)); ?></span>
+                                                        <span title="<?php echo e($debug); ?>"><?php echo e(number_format($total, 2)); ?></span>
                                                     </td>
 
                                                     <td>
