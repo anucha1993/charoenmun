@@ -65,10 +65,21 @@ class QuotationsForm extends Component
 
     public float $quote_subtotal_before_discount = 0;
 
+    /* ─── ตัวแปรสำหรับระบบค้นหาและกรองสินค้า ─── */
+    public string $global_product_search = '';
+    public string $product_type_filter = '';
+    public string $price_range_filter = '';
+    public Collection $filtered_products;
+    public bool $quote_request_print_format = false;
+
     public function mount(?int $id = null): void
     {
         /* default: วันนี้ */
         $this->quote_date = now()->toDateString();
+        
+        /* ─── Initialize ตัวแปรค้นหาและกรอง ─── */
+        $this->filtered_products = collect();
+        
         /* 1) โหมดแก้ไข --------------------------------------------------- */
         if ($id) {
             $this->quotation_id = $id;
@@ -277,6 +288,120 @@ class QuotationsForm extends Component
         $this->calculateTotals();
     }
 
+    /**
+     * ✅ Method สำหรับเพิ่มสินค้าจากระบบค้นหาแบบรวดเร็ว
+     */
+    public function addProductFromSearch($productId)
+    {
+        $product = ProductModel::with('productWireType:id,value')->find($productId);
+        if (!$product) {
+            return;
+        }
+
+        // เพิ่มสินค้าในแถวใหม่ (ไม่ merge กับแถวเดิม)
+        $newItem = [
+            'product_id' => $productId,
+            'product_name' => $product->product_name,
+            'product_search' => $product->product_name . ' ' . ($product->productWireType?->value ?? ''),
+            'product_type' => $product->productType->value,
+            'product_unit' => $product->productUnit->value,
+            'product_note' => $product->product_note,
+            'product_calculation' => $product->product_calculation,
+            'product_length' => $product->product_length ?? null,
+            'product_weight' => $product->product_weight,
+            'product_detail' => $product->product_size,
+            'quantity' => 1,
+            'unit_price' => $product->product_price,
+            'total' => $product->product_price,
+            'product_vat' => false,
+            'product_results' => collect(),
+            'product_results_visible' => false,
+            'selected_from_dropdown' => true,
+        ];
+
+        $this->items[] = $newItem;
+        $this->calculateTotals();
+    }
+
+    /**
+     * ✅ Method สำหรับเคลียร์ตัวกรองสินค้า
+     */
+    public function clearProductFilters()
+    {
+        $this->global_product_search = '';
+        $this->product_type_filter = '';
+        $this->price_range_filter = '';
+        $this->filtered_products = collect();
+    }
+
+    /**
+     * ✅ Watchers สำหรับระบบค้นหาและกรอง
+     */
+    public function updatedGlobalProductSearch()
+    {
+        $this->updateFilteredProducts();
+    }
+
+    public function updatedProductTypeFilter()
+    {
+        $this->updateFilteredProducts();
+    }
+
+    public function updatedPriceRangeFilter()
+    {
+        $this->updateFilteredProducts();
+    }
+
+    /**
+     * ✅ Method สำหรับอัปเดตผลการค้นหาที่กรองแล้ว
+     */
+    private function updateFilteredProducts()
+    {
+        if (empty($this->global_product_search) && empty($this->product_type_filter) && empty($this->price_range_filter)) {
+            $this->filtered_products = collect();
+            return;
+        }
+
+        $query = ProductModel::with(['productType', 'productUnit']);
+
+        // กรองตามคำค้นหา
+        if (!empty($this->global_product_search)) {
+            $query->where(function ($q) {
+                $searchTerm = $this->global_product_search;
+                $q->where('product_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('product_size', 'like', "%{$searchTerm}%")
+                  ->orWhere('product_id', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // กรองตามประเภทสินค้า
+        if (!empty($this->product_type_filter)) {
+            $query->whereHas('productType', function ($q) {
+                $q->where('value', 'like', "%{$this->product_type_filter}%");
+            });
+        }
+
+        // กรองตามช่วงราคา
+        if (!empty($this->price_range_filter)) {
+            switch ($this->price_range_filter) {
+                case '0-1000':
+                    $query->whereBetween('product_price', [0, 1000]);
+                    break;
+                case '1000-5000':
+                    $query->whereBetween('product_price', [1000, 5000]);
+                    break;
+                case '5000-10000':
+                    $query->whereBetween('product_price', [5000, 10000]);
+                    break;
+                case '10000+':
+                    $query->where('product_price', '>', 10000);
+                    break;
+            }
+        }
+
+        $this->filtered_products = $query->limit(20)->get();
+    }
+
     public function save()
     {
         // $this->calculateTotals();
@@ -414,42 +539,10 @@ class QuotationsForm extends Component
                 return;
             }
 
-            // ─── ถ้าแถวนี้มี id เก่า (คือแถวแก้ไขจาก DB) ให้ bypass merge
-            $currentId = $this->items[$index]['id'] ?? null;
-
-            // ใช้ลูปเฉพาะแถวที่ "มี id เดิม" หรือ "เป็นแถวใหม่ที่ไม่มี id"
-            foreach ($this->items as $i => $item) {
-                // ข้ามแถวเดียวกัน และข้ามแถวที่เพิ่งมี id เดิม
-                if ($i == $index) {
-                    continue;
-                }
-
-                // ข้ามแถวที่มาจาก DB แล้ว (ถ้าเราต้องการ merge เฉพาะแถวใหม่กับแถวใหม่)
-                // หรือ เลือกเงื่อนไขที่เหมาะกับกรณีของคุณ
-                $otherId = $item['id'] ?? null;
-
-                // ถ้าเราต้องการให้ "merge เฉพาะแถวใหม่กับแถวใหม่"
-                // ให้เขียนแบบนี้:
-                if (is_null($currentId) && is_null($otherId) && $item['product_id'] == $value) {
-                    // merge แถวใหม่ทั้งสอง (quantity) แล้ว unset แถวนี้
-                    $this->items[$i]['quantity'] += $this->items[$index]['quantity'] ?? 1;
-                    unset($this->items[$index]);
-                    $this->items = array_values($this->items);
-                    $this->calculateTotals();
-                    return;
-                }
-
-                //หากสินค้าซ้ำให้เพิ่มจำนวน
-                if ($item['product_id'] == $value) {
-                    $this->items[$i]['quantity'] += $this->items[$index]['quantity'] ?? 1;
-                    unset($this->items[$index]);
-                    $this->items = array_values($this->items);
-                    $this->calculateTotals();
-                    return;
-                }
-            }
-
-            // ถ้าถึงตรงนี้ → ไม่มีแถวไหนซ้ำ ให้อัปเดตข้อมูลสินค้า
+            // ✅ ปรับเปลี่ยน: ไม่ merge สินค้าซ้ำ อนุญาตให้เพิ่มสินค้าซ้ำได้
+            // ลบการตรวจสอบและ merge สินค้าซ้ำออก
+            
+            // อัปเดตข้อมูลสินค้าให้แถวนี้โดยตรง
             $this->items[$index]['product_detail'] = $product->product_size;
             $this->items[$index]['product_type'] = $product->productType->value;
             $this->items[$index]['product_name'] = $product->product_name;

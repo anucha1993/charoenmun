@@ -480,6 +480,34 @@
             color: #64748b;
         }
         
+        /* Product Filter Section */
+        .product-filter-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .product-filter-section:hover {
+            border-color: #d1d5db;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-result-card {
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .search-result-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .form-grid,
@@ -662,6 +690,12 @@
                                             {{ $selectedCustomer->customer_province_name }}
                                             {{ $selectedCustomer->customer_zipcode }}</div>
                                         <div class="customer-detail">🏢 {{ $selectedCustomer->customer_taxid }}</div>
+                                        @if ($selectedCustomer->customer_wholesale ?? false)
+                                            <div class="customer-detail">💼 <span class="badge bg-success">โฮลเซลล์</span></div>
+                                        @endif
+                                        @if ($selectedCustomer->customer_country)
+                                            <div class="customer-detail">🌍 {{ $selectedCustomer->customer_country }}</div>
+                                        @endif
                                     @else
                                         <div class="empty-state">
                                             <i class="ri-user-add-line"></i>
@@ -746,6 +780,7 @@
                     <div class="section-title">
                         <i class="ri-shopping-cart-line"></i>รายการสินค้า
                     </div>
+                    
                     
                     <div class="product-section">
                         <table class="product-table">
@@ -921,6 +956,16 @@
                                         <i class="ri-percent-line me-2"></i>คำนวณ VAT 7%
                                     </label>
                                 </div>
+
+                                {{-- <div class="form-check mb-3" style="padding: 8px; background: #f0f9ff; border-radius: 6px; border: 1px solid #bae6fd;">
+                                    <input class="form-check-input" type="checkbox" 
+                                        wire:model.live="quote_request_print_format"
+                                        {{ $quote_status === 'success' ? 'disabled' : '' }} 
+                                        id="requestPrintFormatCheck">
+                                    <label class="form-check-label" for="requestPrintFormatCheck" style="font-weight: 600; font-size: 14px;">
+                                        <i class="ri-printer-line me-2"></i>ขอแบบพิมพ์สำหรับใบเสนอราคา
+                                    </label>
+                                </div> --}}
                                 
                                 <label class="form-label">
                                     <i class="ri-file-text-line me-2"></i>หมายเหตุ
