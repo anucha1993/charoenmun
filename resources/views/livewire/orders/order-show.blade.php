@@ -604,10 +604,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    @if ($delivery)
-                        <button type="button" class="btn btn-primary"
-                            onclick="applyPriceAndRedirect({{ $delivery->id }})">พิมพ์เอกสาร</button>
-                    @endif
+                    <button type="button" class="btn btn-primary" id="printWithPriceBtn"
+                        onclick="applyPriceAndRedirect()">พิมพ์เอกสาร</button>
                 </div>
             </div>
         </div>

@@ -587,10 +587,8 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    <!--[if BLOCK]><![endif]--><?php if($delivery): ?>
-                        <button type="button" class="btn btn-primary"
-                            onclick="applyPriceAndRedirect(<?php echo e($delivery->id); ?>)">พิมพ์เอกสาร</button>
-                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                    <button type="button" class="btn btn-primary" id="printWithPriceBtn"
+                        onclick="applyPriceAndRedirect()">พิมพ์เอกสาร</button>
                 </div>
             </div>
         </div>
