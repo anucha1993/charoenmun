@@ -612,7 +612,10 @@
     </div>
 
     <script>
+        let currentDeliveryId = null;
+        
         function openPrintPreview(deliveryId) {
+            currentDeliveryId = deliveryId;
             const selected = [];
             for (let i = 0; i <= 2; i++) {
                 const checkbox = document.getElementById('showPrice' + i);
