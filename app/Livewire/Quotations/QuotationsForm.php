@@ -344,7 +344,7 @@ class QuotationsForm extends Component
                         'product_note' => $row['product_note'],
                         'quantity' => $row['quantity'],
                         'unit_price' => $row['unit_price'],
-                        'total' => $row['quantity'] * $row['unit_price'],
+                        'total' => (float)($row['quantity'] ?? 0) * (float)($row['unit_price'] ?? 0) * (float)($row['product_calculation'] ?? 1),
                         'product_vat' => $row['product_vat'] ? 1 : 0,
                     ],
                 );
@@ -463,7 +463,11 @@ class QuotationsForm extends Component
 
         // ─── คำนวณยอดรวมใหม่ทุกครั้ง
         foreach ($this->items as &$item) {
-            $item['total'] = $item['quantity'] * $item['unit_price'];
+            $quantity = (float) ($item['quantity'] ?? 0);
+            $unitPrice = (float) ($item['unit_price'] ?? 0);
+            $calculation = (float) ($item['product_calculation'] ?? 1);
+            
+            $item['total'] = $quantity * $unitPrice * $calculation;
         }
 
         $this->calculateTotals();
