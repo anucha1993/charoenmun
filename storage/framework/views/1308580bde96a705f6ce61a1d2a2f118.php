@@ -110,11 +110,24 @@
                     <div class="col-6">
                         <h6 class="fs-20">ที่อยู่จัดส่ง</h6>
                         <address>
-                            <?php echo e($quotation->deliveryAddress->delivery_contact_name); ?>
+                            <!--[if BLOCK]><![endif]--><?php if($quotation->deliveryAddress): ?>
+                                <?php echo e($quotation->deliveryAddress->delivery_contact_name); ?>
 
-                            (<?php echo e($quotation->deliveryAddress->delivery_phone); ?>)<br>
-                            <?php echo e($quotation->deliveryAddress->delivery_address); ?><br>
+                                (<?php echo e($quotation->deliveryAddress->delivery_phone); ?>)<br>
+                                <?php echo e($quotation->deliveryAddress->delivery_address); ?><br>
+                            <?php else: ?>
+                                <?php echo e($quotation->customer->customer_name); ?><br>
+                                <?php echo e($quotation->customer->customer_address); ?><br>
+                                <?php echo e($quotation->customer->customer_district_name .
+                                    ' ' .
+                                    $quotation->customer->customer_amphur_name .
+                                    ' ' .
+                                    $quotation->customer->customer_province_name .
+                                    ' ' .
+                                    $quotation->customer->customer_zipcode); ?><br>
+                                (+66) <?php echo e($quotation->customer->customer_phone); ?>
 
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </address>
                     </div> <!-- end col-->
                 </div>

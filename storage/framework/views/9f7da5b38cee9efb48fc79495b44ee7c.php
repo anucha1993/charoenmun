@@ -264,14 +264,18 @@
                     <div class="d-print-none mt-4">
                         <div class="text-center">
                             <button type="submit"
-                                class="btn btn-warning px-4 py-2"
+                                class="btn <?php echo e($editing ? 'btn-success' : 'btn-warning'); ?> px-4 py-2"
                                 style="font-weight:600; font-size:1.1rem;"
                                 <?php if(empty($selected_delivery_id)): ?> disabled <?php endif; ?>
                             >
-                                สร้างใบส่งสินค้า
+                                <!--[if BLOCK]><![endif]--><?php if($editing): ?>
+                                    <i class="ri-save-line me-1"></i> บันทึกการแก้ไข
+                                <?php else: ?>
+                                    <i class="ri-file-list-3-line me-1"></i> สร้างใบส่งสินค้า
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </button>
                             <!--[if BLOCK]><![endif]--><?php if(empty($selected_delivery_id)): ?>
-                                <div class="text-danger mt-2">กรุณาเลือกที่อยู่จัดส่งก่อนสร้างใบส่งสินค้า</div>
+                                <div class="text-danger mt-2">กรุณาเลือกที่อยู่จัดส่งก่อน<?php echo e($editing ? 'บันทึก' : 'สร้างใบส่งสินค้า'); ?></div>
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                     </div>

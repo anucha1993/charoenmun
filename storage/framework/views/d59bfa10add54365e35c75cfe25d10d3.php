@@ -528,7 +528,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                             class="text-pink" title="พิมพ์"><i
                                                                 class="mdi mdi-printer"></i></a> |
                                                         <a href="<?php echo e(route('deliveries.edit', [$delivery->order_id, $delivery->id])); ?>"
-                                                            class="text-dark" target="_blank" title="แก้ไข"><i
+                                                            class="text-dark" title="แก้ไข"><i
                                                                 class="mdi mdi-content-save-edit-outline"></i></a> |
                                                         <button type="button"
                                                             class="btn btn-link text-danger p-0 m-0 align-baseline"

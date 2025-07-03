@@ -244,14 +244,18 @@
                     <div class="d-print-none mt-4">
                         <div class="text-center">
                             <button type="submit"
-                                class="btn btn-warning px-4 py-2"
+                                class="btn {{ $editing ? 'btn-success' : 'btn-warning' }} px-4 py-2"
                                 style="font-weight:600; font-size:1.1rem;"
                                 @if(empty($selected_delivery_id)) disabled @endif
                             >
-                                สร้างใบส่งสินค้า
+                                @if($editing)
+                                    <i class="ri-save-line me-1"></i> บันทึกการแก้ไข
+                                @else
+                                    <i class="ri-file-list-3-line me-1"></i> สร้างใบส่งสินค้า
+                                @endif
                             </button>
                             @if(empty($selected_delivery_id))
-                                <div class="text-danger mt-2">กรุณาเลือกที่อยู่จัดส่งก่อนสร้างใบส่งสินค้า</div>
+                                <div class="text-danger mt-2">กรุณาเลือกที่อยู่จัดส่งก่อน{{ $editing ? 'บันทึก' : 'สร้างใบส่งสินค้า' }}</div>
                             @endif
                         </div>
                     </div>

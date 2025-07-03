@@ -331,10 +331,11 @@ class OrderShow extends Component
 
             if ($delivery->selected_truck_type) {
                 $truckType = $delivery->selected_truck_type;
-                if (!isset($summary['truck_types'][$truckType])) {
-                    $summary['truck_types'][$truckType] = 0;
+                $truckTypeKey = $truckType->name ?? 'unknown';
+                if (!isset($summary['truck_types'][$truckTypeKey])) {
+                    $summary['truck_types'][$truckTypeKey] = 0;
                 }
-                $summary['truck_types'][$truckType]++;
+                $summary['truck_types'][$truckTypeKey]++;
             }
         }
 
@@ -379,5 +380,46 @@ class OrderShow extends Component
             'total_trips_required' => $totalTrips,
             'recommended_truck_for_full_order' => TruckType::getRecommendedTruck($totalOrderWeight),
         ];
+    }
+
+    /**
+     * ลบรายการจัดส่ง
+     */
+    public function deleteDelivery($deliveryId)
+    {
+        try {
+            DB::beginTransaction();
+            
+            // ค้นหา delivery ที่ต้องการลบ
+            $delivery = OrderDeliverysModel::find($deliveryId);
+            
+            if (!$delivery) {
+                $this->dispatch('notify', type: 'error', message: 'ไม่พบรายการจัดส่งที่ต้องการลบ');
+                return;
+            }
+            
+            // ตรวจสอบว่ารายการจัดส่งนี้อยู่ในออร์เดอร์ปัจจุบันหรือไม่
+            if ($delivery->order_id !== $this->order->id) {
+                $this->dispatch('notify', type: 'error', message: 'ไม่สามารถลบรายการจัดส่งของออร์เดอร์อื่นได้');
+                return;
+            }
+            
+            // ลบ delivery items ก่อน (foreign key constraint)
+            $delivery->deliveryItems()->delete();
+            
+            // ลบ delivery
+            $delivery->delete();
+            
+            DB::commit();
+            
+            // รีโหลดข้อมูล
+            $this->order = $this->order->fresh(['deliveries.deliveryItems.orderItem']);
+            
+            $this->dispatch('notify', type: 'success', message: 'ลบรายการจัดส่งเรียบร้อยแล้ว');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('notify', type: 'error', message: 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
     }
 }

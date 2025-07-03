@@ -4,6 +4,7 @@ namespace App\Livewire\Orders;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Layout;
 use App\Models\Orders\OrderModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,7 @@ use App\Models\Orders\OrderDeliveryItems;
 use App\Models\Orders\OrderDeliverysModel;
 use App\Models\customers\deliveryAddressModel;
 
+#[Layout('layouts.horizontal')]
 class OrderDelivery extends Component
 {
     public ?int $order_id = null; // id ที่รับมาจาก route
@@ -52,21 +54,22 @@ class OrderDelivery extends Component
         $this->orderItems = $this->orderModel->items;
         $this->customer_id = $this->orderModel->customer_id;
         $this->customerDelivery = $this->customer_id ? deliveryAddressModel::where('customer_id', $this->customer_id)->get() : collect();
-        if ($delivery) {
-            $this->editing = true;
-            $this->deliveryModel = $delivery->load('deliveryItems.orderItem');
-            $this->fillFromDeliveryModel($delivery);
-        }
 
         // Initialize base stocks from the order items
         foreach ($this->orderItems as $oi) {
             $this->stocks[$oi->product_id] = $oi->quantity;
         }
 
-        if ($delivery->id !== null) {
+        if ($delivery && $delivery->id !== null) {
+            // กำหนดโหมดแก้ไข
             $this->editing = true;
             $this->delivery_id = $delivery->id;
-            $this->deliveryModel = $delivery;
+            $this->deliveryModel = $delivery->load('deliveryItems.orderItem');
+            
+            // ตั้งค่า delivery address
+            $this->fillFromDeliveryModel($delivery);
+            
+            // ดึงข้อมูล items และค่าอื่นๆ
             $this->fillFromDelivery($delivery);
         } else {
             $this->editing = false;
@@ -467,7 +470,7 @@ class OrderDelivery extends Component
             ->all();
     }
 
-    public function saveDelivery(): void
+    public function saveDelivery()
     {
         $service = app(OrderDeliveryService::class);
 
@@ -487,18 +490,18 @@ class OrderDelivery extends Component
         ];
         if ($this->editing) {
             $service->updateDelivery($this->deliveryModel, $payload);
-            $msg = 'อัปเดตใบจัดส่งเรียบร้อย';
+            $msg = 'บันทึกการแก้ไขใบส่งสินค้าเรียบร้อย';
+            $this->dispatch('notify', type: 'success', message: $msg);
         } else {
             $delivery = $service->storeDelivery($this->orderModel, $payload);
-            $msg = 'สร้างใบจัดส่งเรียบร้อย เลขที่: ' . $delivery->order_delivery_number;
+            $msg = 'สร้างใบส่งสินค้าเรียบร้อย เลขที่: ' . $delivery->order_delivery_number;
+            $this->dispatch('notify', type: 'success', message: $msg);
         }
-
-        $this->dispatch('notify', type: 'success', message: 'สร้าง OrderDelivery เรียบร้อย เลขที่: ' . $delivery->order_delivery_number);
-        $this->redirect(route('orders.show', ['order' => $this->order_id]), navigate: true);
+        return redirect()->route('orders.show', ['order' => $this->order_id]);
     }
 
     public function render()
     {
-        return view('livewire.orders.order-delivery')->layout('layouts.horizontal', ['title' => 'DeliveryOrder']);
+        return view('livewire.orders.order-delivery');
     }
 }

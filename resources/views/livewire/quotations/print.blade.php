@@ -112,10 +112,22 @@
                     <div class="col-6">
                         <h6 class="fs-20">ที่อยู่จัดส่ง</h6>
                         <address>
-                            {{ $quotation->deliveryAddress->delivery_contact_name }}
-                            ({{ $quotation->deliveryAddress->delivery_phone }})<br>
-                            {{ $quotation->deliveryAddress->delivery_address }}<br>
-
+                            @if($quotation->deliveryAddress)
+                                {{ $quotation->deliveryAddress->delivery_contact_name }}
+                                ({{ $quotation->deliveryAddress->delivery_phone }})<br>
+                                {{ $quotation->deliveryAddress->delivery_address }}<br>
+                            @else
+                                {{ $quotation->customer->customer_name }}<br>
+                                {{ $quotation->customer->customer_address }}<br>
+                                {{ $quotation->customer->customer_district_name .
+                                    ' ' .
+                                    $quotation->customer->customer_amphur_name .
+                                    ' ' .
+                                    $quotation->customer->customer_province_name .
+                                    ' ' .
+                                    $quotation->customer->customer_zipcode }}<br>
+                                (+66) {{ $quotation->customer->customer_phone }}
+                            @endif
                         </address>
                     </div> <!-- end col-->
                 </div>
