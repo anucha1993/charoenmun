@@ -35,6 +35,11 @@ class OrderShow extends Component
     public $order_grand_total = 0;
     public $order_enable_vat = false;
     public $order_vat_included = false;
+    
+    // ส่วนของการแสดงประวัติการพิมพ์
+    public $showPrintHistory = false;
+    public $selectedDeliveryId = null;
+    public $printHistory = [];
 
     public function mount(OrderModel $order)
     {
@@ -60,6 +65,9 @@ class OrderShow extends Component
             $delivery->updateWeightAndTruckRecommendation();
         }
         
+        // ตรวจสอบและอัพเดทสถานะการจัดส่งของออเดอร์
+        $order->updateDeliveryStatus();
+        
         // คำนวณยอดรวมล่าสุดจาก items ปัจจุบัน
         $this->calculateTotals();
     }
@@ -74,6 +82,9 @@ class OrderShow extends Component
     public function refreshData()
     {
         $this->order = $this->order->fresh(['payments', 'deliveries.deliveryItems']); // ดึงข้อมูลใหม่
+        
+        // ตรวจสอบและอัพเดทสถานะการจัดส่งของออเดอร์
+        $this->order->updateDeliveryStatus();
     }
 
     /**
@@ -136,14 +147,18 @@ class OrderShow extends Component
             'updated_by' => Auth::id(),
         ]);
 
-        $this->order->load('deliveries.deliveryItems');
+        $this->order->load('deliveries.deliveryItems');            // อัพเดทสถานะการจัดส่งของ order หลังจากที่เปลี่ยนสถานะการจัดส่ง
+        $currentStatus = $this->order->updateDeliveryStatus();
+
+        // แปลงสถานะเป็นข้อความภาษาไทยเพื่อแสดงในการแจ้งเตือน
+        $statusText = $this->getOrderStatusText($currentStatus);
 
         $this->dispatchBrowserEvent('notify', [
             'type' => 'success',
-            'message' => 'ยืนยันว่ารอบจัดส่ง #' . $delivery->order_delivery_number . ' จัดส่งเรียบร้อย',
+            'message' => 'ยืนยันว่ารอบจัดส่ง #' . $delivery->order_delivery_number . ' จัดส่งเรียบร้อย (สถานะออเดอร์: ' . $statusText . ')',
         ]);
 
-        // ถ้าออร์เดอร์หลักไม่มี order_items เหลือแล้ว สถานะจะเปลี่ยนเป็น completed (ทำไว้ใน createNewDelivery)
+        // ถ้าออร์เดอร��หลักไม่มี order_items เหลือแล้ว สถานะจะเปลี่ยนเป็น completed (ทำไว้ใน createNewDelivery)
     }
 
     public function openPaymentModal($orderId)
@@ -415,11 +430,94 @@ class OrderShow extends Component
             // รีโหลดข้อมูล
             $this->order = $this->order->fresh(['deliveries.deliveryItems.orderItem']);
             
-            $this->dispatch('notify', type: 'success', message: 'ลบรายการจัดส่งเรียบร้อยแล้ว');
+            // อัพเดทสถานะการจัดส่งของ order หลังจากลบรายการจัดส่ง
+            $currentStatus = $this->order->updateDeliveryStatus();
+            
+            // แปลงสถานะเป็นข้อความภาษาไทยเพื่อแสดงในการแจ้งเตือน
+            $statusText = $this->getOrderStatusText($currentStatus);
+            
+            $this->dispatch('notify', type: 'success', message: 'ลบรายการจัดส่งเรียบร้อยแล้ว (สถานะออเดอร์: ' . $statusText . ')');
             
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('notify', type: 'error', message: 'เกิดข้อผิดพลาด: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * แสดงประวัติการพิมพ์ใบส่งของ
+     * 
+     * @param int $deliveryId รหัสใบส่งของ
+     * @return void
+     */
+    public function showDeliveryPrintHistory(int $deliveryId): void
+    {
+        $this->selectedDeliveryId = $deliveryId;
+        
+        // ดึงข้อมูลประวัติการพิมพ์
+        $printHistory = \App\Models\DeliveryPrint::where('order_delivery_id', $deliveryId)
+                        ->orderBy('print_count', 'asc')
+                        ->get()
+                        ->toArray();
+                        
+        $this->printHistory = $printHistory;
+        $this->showPrintHistory = true;
+    }
+    
+    /**
+     * ปิดหน้าต่างแสดงประวัติการพิมพ์
+     * 
+     * @return void
+     */
+    public function closePrintHistory(): void
+    {
+        $this->showPrintHistory = false;
+        $this->selectedDeliveryId = null;
+        $this->printHistory = [];
+    }
+
+    /**
+     * ตรวจสอบและอัพเดทสถานะการจัดส่งของออเดอร์
+     * 
+     * @return string สถานะการจัดส่งปัจจุบัน
+     */
+    public function checkDeliveryStatus(): string
+    {
+        // เรียกใช้ฟังก์ชันอัพเดทสถานะการจัดส่งจาก OrderModel
+        $status = $this->order->updateDeliveryStatus();
+        
+        // รีโหลดข้อมูลออเดอร์เพื่อให้มีข้อมูลล่าสุด
+        $this->order = $this->order->fresh();
+        
+        // แปลงสถานะเป็นข้อความภาษาไทยเพื่อแสดงในการแจ้งเตือน
+        $statusText = $this->getOrderStatusText($status);
+        
+        // แจ้งเตือนการอัพเดทสถานะ
+        $this->dispatch('notify', 
+            type: 'success', 
+            message: 'อัปเดตสถานะการจัดส่งเป็น "' . $statusText . '"'
+        );
+        
+        return $status;
+    }
+
+    /**
+     * แปลงรหัสสถานะการจัดส่งเป็นข้อความภาษาไทย
+     * 
+     * @param string $status รหัสสถานะ
+     * @return string ข้อความสถานะภาษาไทย
+     */
+    private function getOrderStatusText(string $status): string
+    {
+        return match($status) {
+            'open' => 'เปิดรายการ', // ใช้แทน pending
+            'processing' => 'กำลังดำเนินการ',
+            'someproducts' => 'ส่งสินค้าบางส่วน',
+            'completed' => 'ส่งสินค้าครบแล้ว',
+            'delivered' => 'ส่งสินค้าครบแล้ว', // เพื่อความเข้ากันได้กับโค้ดเดิม
+            'cancelled' => 'ยกเลิกแล้ว',
+            // 'pending' ไม่ใช้แล้ว เนื่องจากไม่ได้อยู่ในค่าที่อนุญาตในฐานข้อมูล
+            default => $status
+        };
     }
 }

@@ -81,6 +81,9 @@
                             style="background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%); border-radius:12px; box-shadow:0 2px 8px rgba(59,130,246,0.04); font-size:15px;">
                             <div class="mb-2 d-flex flex-wrap align-items-center gap-2">
                                 <span><b>สถานะ:</b> {!! order_status_badge($order->order_status) !!}</span>
+                                <button class="btn btn-sm btn-outline-info" wire:click="checkDeliveryStatus" title="ตรวจสอบและอัพเดทสถานะการจัดส่ง">
+                                    <i class="ri-refresh-line"></i>
+                                </button>
                                 {{-- <span class="vr mx-2"></span> --}}
                                 <span><b>ชำระเงิน:</b> {!! payment_status_badge($order->payment_status) !!}</span>
                             </div>
@@ -544,6 +547,11 @@
                                                         <a href="{{ route('deliveries.printer', $delivery->id) }}"
                                                             class="text-pink" title="พิมพ์"><i
                                                                 class="mdi mdi-printer"></i></a> |
+                                                        <a href="javascript:void(0)" 
+                                                            class="text-info"
+                                                            wire:click="showDeliveryPrintHistory({{ $delivery->id }})"
+                                                            title="ประวัติการพิมพ์"><i
+                                                                class="mdi mdi-history"></i></a> |
                                                         <a href="{{ route('deliveries.edit', [$delivery->order_id, $delivery->id]) }}"
                                                             class="text-dark" title="แก้ไข"><i
                                                                 class="mdi mdi-content-save-edit-outline"></i></a> |
@@ -611,55 +619,107 @@
         </div>
     </div>
 
-    <script>
-        let currentDeliveryId = null;
-        
-        function openPrintPreview(deliveryId) {
-            currentDeliveryId = deliveryId;
-            const selected = [];
-            for (let i = 0; i <= 2; i++) {
-                const checkbox = document.getElementById('showPrice' + i);
-                if (checkbox && checkbox.checked) {
-                    selected.push(i);
-                }
-            }
-            // สร้าง query string เช่น show_price[]=0&show_price[]=1
-            const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
-            // สร้าง URL ไปยัง route delivery/print
-            const printUrl = `{{ url('deliveries') }}/${deliveryId}/print?${query}`;
-            // เปิดในแท็บใหม่
-            window.open(printUrl, '_blank');
-            // ปิด modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
-            if (modal) modal.hide();
-        }
-
-        function applyPriceAndRedirect() {
-            if (!currentDeliveryId) {
-                alert('กรุณาเลือกบิลย่อยก่อน');
-                return;
-            }
-            
-            const selected = [];
-            for (let i = 0; i <= 2; i++) {
-                const checkbox = document.getElementById('showPrice' + i);
-                if (checkbox && checkbox.checked) {
-                    selected.push(i);
-                }
-            }
-            
-            // สร้าง query string เช่น show_price[]=0&show_price[]=1
-            const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
-            
-            // สร้าง URL ไปยัง route delivery/print
-            const printUrl = `{{ url('deliveries') }}/${currentDeliveryId}/print?${query}`;
-            
-            // เปิดในแท็บใหม่
-            window.open(printUrl, '_blank');
-            
-            // ปิด modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
-            if (modal) modal.hide();
-        }
-    </script>
+    <!-- Modal ประวัติการพิมพ์ -->
+    <div class="modal fade {{ $showPrintHistory ? 'show' : '' }}" id="printHistoryModal" tabindex="-1" role="dialog" 
+        style="{{ $showPrintHistory ? 'display: block; background-color: rgba(0,0,0,0.5);' : 'display: none;' }}">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ประวัติการพิมพ์ใบส่งของ</h5>
+                    <button type="button" class="btn-close" wire:click="closePrintHistory"></button>
+                </div>
+                <div class="modal-body">
+                    @if(count($printHistory) > 0)
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-bordered">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>ครั้งที่</th>
+                                        <th>ผู้พิมพ์</th>
+                                        <th>วันที่พิมพ์</th>
+                                        <th>สถานะการส่ง</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($printHistory as $index => $history)
+                                        <tr>
+                                            <td>{{ $history['print_count'] }}</td>
+                                            <td>{{ $history['printed_by'] }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($history['printed_at'])->format('d/m/Y H:i:s') }}</td>
+                                            <td>
+                                                @if($history['is_complete_delivery'])
+                                                    <span class="badge bg-success">ส่งของครบ</span>
+                                                @else
+                                                    <span class="badge bg-warning">ส่งของบางส่วน</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-info">
+                            ไม่พบประวัติการพิมพ์ใบส่งของนี้
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" wire:click="closePrintHistory">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    let currentDeliveryId = null;
+    
+    function openPrintPreview(deliveryId) {
+        currentDeliveryId = deliveryId;
+        const selected = [];
+        for (let i = 0; i <= 2; i++) {
+            const checkbox = document.getElementById('showPrice' + i);
+            if (checkbox && checkbox.checked) {
+                selected.push(i);
+            }
+        }
+        // สร้าง query string เช่น show_price[]=0&show_price[]=1
+        const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
+        // สร้าง URL ไปยัง route delivery/print
+        const printUrl = `{{ url('deliveries') }}/${deliveryId}/print?${query}`;
+        // เปิดในแท็บใหม่
+        window.open(printUrl, '_blank');
+        // ปิด modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
+        if (modal) modal.hide();
+    }
+
+    function applyPriceAndRedirect() {
+        if (!currentDeliveryId) {
+            alert('กรุณาเลือกบิลย่อยก่อน');
+            return;
+        }
+        
+        const selected = [];
+        for (let i = 0; i <= 2; i++) {
+            const checkbox = document.getElementById('showPrice' + i);
+            if (checkbox && checkbox.checked) {
+                selected.push(i);
+            }
+        }
+        
+        // สร้าง query string เช่น show_price[]=0&show_price[]=1
+        const query = selected.map(i => `show_price[]=${encodeURIComponent(i)}`).join('&');
+        
+        // สร้าง URL ไปยัง route delivery/print
+        const printUrl = `{{ url('deliveries') }}/${currentDeliveryId}/print?${query}`;
+        
+        // เปิดในแท็บใหม่
+        window.open(printUrl, '_blank');
+        
+        // ปิด modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('printPriceModal'));
+        if (modal) modal.hide();
+    }
+</script>

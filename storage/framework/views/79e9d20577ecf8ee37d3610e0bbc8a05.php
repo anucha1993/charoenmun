@@ -1,25 +1,25 @@
 <div>
-    @php
+    <?php
         $copies = ['ต้นฉบับ (ลูกค้า)', 'สำเนา (คลังสินค้า)', 'สำเนา (พนักงานขับรถ)','สำเนา (ฝ่ายบัญชี)'];
         $copiesTotal = count($copies);
         $totalPages = ceil($delivery->deliveryItems->count() / 8) * $copiesTotal ;
         $loopIndex = 1;
         $showPricePages = request('show_price', []);
         
-    @endphp
+    ?>
     <!-- ปุ่มพิมพ์โดยตรง -->
     <div class="d-print-none text-center mb-4">
         <button class="btn btn-danger" wire:click="showPrintConfirmation">
             <i class="ri-printer-line"></i> พิมพ์ใบส่งของ
         </button>
-        <a href="{{ url()->previous() }}" class="btn btn-secondary">
+        <a href="<?php echo e(url()->previous()); ?>" class="btn btn-secondary">
             <i class="ri-arrow-left-line"></i> กลับ
         </a>
     </div>
     
     <!-- Modal ยืนยันการพิมพ์ -->
-    <div class="modal fade {{ $showPrintModal ? 'show' : '' }}" id="printConfirmModal" tabindex="-1" role="dialog" 
-        style="{{ $showPrintModal ? 'display: block; background-color: rgba(0,0,0,0.5);' : 'display: none;' }}">
+    <div class="modal fade <?php echo e($showPrintModal ? 'show' : ''); ?>" id="printConfirmModal" tabindex="-1" role="dialog" 
+        style="<?php echo e($showPrintModal ? 'display: block; background-color: rgba(0,0,0,0.5);' : 'display: none;'); ?>">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -31,17 +31,18 @@
                         <label for="printedBy">ชื่อผู้พิมพ์</label>
                         <input type="text" class="form-control" id="printedBy" wire:model="printedBy">
                     </div>
-                    <p>นี่เป็นการพิมพ์ครั้งที่ {{ $printCount + 1 }} ของใบส่งของฉบับนี้</p>
-                    @if($isCompleteDelivery)
+                    <p>นี่เป็นการพิมพ์ครั้งที่ <?php echo e($printCount + 1); ?> ของใบส่งของฉบับนี้</p>
+                    <!--[if BLOCK]><![endif]--><?php if($isCompleteDelivery): ?>
                         <div class="alert alert-success">
                             <i class="ri-checkbox-circle-line me-2"></i> ใบส่งของนี้เป็นการส่งสินค้าครบตามใบสั่งซื้อแล้ว
                         </div>
-                    @endif
-                    @if($errorMessage)
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                    <!--[if BLOCK]><![endif]--><?php if($errorMessage): ?>
                         <div class="alert alert-danger">
-                            {{ $errorMessage }}
+                            <?php echo e($errorMessage); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" wire:click="$set('showPrintModal', false)">ยกเลิก</button>
@@ -52,8 +53,8 @@
     </div>
     
     <!-- Modal กรอกรหัสยืนยัน -->
-    <div class="modal fade {{ $showAuthCodeModal ? 'show' : '' }}" id="authCodeModal" tabindex="-1" role="dialog" 
-        style="{{ $showAuthCodeModal ? 'display: block; background-color: rgba(0,0,0,0.5);' : 'display: none;' }}">
+    <div class="modal fade <?php echo e($showAuthCodeModal ? 'show' : ''); ?>" id="authCodeModal" tabindex="-1" role="dialog" 
+        style="<?php echo e($showAuthCodeModal ? 'display: block; background-color: rgba(0,0,0,0.5);' : 'display: none;'); ?>">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -61,16 +62,17 @@
                     <button type="button" class="btn-close" wire:click="$set('showAuthCodeModal', false)"></button>
                 </div>
                 <div class="modal-body">
-                    <p>คุณได้พิมพ์ใบส่งของนี้ไปแล้ว {{ $printCount }} ครั้ง</p>
+                    <p>คุณได้พิมพ์ใบส่งของนี้ไปแล้ว <?php echo e($printCount); ?> ครั้ง</p>
                     <p>หากต้องการพิมพ์อีกครั้ง กรุณากรอกรหัสยืนยัน</p>
                     <div class="form-group mb-3">
                         <input type="password" class="form-control" placeholder="กรอกรหัสยืนยัน" wire:model="authCode">
                     </div>
-                    @if($errorMessage)
+                    <!--[if BLOCK]><![endif]--><?php if($errorMessage): ?>
                         <div class="alert alert-danger">
-                            {{ $errorMessage }}
+                            <?php echo e($errorMessage); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" wire:click="$set('showAuthCodeModal', false)">ยกเลิก</button>
@@ -80,8 +82,8 @@
         </div>
     </div>
     
-@foreach ($copies as $copyIndex => $copyName)
-    @foreach ($delivery->deliveryItems->chunk(8) as $chunkIndex => $chunk)
+<!--[if BLOCK]><![endif]--><?php $__currentLoopData = $copies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $copyIndex => $copyName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $delivery->deliveryItems->chunk(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <div class="card row text-black page-copy" >
             <div class="card-body">
                 <!-- Invoice Detail-->
@@ -95,9 +97,9 @@
 
                         <div class="float-end">
 
-                            <img src="{{ route('qr.deliveries', $delivery->id) }}" alt="QR"
+                            <img src="<?php echo e(route('qr.deliveries', $delivery->id)); ?>" alt="QR"
                                 style="height:100px;"><br>
-                            <small class="float-end">หน้า {{ $copyIndex + 1 }}/{{ $totalPages }}</small>
+                            <small class="float-end">หน้า <?php echo e($copyIndex + 1); ?>/<?php echo e($totalPages); ?></small>
                         </div>
 
                     </div>
@@ -114,24 +116,24 @@
                                 082-4789197 </br>
                                 เลขประจำตัวผู้เสียภาษี 0125560015546
                             </p>
-                            @if($isCompleteDelivery)
+                            <!--[if BLOCK]><![endif]--><?php if($isCompleteDelivery): ?>
                                 <div class="badge bg-success p-2 mt-2" style="font-size: 16px;">
                                     <i class="ri-check-double-line me-1"></i> ส่งของครบแล้ว
                                 </div>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                     </div>
 
                     <div class="col-sm-4 offset-sm-2 mt-2">
                         <div class="mt-0 float-sm-end">
                             <span class="fs-13"><strong>วันที่เสนอราคา: </strong>
-                                &nbsp;&nbsp;&nbsp;{{ date('d/m/Y', strtotime($delivery->quote_date)) }}</span> <br>
+                                &nbsp;&nbsp;&nbsp;<?php echo e(date('d/m/Y', strtotime($delivery->quote_date))); ?></span> <br>
                             <span class="fs-13"><strong>เลขที่ใบส่งของ</strong>
-                                &nbsp;&nbsp;&nbsp;{{ $delivery->order_delivery_number }}</span><br>
+                                &nbsp;&nbsp;&nbsp;<?php echo e($delivery->order_delivery_number); ?></span><br>
                             <span class="fs-13"><strong>เลขที่ใบสั่งซื้อ </strong>
-                                &nbsp;&nbsp;&nbsp;{{ $delivery->order->order_number }}</span><br>
+                                &nbsp;&nbsp;&nbsp;<?php echo e($delivery->order->order_number); ?></span><br>
                             <span class="fs-13"><strong>ชื่อผู้ขาย (Sale) </strong><span class="float-end">
-                                    {{ $delivery->sale->name }}</span></span><br>
+                                    <?php echo e($delivery->sale->name); ?></span></span><br>
                         </div>
                     </div>
                 </div>
@@ -140,44 +142,46 @@
                     <div class="col-6">
                         <h6 class="fs-14">ข้อมูลลูกค้า</h6>
                         <address>
-                            {{ $delivery->order->customer->customer_name }}<br>
-                            {{ $delivery->order->customer->customer_address }}<br>
-                            {{ $delivery->order->customer->customer_district_name .
+                            <?php echo e($delivery->order->customer->customer_name); ?><br>
+                            <?php echo e($delivery->order->customer->customer_address); ?><br>
+                            <?php echo e($delivery->order->customer->customer_district_name .
                                 ' ' .
                                 $delivery->order->customer->customer_amphur_name .
                                 ' ' .
                                 $delivery->order->customer->customer_province_name .
                                 ' ' .
-                                $delivery->order->customer->customer_zipcode }}<br>
-                            (+66) {{ $delivery->order->customer->customer_phone }}
+                                $delivery->order->customer->customer_zipcode); ?><br>
+                            (+66) <?php echo e($delivery->order->customer->customer_phone); ?>
+
                         </address>
                     </div> <!-- end col-->
 
                     <div class="col-6">
                         <h6 class="fs-14">ที่อยู่จัดส่ง</h6>
-                        @if ($delivery->deliveryAddress)
+                        <!--[if BLOCK]><![endif]--><?php if($delivery->deliveryAddress): ?>
                             <address>
-                                {{ $delivery->deliveryAddress->delivery_contact_name }}
-                                ({{ $delivery->deliveryAddress->delivery_phone }})<br>
-                                {{ $delivery->deliveryAddress->delivery_number }}<br>
-                                {{ $delivery->deliveryAddress->delivery_address }}<br>
+                                <?php echo e($delivery->deliveryAddress->delivery_contact_name); ?>
+
+                                (<?php echo e($delivery->deliveryAddress->delivery_phone); ?>)<br>
+                                <?php echo e($delivery->deliveryAddress->delivery_number); ?><br>
+                                <?php echo e($delivery->deliveryAddress->delivery_address); ?><br>
 
                             </address>
-                        @else
+                        <?php else: ?>
                             <address>
-                                {{ $delivery->order->customer->customer_contract_name }} (+66)
-                                {{ $delivery->order->customer->customer_phone }} <br>
-                                {{ $delivery->order->customer->customer_address }}<br>
-                                {{ $delivery->order->customer->customer_district_name .
+                                <?php echo e($delivery->order->customer->customer_contract_name); ?> (+66)
+                                <?php echo e($delivery->order->customer->customer_phone); ?> <br>
+                                <?php echo e($delivery->order->customer->customer_address); ?><br>
+                                <?php echo e($delivery->order->customer->customer_district_name .
                                     ' ' .
                                     $delivery->order->customer->customer_amphur_name .
                                     ' ' .
                                     $delivery->order->customer->customer_province_name .
                                     ' ' .
-                                    $delivery->order->customer->customer_zipcode }}<br>
+                                    $delivery->order->customer->customer_zipcode); ?><br>
 
                             </address>
-                        @endif
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                     </div> <!-- end col-->
                 </div>
@@ -200,18 +204,18 @@
 
                                 <tbody>
 
-                                    @foreach ($chunk as $item)
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td>{{ $loopIndex++ }}</td>
-                                            <td>{{ $item->quantity }}</td>
-                                            <td>{{ $item->orderItem->product_unit }}</td>
-                                            <td><b>{{ $item->orderItem->product_name }}</b>
-                                                ({{ $item->orderItem->product_detail }})
+                                            <td><?php echo e($loopIndex++); ?></td>
+                                            <td><?php echo e($item->quantity); ?></td>
+                                            <td><?php echo e($item->orderItem->product_unit); ?></td>
+                                            <td><b><?php echo e($item->orderItem->product_name); ?></b>
+                                                (<?php echo e($item->orderItem->product_detail); ?>)
                                             </td>
-                                            <td class="price-section">{{ number_format($item->unit_price, 2) }}</td>
-                                        <td class="text-end price-section">{{ number_format($item->total, 2) }}</td>
+                                            <td class="price-section"><?php echo e(number_format($item->unit_price, 2)); ?></td>
+                                        <td class="text-end price-section"><?php echo e(number_format($item->total, 2)); ?></td>
                                         </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
 
 
                                 </tbody>
@@ -227,22 +231,23 @@
                         <div class="clearfix pt-3">
                             <h6 class="text-muted fs-14">หมายเหตุ:</h6>
                             <small>
-                                {{ $delivery->order_deliver_note }}
+                                <?php echo e($delivery->order_deliver_note); ?>
+
                             </small>
                         </div>
                     </div> <!-- end col -->
                     <div class="col-sm-6">
                         <div class="float-end mt-sm-0 price-section">
                             <p><b>จำนวนเงินรวม :</b> <span
-                                    class="float-end">{{ number_format($delivery->order_delivery_subtotal, 2) }}</span>
+                                    class="float-end"><?php echo e(number_format($delivery->order_delivery_subtotal, 2)); ?></span>
                             </p>
                             <p><b>ส่วนลด:</b> <span
-                                    class="float-end">{{ number_format($delivery->order_delivery_discount, 2) }}</span>
+                                    class="float-end"><?php echo e(number_format($delivery->order_delivery_discount, 2)); ?></span>
                             </p>
                             <p><b>ภาษีมูลค่าเพิ่ม:</b> <span
-                                    class="float-end">{{ number_format($delivery->order_delivery_vat, 2) }}</span></p>
+                                    class="float-end"><?php echo e(number_format($delivery->order_delivery_vat, 2)); ?></span></p>
                             <p><b>จำนวนเงินทั้งสิ้น: &nbsp; </b> <span
-                                    class="float-end">{{ number_format($delivery->order_delivery_grand_total, 2) }}</span>
+                                    class="float-end"><?php echo e(number_format($delivery->order_delivery_grand_total, 2)); ?></span>
                             </p>
                         </div>
                         <div class="clearfix"></div>
@@ -279,30 +284,20 @@
                     </div> <!-- end col -->
                 </div>
 
-                {{-- <div class="d-print-none mt-4">
-                    <div class="text-center">
-                        <a href="javascript:window.print()" class="btn btn-danger"><i class="ri-printer-line"></i>
-                            Print</a>
-
-                    </div>
-                </div> --}}
+                
                 <!-- end buttons -->
 
             </div> <!-- end card-body-->
         </div> <!-- end card -->
 
-        {{-- <div class="d-print-none text-center mb-4">
-            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#printPriceModal">
-                <i class="ri-printer-line"></i> พิมพ์ใบส่งของ
-            </button>
-        </div> --}}
+        
 
 
-    @endforeach
-    @if (!$loop->last)
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+    <!--[if BLOCK]><![endif]--><?php if(!$loop->last): ?>
         <div class="page-break"></div>
-    @endif
-    @endforeach
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
     <!-- end row -->
     <style>
         @media print {
@@ -384,3 +379,4 @@
 
 
 
+<?php /**PATH C:\laragon\www\charoenmun\resources\views/livewire/orders/order-delivery-print.blade.php ENDPATH**/ ?>

@@ -2,7 +2,7 @@
 <html lang="en" data-sidenav-size="{{ $sidenav ?? 'default' }}" data-layout-mode="{{ $layoutMode ?? 'fluid' }}" data-layout-position="{{ $position ?? 'fixed' }}" data-menu-color="{{ $menuColor ?? 'dark' }}" data-topbar-color="{{ $topbarColor ?? 'light' }}">
 
 <head>
-    @include('layouts.shared/title-meta', ['title' => $title])
+    @include('layouts.shared/title-meta', ['title' => $title ?? 'Charoenmun'])
     @yield('css')
     @include('layouts.shared/head-css', ['mode' => $mode ?? '', 'demo' => $demo ?? ''])
 </head>

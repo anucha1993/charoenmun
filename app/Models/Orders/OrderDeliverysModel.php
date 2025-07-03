@@ -69,6 +69,27 @@ class OrderDeliverysModel extends Model
     {
         return $this->hasMany(OrderPayment::class, 'order_delivery_id');
     }
+    
+    public function prints()
+    {
+        return $this->hasMany(\App\Models\DeliveryPrint::class, 'order_delivery_id');
+    }
+    
+    /**
+     * ตรวจสอบว่าใบส่งของนี้มีการส่งของครบตามใบสั่งซื้อหรือไม่
+     * 
+     * @return bool
+     */
+    public function isCompleteDelivery()
+    {
+        // ตรวจสอบจากสถานะที่บันทึกไว้ในฐานข้อมูล
+        if ($this->order_delivery_status_order == 1) {
+            return true;
+        }
+        
+        // ตรวจสอบจากรายการสินค้าทั้งหมดว่าส่งครบหรือไม่
+        return $this->order->isDeliveryComplete();
+    }
 
     public function updatePaymentStatus(): void
 {
