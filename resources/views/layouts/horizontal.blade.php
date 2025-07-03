@@ -107,5 +107,8 @@
             });
         });
     </script>
+    
+    <!-- Fix scroll position for select elements -->
+    <script src="{{ asset('js/scroll-position-fix.js') }}"></script>
 </body>
 </html>

@@ -1057,81 +1057,37 @@
 
         {{-- Scripts --}}
         <script>
-        // ✅ Helper function สำหรับทำความสะอาด modal อย่างสมบูรณ์
-        function cleanupModal(modalId) {
-            const modalEl = document.getElementById(modalId);
-            if (!modalEl) return;
+        // Helper function to safely find Livewire component
+        function safeLivewireFind() {
+            try {
+                const wireElement = document.querySelector('[wire\\:id]');
+                if (wireElement) {
+                    const wireId = wireElement.getAttribute('wire:id');
+                    if (wireId) {
+                        return Livewire.find(wireId);
+                    }
+                }
+                return null;
+            } catch (err) {
+                console.error("Error finding Livewire component:", err);
+                return null;
+            }
+        }
 
-            const modal = bootstrap.Modal.getInstance(modalEl);
+        // Close modal and reset it
+        function cleanupModal(modalId) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
             if (modal) {
                 modal.hide();
             }
-
-            // ทำความสะอาดอย่างสมบูรณ์หลังปิด modal
-            setTimeout(() => {
-                // ลบ backdrop ทั้งหมด
-                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                
-                // รีเซ็ต body styles และ classes
-                document.body.classList.remove('modal-open');
-                document.body.style.removeProperty('overflow');
-                document.body.style.removeProperty('padding-right');
-                document.body.style.removeProperty('margin-right');
-                
-                // รีเซ็ต modal classes
-                modalEl.classList.remove('show');
-                modalEl.style.removeProperty('display');
-                modalEl.style.removeProperty('padding-right');
-                modalEl.setAttribute('aria-hidden', 'true');
-                modalEl.removeAttribute('aria-modal');
-                
-                // บังคับให้หน้าเลื่อนได้
-                document.documentElement.style.removeProperty('overflow');
-                document.documentElement.style.removeProperty('padding-right');
-                
-                // เคลียร์ style attribute ทั้งหมดถ้าเป็นค่าเริ่มต้น
-                if (document.body.style.length === 0) {
-                    document.body.removeAttribute('style');
-                }
-                if (document.documentElement.style.length === 0) {
-                    document.documentElement.removeAttribute('style');
-                }
-            }, 350); // เพิ่มเวลาให้มากขึ้นเล็กน้อย
+            
+            // Reset form fields if needed
+            const form = document.querySelector(`#${modalId} form`);
+            if (form) {
+                form.reset();
+            }
         }
 
-        document.addEventListener('open-delivery-modal', () => {
-            const modal = new bootstrap.Modal(document.getElementById('bs-example-modal-lg'));
-            modal.show();
-        });
-        
-        document.addEventListener('close-delivery-modal', () => {
-            cleanupModal('bs-example-modal-lg');
-        });
-
-        // เพิ่มการจัดการเมื่อสร้างที่อยู่จัดส่งสำเร็จ
-        document.addEventListener('delivery-address-created', () => {
-            cleanupModal('bs-example-modal-lg');
-        });
-
-        // เพิ่มการจัดการเมื่อแก้ไขที่อยู่จัดส่งสำเร็จ
-        document.addEventListener('delivery-address-updated', () => {
-            cleanupModal('bs-example-modal-lg');
-        });
-
-        document.addEventListener('open-customer-modal', () => {
-            new bootstrap.Modal(document.getElementById('customerModal')).show();
-        });
-        
-        document.addEventListener('close-customer-modal', () => {
-            cleanupModal('customerModal');
-        });
-
-        // เพิ่มการจัดการเมื่อสร้างลูกค้าสำเร็จ
-        document.addEventListener('customer-created', () => {
-            cleanupModal('customerModal');
-        });
-
-        // เพิ่มการจัดการเมื่อแก้ไขลูกค้าสำเร็จ
         document.addEventListener('customer-updated', () => {
             cleanupModal('customerModal');
         });
@@ -1141,39 +1097,56 @@
             select.select2();
             select.on('change', function() {
                 let selectedId = $(this).val();
-                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-                livewireComponent.call('setCustomerId', selectedId);
+                const livewireComponent = safeLivewireFind();
+                if (livewireComponent) {
+                    livewireComponent.call('setCustomerId', selectedId);
+                }
             });
         });
 
         document.addEventListener('customer-created-success', function(e) {
-            const detail = e.detail?.[0] ?? {};
-            const customerId = parseInt(detail.customerId);
-            const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-            
-            livewireComponent.call('refreshCustomers').then(() => {
-                setTimeout(() => {
-                    const found = $(`#customerSelect option[value="${customerId}"]`).length > 0;
-                    if (found) {
-                        $('#customerSelect').val(customerId).trigger('change');
-                        livewireComponent.call('setCustomerId', customerId);
-                    }
-                }, 300);
-            });
+            try {
+                const detail = e.detail?.[0] ?? {};
+                const customerId = parseInt(detail.customerId);
+                const livewireComponent = safeLivewireFind();
+                
+                if (livewireComponent && typeof livewireComponent.call === 'function') {
+                    livewireComponent.call('refreshCustomers')
+                        .then(() => {
+                            setTimeout(() => {
+                                const found = $(`#customerSelect option[value="${customerId}"]`).length > 0;
+                                if (found) {
+                                    $('#customerSelect').val(customerId).trigger('change');
+                                    livewireComponent.call('setCustomerId', customerId);
+                                }
+                            }, 300);
+                        })
+                        .catch(err => console.error("Error refreshing customers:", err));
+                }
+            } catch (err) {
+                console.error("Error in customer-created-success handler:", err);
+            }
         });
 
         document.addEventListener('delivery-created-success', function(e) {
-            const detail = e.detail?.[0] ?? {};
-            const deliveryId = parseInt(detail.deliveryId);
-            const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-            
-            setTimeout(() => {
-                const $dropdown = $("select[name='selected_delivery_id']");
-                const found = $dropdown.find(`option[value='${deliveryId}']`).length > 0;
-                if (found) {
-                    $dropdown.val(deliveryId).trigger('change');
+            try {
+                const detail = e.detail?.[0] ?? {};
+                const deliveryId = parseInt(detail.deliveryId);
+                const livewireComponent = safeLivewireFind();
+                
+                if (livewireComponent && typeof livewireComponent.call === 'function') {
+                    setTimeout(() => {
+                        const $dropdown = $("select[name='selected_delivery_id']");
+                        const found = $dropdown.find(`option[value='${deliveryId}']`).length > 0;
+                        if (found) {
+                            $dropdown.val(deliveryId).trigger('change');
+                            livewireComponent.call('$set', 'selected_delivery_id', deliveryId);
+                        }
+                    }, 500);
                 }
-            }, 500);
+            } catch (err) {
+                console.error("Error in delivery-created-success handler:", err);
+            }
         });
 
         // Handle product search dropdown
@@ -1185,16 +1158,18 @@
                 });
                 
                 // Also update Livewire state
-                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-                if (livewireComponent) {
+                const livewireComponent = safeLivewireFind();
+                if (livewireComponent && livewireComponent.items) {
                     // Find all visible dropdowns and hide them in Livewire state
                     const visibleDropdowns = document.querySelectorAll('.product-search-dropdown[style*="display: block"], .product-search-dropdown:not([style*="display: none"])');
                     visibleDropdowns.forEach((dropdown, index) => {
                         // Get the row index from the dropdown's parent
                         const row = dropdown.closest('tr');
-                        const rowIndex = Array.from(row.parentNode.children).indexOf(row);
-                        if (livewireComponent.items && livewireComponent.items[rowIndex]) {
-                            livewireComponent.call('$set', `items.${rowIndex}.product_results_visible`, false);
+                        if (row) {
+                            const rowIndex = Array.from(row.parentNode.children).indexOf(row);
+                            if (livewireComponent.items && livewireComponent.items[rowIndex]) {
+                                livewireComponent.call('$set', `items.${rowIndex}.product_results_visible`, false);
+                            }
                         }
                     });
                 }
@@ -1209,10 +1184,10 @@
                 });
                 
                 // Also update Livewire state
-                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                const livewireComponent = safeLivewireFind();
                 if (livewireComponent && livewireComponent.items) {
                     livewireComponent.items.forEach((item, index) => {
-                        if (item.product_results_visible) {
+                        if (item && item.product_results_visible) {
                             livewireComponent.call('$set', `items.${index}.product_results_visible`, false);
                         }
                     });
@@ -1223,17 +1198,20 @@
         // ✅ ป้องกันการพิมพ์สินค้าที่ไม่มีในระบบ - อนุญาตให้ค้นหาได้ปกติ
         document.addEventListener('input', function(e) {
             if (e.target.matches('[wire\\:model*="product_search"]')) {
-                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-                if (livewireComponent) {
+                const livewireComponent = safeLivewireFind();
+                if (livewireComponent && livewireComponent.items) {
                     // ดึงหมายเลขแถวจาก wire:model
-                    const match = e.target.getAttribute('wire:model').match(/items\.(\d+)\.product_search/);
-                    if (match) {
-                        const rowIndex = parseInt(match[1]);
-                        const item = livewireComponent.items[rowIndex];
-                        
-                        // เคลียร์ product_id เมื่อเริ่มพิมพ์ใหม่ (เพื่อให้ต้องเลือกจาก dropdown ใหม่)
-                        if (e.target.value && item.product_id && !item.selected_from_dropdown) {
-                            livewireComponent.call('$set', `items.${rowIndex}.product_id`, null);
+                    const wireModel = e.target.getAttribute('wire:model');
+                    if (wireModel) {
+                        const match = wireModel.match(/items\.(\d+)\.product_search/);
+                        if (match) {
+                            const rowIndex = parseInt(match[1]);
+                            const item = livewireComponent.items[rowIndex];
+                            
+                            // เคลียร์ product_id เมื่อเริ่มพิมพ์ใหม่ (เพื่อให้ต้องเลือกจาก dropdown ใหม่)
+                            if (e.target.value && item && item.product_id && !item.selected_from_dropdown) {
+                                livewireComponent.call('$set', `items.${rowIndex}.product_id`, null);
+                            }
                         }
                     }
                 }
@@ -1244,15 +1222,18 @@
         document.addEventListener('paste', function(e) {
             if (e.target.matches('[wire\\:model*="product_search"]')) {
                 // อนุญาตให้ paste แต่เคลียร์ product_id เพื่อให้ต้องเลือกจาก dropdown ใหม่
-                const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-                if (livewireComponent) {
-                    const match = e.target.getAttribute('wire:model').match(/items\.(\d+)\.product_search/);
-                    if (match) {
-                        const rowIndex = parseInt(match[1]);
-                        setTimeout(() => {
-                            livewireComponent.call('$set', `items.${rowIndex}.product_id`, null);
-                            livewireComponent.call('$set', `items.${rowIndex}.selected_from_dropdown`, false);
-                        }, 100);
+                const livewireComponent = safeLivewireFind();
+                if (livewireComponent && livewireComponent.items) {
+                    const wireModel = e.target.getAttribute('wire:model');
+                    if (wireModel) {
+                        const match = wireModel.match(/items\.(\d+)\.product_search/);
+                        if (match) {
+                            const rowIndex = parseInt(match[1]);
+                            setTimeout(() => {
+                                livewireComponent.call('$set', `items.${rowIndex}.product_id`, null);
+                                livewireComponent.call('$set', `items.${rowIndex}.selected_from_dropdown`, false);
+                            }, 100);
+                        }
                     }
                 }
             }

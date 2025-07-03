@@ -1,38 +1,38 @@
 <div>
- <style>
-    @font-face {
-        font-family: 'THSarabunNew';
-        font-style: normal;
-        font-weight: normal;
-        src: url('{{ asset("fonts/THSarabunNew.ttf") }}') format("truetype");
-    }
+    <style>
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: normal;
+            font-weight: normal;
+            src: url('{{ asset('fonts/THSarabunNew.ttf') }}') format("truetype");
+        }
 
-    @font-face {
-        font-family: 'THSarabunNew';
-        font-style: normal;
-        font-weight: bold;
-        src: url('{{ asset("fonts/THSarabunNew Bold.ttf") }}') format("truetype");
-    }
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: normal;
+            font-weight: bold;
+            src: url('{{ asset('fonts/THSarabunNew Bold.ttf') }}') format("truetype");
+        }
 
-    @font-face {
-        font-family: 'THSarabunNew';
-        font-style: italic;
-        font-weight: normal;
-        src: url('{{ asset("fonts/THSarabunNew Italic.ttf") }}') format("truetype");
-    }
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: italic;
+            font-weight: normal;
+            src: url('{{ asset('fonts/THSarabunNew Italic.ttf') }}') format("truetype");
+        }
 
-    @font-face {
-        font-family: 'THSarabunNew';
-        font-style: italic;
-        font-weight: bold;
-        src: url('{{ asset("fonts/THSarabunNew BoldItalic.ttf") }}') format("truetype");
-    }
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: italic;
+            font-weight: bold;
+            src: url('{{ asset('fonts/THSarabunNew BoldItalic.ttf') }}') format("truetype");
+        }
 
-    body {
-        font-family: 'THSarabunNew', sans-serif;
-        font-size: 16pt;
-    }
-</style>
+        body {
+            font-family: 'THSarabunNew', sans-serif;
+            font-size: 16pt;
+        }
+    </style>
 
     @php
         $totalPages = ceil($quotation->items->count() / 8);
@@ -57,8 +57,9 @@
 
                         <div class="float-end">
 
-                            <img src="{{ route('qr.quotation', $quotation->id) }}" alt="QR" style="height:100px;"><br>
-                             <small class="float-end">หน้า {{ $chunkIndex + 1 }}/{{ $totalPages }}</small>
+                            <img src="{{ route('qr.quotation', $quotation->id) }}" alt="QR"
+                                style="height:100px;"><br>
+                            <small class="float-end">หน้า {{ $chunkIndex + 1 }}/{{ $totalPages }}</small>
                         </div>
 
                     </div>
@@ -112,7 +113,7 @@
                     <div class="col-6">
                         <h6 class="fs-20">ที่อยู่จัดส่ง</h6>
                         <address>
-                            @if($quotation->deliveryAddress)
+                            @if ($quotation->deliveryAddress)
                                 {{ $quotation->deliveryAddress->delivery_contact_name }}
                                 ({{ $quotation->deliveryAddress->delivery_phone }})<br>
                                 {{ $quotation->deliveryAddress->delivery_address }}<br>
@@ -164,12 +165,13 @@
                                     @foreach ($chunk as $item)
                                         <tr>
                                             <td>{{ $loopIndex++ }}</td>
-                                            <td>{{ $item->quantity }}</td>
+                                            <td>{{ number_format($item->unit_price, 2) }}</td>
+
                                             <td>{{ $item->product_unit }}</td>
                                             <td><b>{{ $item->product_name }}</b> <br />
                                                 {{ $item->product_note }}
                                             </td>
-                                            <td>{{ number_format($item->unit_price, 2) }}</td>
+                                            <td>{{ $item->quantity }}</td>
                                             <td class="text-end">{{ number_format($item->total, 2) }}</td>
                                         </tr>
                                     @endforeach
@@ -209,19 +211,19 @@
                 </div>
                 <!-- end row-->
                 <hr>
-                 <div class="row ">
+                <div class="row ">
                     <div class="col-sm-6">
                         <div class="clearfix pt-3">
-                           <span>ผู้เสนอราคา</span><br>
-                           <span>{{$quotation->sale->name}}</span><br>
-                           
+                            <span>ผู้เสนอราคา</span><br>
+                            <span>{{ $quotation->sale->name }}</span><br>
+
                         </div>
                     </div> <!-- end col -->
                     <div class="col-sm-6">
                         <div class="float-end mt-sm-0">
-                           <span>หมายเหตุ:เงื่อนไขการชำระเงิน</span><br>
-                               <span>1. โอนก่อนจัดส่งสินค้า</span><br>
-                                   <span>2. ชำระเป็นเงินสด เมื่อตรวจรับสินค้าเรียบร้อย</span><br>
+                            <span>หมายเหตุ:เงื่อนไขการชำระเงิน</span><br>
+                            <span>1. โอนก่อนจัดส่งสินค้า</span><br>
+                            <span>2. ชำระเป็นเงินสด เมื่อตรวจรับสินค้าเรียบร้อย</span><br>
                         </div>
                         <div class="clearfix"></div>
                     </div> <!-- end col -->
@@ -238,9 +240,8 @@
 
             </div> <!-- end card-body-->
         </div> <!-- end card -->
-
-  @endforeach
-<!-- end row -->
+    @endforeach
+    <!-- end row -->
 </div>
 
 

@@ -135,6 +135,9 @@
             });
         });
     </script>
+    
+    <!-- Fix scroll position for select elements -->
+    <script src="<?php echo e(asset('js/scroll-position-fix.js')); ?>"></script>
 </body>
 </html>
 <?php /**PATH C:\laragon\www\charoenmun\resources\views/layouts/horizontal.blade.php ENDPATH**/ ?>

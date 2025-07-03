@@ -1,38 +1,38 @@
 <div>
- <style>
-    @font-face {
-        font-family: 'THSarabunNew';
-        font-style: normal;
-        font-weight: normal;
-        src: url('<?php echo e(asset("fonts/THSarabunNew.ttf")); ?>') format("truetype");
-    }
+    <style>
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: normal;
+            font-weight: normal;
+            src: url('<?php echo e(asset('fonts/THSarabunNew.ttf')); ?>') format("truetype");
+        }
 
-    @font-face {
-        font-family: 'THSarabunNew';
-        font-style: normal;
-        font-weight: bold;
-        src: url('<?php echo e(asset("fonts/THSarabunNew Bold.ttf")); ?>') format("truetype");
-    }
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: normal;
+            font-weight: bold;
+            src: url('<?php echo e(asset('fonts/THSarabunNew Bold.ttf')); ?>') format("truetype");
+        }
 
-    @font-face {
-        font-family: 'THSarabunNew';
-        font-style: italic;
-        font-weight: normal;
-        src: url('<?php echo e(asset("fonts/THSarabunNew Italic.ttf")); ?>') format("truetype");
-    }
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: italic;
+            font-weight: normal;
+            src: url('<?php echo e(asset('fonts/THSarabunNew Italic.ttf')); ?>') format("truetype");
+        }
 
-    @font-face {
-        font-family: 'THSarabunNew';
-        font-style: italic;
-        font-weight: bold;
-        src: url('<?php echo e(asset("fonts/THSarabunNew BoldItalic.ttf")); ?>') format("truetype");
-    }
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: italic;
+            font-weight: bold;
+            src: url('<?php echo e(asset('fonts/THSarabunNew BoldItalic.ttf')); ?>') format("truetype");
+        }
 
-    body {
-        font-family: 'THSarabunNew', sans-serif;
-        font-size: 16pt;
-    }
-</style>
+        body {
+            font-family: 'THSarabunNew', sans-serif;
+            font-size: 16pt;
+        }
+    </style>
 
     <?php
         $totalPages = ceil($quotation->items->count() / 8);
@@ -54,8 +54,9 @@
 
                         <div class="float-end">
 
-                            <img src="<?php echo e(route('qr.quotation', $quotation->id)); ?>" alt="QR" style="height:100px;"><br>
-                             <small class="float-end">หน้า <?php echo e($chunkIndex + 1); ?>/<?php echo e($totalPages); ?></small>
+                            <img src="<?php echo e(route('qr.quotation', $quotation->id)); ?>" alt="QR"
+                                style="height:100px;"><br>
+                            <small class="float-end">หน้า <?php echo e($chunkIndex + 1); ?>/<?php echo e($totalPages); ?></small>
                         </div>
 
                     </div>
@@ -153,13 +154,14 @@
                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
                                             <td><?php echo e($loopIndex++); ?></td>
-                                            <td><?php echo e($item->quantity); ?></td>
+                                            <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
+
                                             <td><?php echo e($item->product_unit); ?></td>
                                             <td><b><?php echo e($item->product_name); ?></b> <br />
                                                 <?php echo e($item->product_note); ?>
 
                                             </td>
-                                            <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
+                                            <td><?php echo e($item->quantity); ?></td>
                                             <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                         </tr>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
@@ -200,19 +202,19 @@
                 </div>
                 <!-- end row-->
                 <hr>
-                 <div class="row ">
+                <div class="row ">
                     <div class="col-sm-6">
                         <div class="clearfix pt-3">
-                           <span>ผู้เสนอราคา</span><br>
-                           <span><?php echo e($quotation->sale->name); ?></span><br>
-                           
+                            <span>ผู้เสนอราคา</span><br>
+                            <span><?php echo e($quotation->sale->name); ?></span><br>
+
                         </div>
                     </div> <!-- end col -->
                     <div class="col-sm-6">
                         <div class="float-end mt-sm-0">
-                           <span>หมายเหตุ:เงื่อนไขการชำระเงิน</span><br>
-                               <span>1. โอนก่อนจัดส่งสินค้า</span><br>
-                                   <span>2. ชำระเป็นเงินสด เมื่อตรวจรับสินค้าเรียบร้อย</span><br>
+                            <span>หมายเหตุ:เงื่อนไขการชำระเงิน</span><br>
+                            <span>1. โอนก่อนจัดส่งสินค้า</span><br>
+                            <span>2. ชำระเป็นเงินสด เมื่อตรวจรับสินค้าเรียบร้อย</span><br>
                         </div>
                         <div class="clearfix"></div>
                     </div> <!-- end col -->
@@ -229,9 +231,8 @@
 
             </div> <!-- end card-body-->
         </div> <!-- end card -->
-
-  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-<!-- end row -->
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+    <!-- end row -->
 </div>
 
 
