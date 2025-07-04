@@ -1,4 +1,4 @@
-<div wire:ignore.self class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">>
+<div wire:ignore.self class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -17,8 +17,8 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-2">
-                            <label for="">ประเภทลูกค้า <span class="text-danger">*</span></label>
-                            <select class="form-select" wire:model="customer_type" required>
+                            <label for="">ประเภทลูกค้า</label>
+                            <select class="form-select" wire:model="customer_type">
                                 <option value="">--กรุณาเลือก--</option>
                                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customerType; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($option->id); ?>"><?php echo e($option->value); ?>
@@ -28,8 +28,8 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-2">
-                            <label for="">ระดับลุกค้า <span class="text-danger">*</span></label>
-                            <select class="form-select" wire:model="customer_level" required>
+                            <label for="">ระดับลูกค้า</label>
+                            <select class="form-select" wire:model="customer_level">
                                 <option value="">--กรุณาเลือก--</option>
                                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customerLevel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($option->id); ?>"><?php echo e($option->value); ?>
@@ -87,7 +87,7 @@
 
                         <div class="col-md-6 mb-2">
                             <label for="">จังหวัด</label>
-                            <select class="form-select" wire:model.live="customer_province" required>
+                            <select class="form-select" wire:model.live="customer_province">
                                 <option value="">-- เลือกจังหวัด --</option>
                                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $provinces; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($code); ?>"><?php echo e($name); ?>
@@ -99,8 +99,7 @@
 
                         <div class="col-md-6 mb-2">
                             <label for="">อำเภอ/เขต</label>
-                            <select class="form-select" wire:model.live="customer_amphur" <?php if(!$amphures): echo 'disabled'; endif; ?>
-                                required>
+                            <select class="form-select" wire:model.live="customer_amphur" <?php if(!$amphures): echo 'disabled'; endif; ?>>
                                 <option value="">-- เลือกอำเภอ --</option>
                                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $amphures; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($code); ?>"
@@ -115,7 +114,7 @@
                         <div class="col-md-6 mb-2">
                             <label for="">ตำบล/แขวง</label>
                             <select class="form-select" wire:model.live="customer_district"
-                                <?php if(!$districts): echo 'disabled'; endif; ?> required>
+                                <?php if(!$districts): echo 'disabled'; endif; ?>>
                                 <option value="">-- เลือกตำบล --</option>
                                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $districts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($code); ?>"

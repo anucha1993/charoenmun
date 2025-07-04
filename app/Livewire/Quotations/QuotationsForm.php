@@ -102,7 +102,7 @@ class QuotationsForm extends Component
 
         /* โหลด dropdown */
 
-        $this->customers = customerModel::all();
+        $this->customers = customerModel::orderBy('created_at', 'desc')->get();
         $this->customerDelivery = $this->customer_id ? deliveryAddressModel::where('customer_id', $this->customer_id)->get() : collect();
         $this->calculateTotals(); // <-- เพิ่มตรงนี้
     }
@@ -602,7 +602,7 @@ class QuotationsForm extends Component
 
     public function openDeliveryModal(int $customer_id)
     {
-        $this->dispatch('open-delivery-modal', $customer_id);
+        $this->dispatch('open-delivery-modal', customerId: $customer_id);
     }
 
     /** ลบแถวสินค้า */
@@ -739,18 +739,23 @@ class QuotationsForm extends Component
     #[On('delivery-created-success')]
     public function handleDeliveryCreatedSuccess(array $payload): void
     {
+        logger('Delivery created success received', $payload);
+        
         $this->selected_delivery_id = $payload['deliveryId'] ?? null;
 
         // โหลด dropdown ใหม่ (เพื่อให้มี delivery option)
         $this->refreshCustomers(); // ✅ โหลด customerDelivery ใหม่
 
         // อัปเดต selectedDelivery ด้วย
-        $this->selectedDelivery = deliveryAddressModel::find($this->selected_delivery_id);
+        if ($this->selected_delivery_id) {
+            $this->selectedDelivery = deliveryAddressModel::find($this->selected_delivery_id);
+            logger('Selected delivery updated', ['delivery' => $this->selectedDelivery]);
+        }
     }
 
    public function refreshCustomers(): void
 {
-    $this->customers = customerModel::all();
+    $this->customers = customerModel::orderBy('created_at', 'desc')->get();
 
     if ($this->customer_id) {
         $this->customerDelivery = deliveryAddressModel::where('customer_id', $this->customer_id)->get();

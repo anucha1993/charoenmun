@@ -1,4 +1,4 @@
-<div wire:ignore.self class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">>
+<div wire:ignore.self class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -17,8 +17,8 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-2">
-                            <label for="">ประเภทลูกค้า <span class="text-danger">*</span></label>
-                            <select class="form-select" wire:model="customer_type" required>
+                            <label for="">ประเภทลูกค้า</label>
+                            <select class="form-select" wire:model="customer_type">
                                 <option value="">--กรุณาเลือก--</option>
                                 @foreach ($customerType as $option)
                                     <option value="{{ $option->id }}">{{ $option->value }}
@@ -27,8 +27,8 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-2">
-                            <label for="">ระดับลุกค้า <span class="text-danger">*</span></label>
-                            <select class="form-select" wire:model="customer_level" required>
+                            <label for="">ระดับลูกค้า</label>
+                            <select class="form-select" wire:model="customer_level">
                                 <option value="">--กรุณาเลือก--</option>
                                 @foreach ($customerLevel as $option)
                                     <option value="{{ $option->id }}">{{ $option->value }}
@@ -85,7 +85,7 @@
 
                         <div class="col-md-6 mb-2">
                             <label for="">จังหวัด</label>
-                            <select class="form-select" wire:model.live="customer_province" required>
+                            <select class="form-select" wire:model.live="customer_province">
                                 <option value="">-- เลือกจังหวัด --</option>
                                 @foreach ($provinces as $code => $name)
                                     <option value="{{ $code }}">{{ $name }}
@@ -96,8 +96,7 @@
 
                         <div class="col-md-6 mb-2">
                             <label for="">อำเภอ/เขต</label>
-                            <select class="form-select" wire:model.live="customer_amphur" @disabled(!$amphures)
-                                required>
+                            <select class="form-select" wire:model.live="customer_amphur" @disabled(!$amphures)>
                                 <option value="">-- เลือกอำเภอ --</option>
                                 @foreach ($amphures as $code => $name)
                                     <option value="{{ $code }}"
@@ -111,7 +110,7 @@
                         <div class="col-md-6 mb-2">
                             <label for="">ตำบล/แขวง</label>
                             <select class="form-select" wire:model.live="customer_district"
-                                @disabled(!$districts) required>
+                                @disabled(!$districts)>
                                 <option value="">-- เลือกตำบล --</option>
                                 @foreach ($districts as $code => $name)
                                     <option value="{{ $code }}"

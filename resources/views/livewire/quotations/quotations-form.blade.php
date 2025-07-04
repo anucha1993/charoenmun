@@ -382,6 +382,16 @@
             margin-bottom: 4px;
         }
         
+        .customer-detail.text-muted {
+            font-style: italic;
+            color: #9ca3af !important;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px dashed #dee2e6;
+            margin: 4px 0;
+        }
+        
         .action-buttons {
             padding: 20px 32px;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -412,6 +422,29 @@
             font-size: 32px;
             margin-bottom: 8px;
             opacity: 0.5;
+        }
+        
+        /* Empty Delivery State */
+        .empty-delivery-state {
+            padding: 8px 0;
+        }
+        
+        .empty-delivery-state .text-muted {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .empty-delivery-state .btn {
+            border-color: #d1d5db;
+            color: #6b7280;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .empty-delivery-state .btn:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
         }
         
         /* Product Search Dropdown */
@@ -508,6 +541,20 @@
             border-color: #667eea;
         }
         
+        /* Modal Backdrop Fix */
+        .modal-backdrop.show {
+            opacity: 0.5;
+        }
+        
+        /* Ensure proper modal z-index */
+        .modal {
+            z-index: 1055;
+        }
+        
+        .modal-backdrop {
+            z-index: 1050;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .form-grid,
@@ -664,7 +711,7 @@
                                             @endforeach
                                         </select>
                                         <button type="button" class="btn btn-outline btn-icon" 
-                                                onclick="Livewire.dispatch('create-customer')"
+                                                onclick="Livewire.dispatch('create-customer'); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('customerModal')); modal.show(); }, 100);"
                                                 title="เพิ่มลูกค้าใหม่">
                                             <i class="ri-add-line"></i>
                                         </button>
@@ -677,18 +724,22 @@
                                             <div class="customer-name">{{ $selectedCustomer->customer_contract_name }}</div>
                                             @if ($customer_id)
                                                 <button type="button" class="btn btn-sm btn-outline"
-                                                        onclick="Livewire.dispatch('edit-customer', { id: {{ $customer_id }} })"
+                                                        onclick="Livewire.dispatch('edit-customer', { id: {{ $customer_id }} }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('customerModal')); modal.show(); }, 100);"
                                                         title="แก้ไขข้อมูลลูกค้า">
                                                     <i class="ri-edit-line"></i>
                                                 </button>
                                             @endif
                                         </div>
                                         <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone }}</div>
-                                        <div class="customer-detail">📍 {{ $selectedCustomer->customer_address }}
-                                            {{ $selectedCustomer->customer_district_name }}
-                                            {{ $selectedCustomer->customer_amphur_name }}
-                                            {{ $selectedCustomer->customer_province_name }}
-                                            {{ $selectedCustomer->customer_zipcode }}</div>
+                                        @if($selectedCustomer->customer_address || $selectedCustomer->customer_district_name || $selectedCustomer->customer_amphur_name || $selectedCustomer->customer_province_name)
+                                            <div class="customer-detail">📍 {{ $selectedCustomer->customer_address }}
+                                                {{ $selectedCustomer->customer_district_name }}
+                                                {{ $selectedCustomer->customer_amphur_name }}
+                                                {{ $selectedCustomer->customer_province_name }}
+                                                {{ $selectedCustomer->customer_zipcode }}</div>
+                                        @else
+                                            <div class="customer-detail text-muted">📍 ไม่มีข้อมูลที่อยู่</div>
+                                        @endif
                                         <div class="customer-detail">🏢 {{ $selectedCustomer->customer_taxid }}</div>
                                         @if ($selectedCustomer->customer_wholesale ?? false)
                                             <div class="customer-detail">💼 <span class="badge bg-success">โฮลเซลล์</span></div>
@@ -726,7 +777,7 @@
                                         </select>
                                         @if ($selectedCustomer)
                                             <button type="button" class="btn btn-outline btn-icon" 
-                                                    wire:click.prevent="openDeliveryModal({{ $customer_id }})"
+                                                    wire:click="openDeliveryModal({{ $customer_id }})"
                                                     title="เพิ่มที่อยู่จัดส่ง">
                                                 <i class="ri-add-line"></i>
                                             </button>
@@ -743,7 +794,7 @@
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div class="customer-name">{{ $selectedDelivery->delivery_contact_name }}</div>
                                             <button type="button" class="btn btn-sm btn-outline"
-                                                    onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: {{ $selectedDelivery->id }} })"
+                                                    onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: {{ $selectedDelivery->id }} }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('deliveryModal')); modal.show(); }, 100);"
                                                     title="แก้ไขที่อยู่จัดส่ง">
                                                 <i class="ri-edit-line"></i>
                                             </button>
@@ -752,15 +803,32 @@
                                         <div class="customer-detail">📍 {{ $selectedDelivery->delivery_address }}</div>
                                     @else
                                         @if ($selectedCustomer)
-                                            <div class="warning-box">
-                                                <div class="customer-detail text-warning"><strong>⚠️ ใช้ที่อยู่ลูกค้า</strong></div>
-                                                <div class="customer-name">{{ $selectedCustomer->customer_contract_name }}</div>
-                                                <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone }}</div>
-                                                <div class="customer-detail">📍 {{ $selectedCustomer->customer_address }}
-                                                    {{ $selectedCustomer->customer_district_name }}
-                                                    {{ $selectedCustomer->customer_amphur_name }}
-                                                    {{ $selectedCustomer->customer_province_name }}
-                                                    {{ $selectedCustomer->customer_zipcode }}</div>
+                                            <div class="empty-delivery-state">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div class="text-muted">
+                                                        <i class="ri-map-pin-line me-1"></i>
+                                                        ไม่พบที่อยู่
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-outline"
+                                                            onclick="Livewire.dispatch('open-delivery-modal', { customerId: {{ $selectedCustomer->id }} }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('deliveryModal')); modal.show(); }, 100);"
+                                                            title="เพิ่มที่อยู่จัดส่ง">
+                                                        <i class="ri-edit-line"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="warning-box">
+                                                    <div class="customer-detail text-warning"><strong>⚠️ ใช้ที่อยู่ลูกค้า</strong></div>
+                                                    <div class="customer-name">{{ $selectedCustomer->customer_contract_name }}</div>
+                                                    <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone }}</div>
+                                                    @if($selectedCustomer->customer_address || $selectedCustomer->customer_district_name || $selectedCustomer->customer_amphur_name || $selectedCustomer->customer_province_name)
+                                                        <div class="customer-detail">📍 {{ $selectedCustomer->customer_address }}
+                                                            {{ $selectedCustomer->customer_district_name }}
+                                                            {{ $selectedCustomer->customer_amphur_name }}
+                                                            {{ $selectedCustomer->customer_province_name }}
+                                                            {{ $selectedCustomer->customer_zipcode }}</div>
+                                                    @else
+                                                        <div class="customer-detail text-muted">📍 ไม่มีข้อมูลที่อยู่</div>
+                                                    @endif
+                                                </div>
                                             </div>
                                         @else
                                             <div class="empty-state">
@@ -1051,6 +1119,29 @@
             </div>
         </div>
         
+        <style>
+            .modal {
+                z-index: 1055 !important;
+            }
+            .modal-backdrop {
+                z-index: 1050 !important;
+            }
+            .modal-backdrop.fade {
+                opacity: 0;
+            }
+            .modal-backdrop.show {
+                opacity: 0.5;
+            }
+            /* Ensure modal backdrop is properly removed */
+            body:not(.modal-open) .modal-backdrop {
+                display: none !important;
+            }
+            /* Override any potential conflicts */
+            .modal-open {
+                overflow: hidden !important;
+            }
+        </style>
+
         {{-- Modals --}}
         <livewire:quotations.customer-modal />
         <livewire:quotations.delivery-address-modal />
@@ -1076,21 +1167,207 @@
 
         // Close modal and reset it
         function cleanupModal(modalId) {
-            const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
-            if (modal) {
-                modal.hide();
+            try {
+                const modalElement = document.getElementById(modalId);
+                if (modalElement) {
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // Remove modal-open class immediately
+                    document.body.classList.remove('modal-open');
+                    
+                    // Force remove backdrop and reset styles
+                    setTimeout(() => {
+                        const backdrops = document.querySelectorAll('.modal-backdrop');
+                        backdrops.forEach(backdrop => {
+                            backdrop.remove();
+                        });
+                        
+                        // Reset body styles
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                        document.body.style.position = '';
+                        document.body.style.top = '';
+                        document.body.style.left = '';
+                        document.body.style.right = '';
+                        document.body.style.bottom = '';
+                        
+                        // Remove any remaining modal classes
+                        document.body.classList.remove('modal-open');
+                    }, 100);
+                    
+                    // Reset form fields if needed
+                    const form = modalElement.querySelector('form');
+                    if (form) {
+                        form.reset();
+                    }
+                }
+            } catch (error) {
+                console.error('Error closing modal:', error);
+                // Force cleanup if error occurs
+                forceCleanupModal();
             }
-            
-            // Reset form fields if needed
-            const form = document.querySelector(`#${modalId} form`);
-            if (form) {
-                form.reset();
+        }
+
+        // Force cleanup function for emergency situations
+        function forceCleanupModal() {
+            try {
+                // Remove all modal backdrops
+                document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                    backdrop.remove();
+                });
+                
+                // Reset body completely
+                document.body.classList.remove('modal-open');
+                document.body.style.cssText = '';
+                document.body.removeAttribute('style');
+                
+                // Hide all modals
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.classList.remove('show');
+                    modal.style.display = 'none';
+                    modal.setAttribute('aria-hidden', 'true');
+                    modal.removeAttribute('aria-modal');
+                    modal.removeAttribute('role');
+                });
+                
+                console.log('Force cleanup completed');
+            } catch (error) {
+                console.error('Error in force cleanup:', error);
             }
         }
 
         document.addEventListener('customer-updated', () => {
             cleanupModal('customerModal');
         });
+
+        document.addEventListener('customer-created-success', (event) => {
+            cleanupModal('customerModal');
+        });
+
+        document.addEventListener('delivery-updated', () => {
+            cleanupModal('deliveryModal');
+        });
+
+        document.addEventListener('delivery-updated-success', (event) => {
+            try {
+                const detail = event.detail?.[0] ?? {};
+                const livewireComponent = safeLivewireFind();
+                
+                // ปิด modal ก่อน
+                cleanupModal('deliveryModal');
+                
+                if (livewireComponent && typeof livewireComponent.call === 'function') {
+                    // รีเฟรชข้อมูล
+                    livewireComponent.call('refreshCustomers');
+                }
+            } catch (err) {
+                console.error("Error in delivery-updated-success handler:", err);
+                cleanupModal('deliveryModal');
+            }
+        });
+
+        document.addEventListener('delivery-created-success', (event) => {
+            cleanupModal('deliveryModal');
+        });
+
+        // ✅ จัดการการปิด modal แบบบังคับ
+        document.addEventListener('force-close-delivery-modal', (event) => {
+            console.log('Force closing delivery modal');
+            cleanupModal('deliveryModal');
+        });
+
+        // ✅ Backup event listener using Livewire's event system
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('force-close-delivery-modal', () => {
+                console.log('Livewire force-close-delivery-modal event received');
+                cleanupModal('deliveryModal');
+            });
+        });
+
+        // ✅ Handle Bootstrap modal events for delivery modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const deliveryModal = document.getElementById('deliveryModal');
+            if (deliveryModal) {
+                deliveryModal.addEventListener('hidden.bs.modal', function (event) {
+                    console.log('Bootstrap modal hidden event triggered');
+                    // Ensure complete cleanup
+                    setTimeout(() => {
+                        forceCleanupModal();
+                    }, 50);
+                });
+                
+                deliveryModal.addEventListener('hide.bs.modal', function (event) {
+                    console.log('Bootstrap modal hide event triggered');
+                    // Start cleanup immediately
+                    document.body.classList.remove('modal-open');
+                });
+            }
+        });
+
+        // เปิด delivery modal เมื่อได้รับ event
+        document.addEventListener('show-delivery-modal', (event) => {
+            try {
+                const modalElement = document.getElementById('deliveryModal');
+                if (modalElement) {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
+            } catch (error) {
+                console.error('Error opening delivery modal:', error);
+            }
+        });
+
+        document.addEventListener('open-delivery-modal', (event) => {
+            try {
+                const modalElement = document.getElementById('deliveryModal');
+                if (modalElement) {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
+            } catch (error) {
+                console.error('Error opening delivery modal:', error);
+            }
+        });
+
+        // Handle modal events - Remove old event listeners as we now use inline onclick
+        // document.addEventListener('create-customer', () => {
+        //     try {
+        //         const modalElement = document.getElementById('customerModal');
+        //         if (modalElement) {
+        //             const modal = new bootstrap.Modal(modalElement);
+        //             modal.show();
+        //         }
+        //     } catch (error) {
+        //         console.error('Error opening customer modal:', error);
+        //     }
+        // });
+
+        // document.addEventListener('edit-customer', (event) => {
+        //     try {
+        //         const modalElement = document.getElementById('customerModal');
+        //         if (modalElement) {
+        //             const modal = new bootstrap.Modal(modalElement);
+        //             modal.show();
+        //         }
+        //     } catch (error) {
+        //         console.error('Error opening customer modal:', error);
+        //     }
+        // });
+
+        // document.addEventListener('edit-delivery-modal', (event) => {
+        //     try {
+        //         const modalElement = document.getElementById('deliveryModal');
+        //         if (modalElement) {
+        //             const modal = new bootstrap.Modal(modalElement);
+        //             modal.show();
+        //         }
+        //     } catch (error) {
+        //         console.error('Error opening delivery modal:', error);
+        //     }
+        // });
 
         document.addEventListener('DOMContentLoaded', function() {
             let select = $('#customerSelect');
@@ -1134,18 +1411,24 @@
                 const deliveryId = parseInt(detail.deliveryId);
                 const livewireComponent = safeLivewireFind();
                 
+                // ปิด modal ก่อน
+                cleanupModal('deliveryModal');
+                
                 if (livewireComponent && typeof livewireComponent.call === 'function') {
-                    setTimeout(() => {
-                        const $dropdown = $("select[name='selected_delivery_id']");
-                        const found = $dropdown.find(`option[value='${deliveryId}']`).length > 0;
-                        if (found) {
-                            $dropdown.val(deliveryId).trigger('change');
-                            livewireComponent.call('$set', 'selected_delivery_id', deliveryId);
-                        }
-                    }, 500);
+                    // รีเฟรชข้อมูล
+                    livewireComponent.call('refreshCustomers').then(() => {
+                        // เลือก delivery ที่เพิ่มใหม่
+                        setTimeout(() => {
+                            if (deliveryId) {
+                                livewireComponent.call('$set', 'selected_delivery_id', deliveryId);
+                            }
+                        }, 500);
+                    }).catch(err => console.error("Error refreshing delivery:", err));
                 }
             } catch (err) {
                 console.error("Error in delivery-created-success handler:", err);
+                // Force cleanup on error
+                cleanupModal('deliveryModal');
             }
         });
 

@@ -144,6 +144,7 @@
                                         <th>จำนวน</th>
                                         <th>หน่วยนับ</th>
                                         <th>รายการสินค้า</th>
+                                        <th>ความยาว</th>
                                         <th>ราคาต่อหน่วย</th>
                                         <th class="text-end">จำนวนเงินรวม</th>
                                     </tr>
@@ -168,9 +169,10 @@
                                             <td>{{ number_format($item->unit_price, 2) }}</td>
 
                                             <td>{{ $item->product_unit }}</td>
-                                            <td><b>{{ $item->product_name }}</b> <br />
+                                            <td><b>{{ $item->product_name }} </b> {{$item->product_calculation??1}}<br />
                                                 {{ $item->product_note }}
                                             </td>
+                                            <td>{{ number_format($item->product_length) }} ตรม.</td>
                                             <td>{{ $item->quantity }}</td>
                                             <td class="text-end">{{ number_format($item->total, 2) }}</td>
                                         </tr>

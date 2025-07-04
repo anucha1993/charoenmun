@@ -144,6 +144,7 @@
                                         <th>จำนวน</th>
                                         <th>หน่วยนับ</th>
                                         <th>รายการสินค้า</th>
+                                        <th>ความยาว</th>
                                         <th>ราคาต่อหน่วย</th>
                                         <th class="text-end">จำนวนเงินรวม</th>
                                     </tr>
@@ -157,10 +158,11 @@
                                             <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
 
                                             <td><?php echo e($item->product_unit); ?></td>
-                                            <td><b><?php echo e($item->product_name); ?></b> <br />
+                                            <td><b><?php echo e($item->product_name); ?> </b> <?php echo e($item->product_calculation??1); ?><br />
                                                 <?php echo e($item->product_note); ?>
 
                                             </td>
+                                            <td><?php echo e(number_format($item->product_length)); ?> ตรม.</td>
                                             <td><?php echo e($item->quantity); ?></td>
                                             <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                         </tr>

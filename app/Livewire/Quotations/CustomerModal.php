@@ -115,24 +115,23 @@ class CustomerModal extends Component
 
         if ($customer) {
             $this->customer_id = $customer->id;
-            $this->customer_code = $customer->customer_code;
-            $this->customer_name = $customer->customer_name;
-            $this->customer_type = $customer->customer_type;
-            $this->customer_level = $customer->customer_level;
-            $this->customer_taxid = $customer->customer_taxid;
-            $this->customer_contract_name = $customer->customer_contract_name;
-            $this->customer_phone = $customer->customer_phone;
-            $this->customer_email = $customer->customer_email;
-            $this->customer_idline = $customer->customer_idline;
-            $this->customer_address = $customer->customer_address;
+            $this->customer_code = $customer->customer_code ?? '';
+            $this->customer_name = $customer->customer_name ?? '';
+            $this->customer_type = $customer->customer_type ?? '';
+            $this->customer_level = $customer->customer_level ?? '';
+            $this->customer_taxid = $customer->customer_taxid ?? '';
+            $this->customer_contract_name = $customer->customer_contract_name ?? '';
+            $this->customer_phone = $customer->customer_phone ?? '';
+            $this->customer_email = $customer->customer_email ?? '';
+            $this->customer_idline = $customer->customer_idline ?? '';
+            $this->customer_address = $customer->customer_address ?? '';
 
-            $this->customer_province = $customer->customer_province;
-            $this->amphures = amphuresModel::where('province_code', $this->customer_province)->pluck('amphur_name', 'amphur_code')->toArray();
-            $this->customer_amphur = $customer->customer_amphur;
-            $this->districts = districtsModel::where('amphur_code', $this->customer_amphur)->pluck('district_name', 'district_code')->toArray();
-            $this->customer_district = $customer->customer_district;
-            $this->customer_zipcode = districtsModel::where('district_code', $this->customer_district)->value('zipcode') ?? '';
-            $this->customer_zipcode = $customer->customer_zipcode;
+            $this->customer_province = $customer->customer_province ?? '';
+            $this->amphures = $this->customer_province ? amphuresModel::where('province_code', $this->customer_province)->pluck('amphur_name', 'amphur_code')->toArray() : [];
+            $this->customer_amphur = $customer->customer_amphur ?? '';
+            $this->districts = $this->customer_amphur ? districtsModel::where('amphur_code', $this->customer_amphur)->pluck('district_name', 'district_code')->toArray() : [];
+            $this->customer_district = $customer->customer_district ?? '';
+            $this->customer_zipcode = $customer->customer_zipcode ?? '';
         }
     }
 
@@ -168,19 +167,19 @@ class CustomerModal extends Component
             return;
         }
 
-        $this->customer_province = $districts->first()->province_code;
+        $this->customer_province = $districts->first()->province_code ?? '';
         $this->updatedCustomerProvince();
 
         $amphurCodes = $districts->pluck('amphur_code')->unique();
         $this->amphures = amphuresModel::whereIn('amphur_code', $amphurCodes)->orderBy('amphur_name')->pluck('amphur_name', 'amphur_code')->toArray();
 
         if ($amphurCodes->count() === 1) {
-            $this->customer_amphur = $amphurCodes->first();
+            $this->customer_amphur = $amphurCodes->first() ?? '';
             $this->updatedCustomerAmphur();
 
             $sameAmp = $districts->where('amphur_code', $this->customer_amphur);
             if ($sameAmp->count() === 1) {
-                $this->customer_district = $sameAmp->first()->district_code;
+                $this->customer_district = $sameAmp->first()->district_code ?? '';
             }
         } else {
             $this->customer_amphur = '';
@@ -194,22 +193,24 @@ class CustomerModal extends Component
     {
         $this->validate([
             'customer_name' => 'required|string|max:255',
-            'customer_level' => 'required|string|max:255',
-            'customer_type' => 'required|string|max:255',
+            'customer_level' => 'nullable|string|max:255',
+            'customer_type' => 'nullable|string|max:255',
         ]);
+        
+        // Convert empty strings to null for integer columns (foreign keys)
         $customer = customerModel::updateOrCreate(
             ['id' => $this->customer_id],
             [
-                'customer_type' => $this->customer_type,
-                'customer_level' => $this->customer_level,
+                'customer_type' => $this->customer_type ?: '',
+                'customer_level' => $this->customer_level ?: '',
                 'customer_name' => $this->customer_name,
                 'customer_contract_name' => $this->customer_contract_name,
                 'customer_code' => $this->customer_code,
                 'customer_address' => $this->customer_address,
                 'customer_taxid' => $this->customer_taxid,
-                'customer_province' => $this->customer_province,
-                'customer_amphur' => $this->customer_amphur,
-                'customer_district' => $this->customer_district,
+                'customer_province' => $this->customer_province ?: null, // Convert empty string to null
+                'customer_amphur' => $this->customer_amphur ?: null, // Convert empty string to null
+                'customer_district' => $this->customer_district ?: null, // Convert empty string to null
                 'customer_zipcode' => $this->customer_zipcode,
                 'customer_phone' => $this->customer_phone,
                 'customer_email' => $this->customer_email,
@@ -218,15 +219,22 @@ class CustomerModal extends Component
         )->fresh();
 
         $this->dispatch('close-customer-modal');
+        
+        // ส่งข้อมูลกลับและรีเฟรชหน้าจอ
         if ($customer && $customer->id) {
             $this->dispatch('customer-created-success', ['customerId' => $customer->id]);
+            $this->dispatch('customer-updated'); // ส่งเพื่อปิด modal
         } else {
             logger('❗ Customer creation failed or missing ID', ['customer' => $customer]);
         }
+        
+        // รีเซ็ตฟอร์มหลังบันทึก
+        $this->reset(['customer_id', 'customer_code', 'customer_name', 'customer_type', 'customer_level', 'customer_taxid', 'customer_contract_name', 'customer_phone', 'customer_email', 'customer_idline', 'customer_address', 'customer_province', 'customer_amphur', 'customer_district', 'customer_zipcode', 'amphures', 'districts']);
     }
 
     public function render()
     {
         return view('livewire.quotations.customer-modal');
     }
+
 }
