@@ -733,27 +733,11 @@
                                                 </button>
                                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </div>
-                                        <div class="customer-detail">📞 <?php echo e($selectedCustomer->customer_phone); ?></div>
-                                        <!--[if BLOCK]><![endif]--><?php if($selectedCustomer->customer_address || $selectedCustomer->customer_district_name || $selectedCustomer->customer_amphur_name || $selectedCustomer->customer_province_name): ?>
-                                            <div class="customer-detail">📍 <?php echo e($selectedCustomer->customer_address); ?>
+                                        <div class="customer-detail">📞 <?php echo e($selectedCustomer->customer_phone?? 'ไม่พบข้อมูล'); ?></div>
+                                        <div class="customer-detail">📍 <?php echo e($selectedCustomer->customer_address?? 'ไม่พบข้อมูล'); ?></div>
+                                        <div class="customer-detail">🏢 <?php echo e($selectedCustomer->customer_taxid?? 'ไม่พบข้อมูล'); ?></div>
 
-                                                <?php echo e($selectedCustomer->customer_district_name); ?>
-
-                                                <?php echo e($selectedCustomer->customer_amphur_name); ?>
-
-                                                <?php echo e($selectedCustomer->customer_province_name); ?>
-
-                                                <?php echo e($selectedCustomer->customer_zipcode); ?></div>
-                                        <?php else: ?>
-                                            <div class="customer-detail text-muted">📍 ไม่มีข้อมูลที่อยู่</div>
-                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                        <div class="customer-detail">🏢 <?php echo e($selectedCustomer->customer_taxid); ?></div>
-                                        <!--[if BLOCK]><![endif]--><?php if($selectedCustomer->customer_wholesale ?? false): ?>
-                                            <div class="customer-detail">💼 <span class="badge bg-success">โฮลเซลล์</span></div>
-                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                        <!--[if BLOCK]><![endif]--><?php if($selectedCustomer->customer_country): ?>
-                                            <div class="customer-detail">🌍 <?php echo e($selectedCustomer->customer_country); ?></div>
-                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                        
                                     <?php else: ?>
                                         <div class="empty-state">
                                             <i class="ri-user-add-line"></i>
@@ -825,21 +809,9 @@
                                                 </div>
                                                 <div class="warning-box">
                                                     <div class="customer-detail text-warning"><strong>⚠️ ใช้ที่อยู่ลูกค้า</strong></div>
-                                                    <div class="customer-name"><?php echo e($selectedCustomer->customer_contract_name); ?></div>
-                                                    <div class="customer-detail">📞 <?php echo e($selectedCustomer->customer_phone); ?></div>
-                                                    <!--[if BLOCK]><![endif]--><?php if($selectedCustomer->customer_address || $selectedCustomer->customer_district_name || $selectedCustomer->customer_amphur_name || $selectedCustomer->customer_province_name): ?>
-                                                        <div class="customer-detail">📍 <?php echo e($selectedCustomer->customer_address); ?>
-
-                                                            <?php echo e($selectedCustomer->customer_district_name); ?>
-
-                                                            <?php echo e($selectedCustomer->customer_amphur_name); ?>
-
-                                                            <?php echo e($selectedCustomer->customer_province_name); ?>
-
-                                                            <?php echo e($selectedCustomer->customer_zipcode); ?></div>
-                                                    <?php else: ?>
-                                                        <div class="customer-detail text-muted">📍 ไม่มีข้อมูลที่อยู่</div>
-                                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                    <div class="customer-name"><?php echo e($selectedCustomer->customer_contract_name ?? 'ไม่พบข้อมูล'); ?></div>
+                                                    <div class="customer-detail">📞 <?php echo e($selectedCustomer->customer_phone ?? 'ไม่พบข้อมูล'); ?></div>
+                                                    <div class="customer-detail">📍 <?php echo e($selectedCustomer->customer_address ?? 'ไม่พบข้อมูล'); ?></div>
                                                 </div>
                                             </div>
                                         <?php else: ?>

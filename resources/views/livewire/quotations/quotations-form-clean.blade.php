@@ -328,13 +328,9 @@
                                             </button>
                                         @endif
                                     </div>
-                                    <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone }}</div>
-                                    <div class="customer-detail">📍 {{ $selectedCustomer->customer_address }}
-                                        {{ $selectedCustomer->customer_district_name }}
-                                        {{ $selectedCustomer->customer_amphur_name }}
-                                        {{ $selectedCustomer->customer_province_name }}
-                                        {{ $selectedCustomer->customer_zipcode }}</div>
-                                    <div class="customer-detail">🏢 {{ $selectedCustomer->customer_taxid }}</div>
+                                    <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone?? 'ไม่พบข้อมูล' }}</div>
+                                    <div class="customer-detail">📍 {{ $selectedCustomer->customer_address?? 'ไม่พบข้อมูล' }}</div>
+                                    <div class="customer-detail">🏢 {{ $selectedCustomer->customer_taxid?? 'ไม่พบข้อมูล' }}</div>
                                 @else
                                     <div class="text-center text-muted py-4">
                                         <i class="ri-user-add-line fs-1 mb-2"></i>
@@ -346,7 +342,6 @@
 
                         <div class="col-md-6">
                             <h6 class="mb-3" style="font-weight: 600; color: #374151;">ที่อยู่จัดส่ง</h6>
-                            
                             <div class="form-row align-items-end">
                                 <div class="form-col">
                                     <div class="form-group">
@@ -376,7 +371,6 @@
                                     @endif
                                 </div>
                             </div>
-
                             <div class="customer-info">
                                 @if ($selectedDelivery)
                                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -386,19 +380,16 @@
                                                 title="แก้ไขที่อยู่จัดส่ง">
                                             <i class="ri-edit-line"></i>
                                         </button>
-                                    </div>                                        <div class="customer-detail">📞 {{ $selectedDelivery->delivery_phone }}</div>
-                                        <div class="customer-detail">📍 {{ $selectedDelivery->delivery_address }}</div>
+                                    </div>
+                                    <div class="customer-detail">📞 {{ $selectedDelivery->delivery_phone }}</div>
+                                    <div class="customer-detail">📍 {{ $selectedDelivery->delivery_address }}</div>
                                 @else
                                     @if ($selectedCustomer)
                                         <div class="border border-warning border-2 p-3 rounded" style="background: #fef3c7;">
                                             <div class="customer-detail text-warning"><strong>⚠️ ใช้ที่อยู่ลูกค้า</strong></div>
                                             <div class="customer-name">{{ $selectedCustomer->customer_contract_name }}</div>
                                             <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone }}</div>
-                                            <div class="customer-detail">📍 {{ $selectedCustomer->customer_address }}
-                                                {{ $selectedCustomer->customer_district_name }}
-                                                {{ $selectedCustomer->customer_amphur_name }}
-                                                {{ $selectedCustomer->customer_province_name }}
-                                                {{ $selectedCustomer->customer_zipcode }}</div>
+                                            <div class="customer-detail">📍 {{ $selectedCustomer->customer_address }}</div>
                                         </div>
                                     @else
                                         <div class="text-center text-muted py-4">

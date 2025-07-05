@@ -21,7 +21,7 @@
             margin-bottom: 24px;
         }
         
-        .page-title {
+        .page-title {โ
             font-size: 32px;
             font-weight: 700;
             color: #111827;
@@ -486,7 +486,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-content">
-                        <h3>{{ $quotes->where('quote_status', 'wait')->count() }}</h3>
+                        <h3>{{ $statusData['data'][0] }}</h3>
                         <p>รอดำเนินการ</p>
                     </div>
                     <div class="stat-icon warning">
@@ -495,7 +495,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-content">
-                        <h3>{{ $quotes->where('quote_status', 'success')->count() }}</h3>
+                        <h3>{{ $statusData['data'][1] }}</h3>
                         <p>ยืนยันแล้ว</p>
                     </div>
                     <div class="stat-icon success">
@@ -548,7 +548,7 @@
                         <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 8px; display: block;">
                             &nbsp;
                         </label>
-                        <button class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        <button class="btn btn-primary" style="width: 100%; justify-content: center;" wire:click="refreshData">
                             <i class="ri-refresh-line me-1"></i>รีเฟรช
                         </button>
                     </div>

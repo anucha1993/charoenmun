@@ -40,6 +40,7 @@ class OrderIndex extends Component
             'totalOrders' => $totalOrders,
             'paymentSummary' => $paymentSummary,
             'statusSummary' => $statusSummary,
+            // ไม่จำเป็นต้องส่งสีหรือรายละเอียดสีตัวอักษรทั้งหมด ให้จัดการใน blade/css ตามความเหมาะสม
         ])->layout('layouts.horizontal', ['title' => 'Orders']);
     }
 }

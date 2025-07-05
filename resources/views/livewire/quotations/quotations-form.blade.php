@@ -730,23 +730,16 @@
                                                 </button>
                                             @endif
                                         </div>
-                                        <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone }}</div>
-                                        @if($selectedCustomer->customer_address || $selectedCustomer->customer_district_name || $selectedCustomer->customer_amphur_name || $selectedCustomer->customer_province_name)
-                                            <div class="customer-detail">📍 {{ $selectedCustomer->customer_address }}
-                                                {{ $selectedCustomer->customer_district_name }}
-                                                {{ $selectedCustomer->customer_amphur_name }}
-                                                {{ $selectedCustomer->customer_province_name }}
-                                                {{ $selectedCustomer->customer_zipcode }}</div>
-                                        @else
-                                            <div class="customer-detail text-muted">📍 ไม่มีข้อมูลที่อยู่</div>
-                                        @endif
-                                        <div class="customer-detail">🏢 {{ $selectedCustomer->customer_taxid }}</div>
-                                        @if ($selectedCustomer->customer_wholesale ?? false)
+                                        <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone?? 'ไม่พบข้อมูล' }}</div>
+                                        <div class="customer-detail">📍 {{ $selectedCustomer->customer_address?? 'ไม่พบข้อมูล' }}</div>
+                                        <div class="customer-detail">🏢 {{ $selectedCustomer->customer_taxid?? 'ไม่พบข้อมูล' }}</div>
+
+                                        {{-- @if ($selectedCustomer->customer_wholesale ?? false)
                                             <div class="customer-detail">💼 <span class="badge bg-success">โฮลเซลล์</span></div>
                                         @endif
                                         @if ($selectedCustomer->customer_country)
                                             <div class="customer-detail">🌍 {{ $selectedCustomer->customer_country }}</div>
-                                        @endif
+                                        @endif --}}
                                     @else
                                         <div class="empty-state">
                                             <i class="ri-user-add-line"></i>
@@ -817,17 +810,9 @@
                                                 </div>
                                                 <div class="warning-box">
                                                     <div class="customer-detail text-warning"><strong>⚠️ ใช้ที่อยู่ลูกค้า</strong></div>
-                                                    <div class="customer-name">{{ $selectedCustomer->customer_contract_name }}</div>
-                                                    <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone }}</div>
-                                                    @if($selectedCustomer->customer_address || $selectedCustomer->customer_district_name || $selectedCustomer->customer_amphur_name || $selectedCustomer->customer_province_name)
-                                                        <div class="customer-detail">📍 {{ $selectedCustomer->customer_address }}
-                                                            {{ $selectedCustomer->customer_district_name }}
-                                                            {{ $selectedCustomer->customer_amphur_name }}
-                                                            {{ $selectedCustomer->customer_province_name }}
-                                                            {{ $selectedCustomer->customer_zipcode }}</div>
-                                                    @else
-                                                        <div class="customer-detail text-muted">📍 ไม่มีข้อมูลที่อยู่</div>
-                                                    @endif
+                                                    <div class="customer-name">{{ $selectedCustomer->customer_contract_name ?? 'ไม่พบข้อมูล' }}</div>
+                                                    <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone ?? 'ไม่พบข้อมูล' }}</div>
+                                                    <div class="customer-detail">📍 {{ $selectedCustomer->customer_address ?? 'ไม่พบข้อมูล' }}</div>
                                                 </div>
                                             </div>
                                         @else

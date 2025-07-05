@@ -62,26 +62,44 @@ class QuotationIndex extends Component
         ]);
     }
 
+    public function refreshData()
+    {
+        $this->resetPage();
+         $this->search = '';
+        $this->status = '';
+        $this->computeChartData();
+        $this->dispatch('chart-update', [
+            'status'    => $this->statusData,
+            'customers' => $this->customerData,
+        ]);
+    }
+
     private function computeChartData()
     {
-        // สร้าง query พื้นฐานสำหรับกราฟ (filter search/status)
-        $queryForGraph = QuotationModel::query()
-            ->when($this->search, fn($q) =>
-                $q->where('quote_number','like', "%{$this->search}%")
-                  ->orWhereHas('customer', fn($c) =>
-                      $c->where('customer_name','like', "%{$this->search}%")
-                  )
-            )
+        // Query สำหรับ status summary (filter ด้วย search และ status)
+        $queryForStatus = QuotationModel::query()
+            ->when($this->search, function($q) {
+                $q->where(function($q) {
+                    $q->where('quote_number','like', "%{$this->search}%")
+                      ->orWhereHas('customer', fn($c) =>
+                          $c->where('customer_name','like', "%{$this->search}%")
+                      );
+                });
+            })
             ->when($this->status, fn($q) =>
                 $q->where('quote_status', $this->status)
             );
 
-        // 1) นับใบเสนอราคาแยกตามสถานะ
-        $statusCounts = (clone $queryForGraph)
+        // 1) นับใบเสนอราคาแยกตามสถานะ (filter สถานะด้วย)
+        $statusCounts = (clone $queryForStatus)
             ->select('quote_status')
             ->selectRaw('COUNT(*) as total')
             ->groupBy('quote_status')
-            ->pluck('total','quote_status');
+            ->get()
+            ->mapWithKeys(function($item) {
+                $status = $item->getRawOriginal('quote_status');
+                return [$status => $item->total];
+            });
 
         $this->statusData = [
             'labels' => ['รอดำเนินการ','ยืนยันแล้ว','ยกเลิก'],
@@ -92,7 +110,20 @@ class QuotationIndex extends Component
             ],
         ];
 
-        // 2) Top 10 ลูกค้า (โดยจำกัด 10 รายเรียงตามจำนวนใบเสนอราคา)
+        // 2) Top 10 ลูกค้า (filter ด้วย search และ status ตามปกติ)
+        $queryForGraph = QuotationModel::query()
+            ->when($this->search, function($q) {
+                $q->where(function($q) {
+                    $q->where('quote_number','like', "%{$this->search}%")
+                      ->orWhereHas('customer', fn($c) =>
+                          $c->where('customer_name','like', "%{$this->search}%")
+                      );
+                });
+            })
+            ->when($this->status, fn($q) =>
+                $q->where('quote_status', $this->status)
+            );
+
         $topCustomers = (clone $queryForGraph)
             ->selectRaw('customer_id, COUNT(*) as total')
             ->groupBy('customer_id')
@@ -110,12 +141,14 @@ class QuotationIndex extends Component
     public function render()
     {
         $quotes = QuotationModel::with(['customer','sale'])
-            ->when($this->search, fn($q) =>
-                $q->where('quote_number','like', "%{$this->search}%")
-                  ->orWhereHas('customer', fn($c) =>
-                      $c->where('customer_name','like', "%{$this->search}%")
-                  )
-            )
+            ->when($this->search, function($q) {
+                $q->where(function($q) {
+                    $q->where('quote_number','like', "%{$this->search}%")
+                      ->orWhereHas('customer', fn($c) =>
+                          $c->where('customer_name','like', "%{$this->search}%")
+                      );
+                });
+            })
             ->when($this->status, fn($q) =>
                 $q->where('quote_status', $this->status)
             )

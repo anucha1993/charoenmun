@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="fullWidthModalLabel">Modal Heading</h4>
+                <h4 class="modal-title" id="fullWidthModalLabel">ข้อมูลลูกค้า</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -81,56 +81,8 @@
                         <hr>
 
                         <div class="col-md-12 mb-2">
-                            <label for="">เลขที่/หมู่/ซอย </label>
-                            <input type="text" wire:model="customer_address" id="" class="form-control">
-                        </div>
-
-                        <div class="col-md-6 mb-2">
-                            <label for="">จังหวัด</label>
-                            <select class="form-select" wire:model.live="customer_province">
-                                <option value="">-- เลือกจังหวัด --</option>
-                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $provinces; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($code); ?>"><?php echo e($name); ?>
-
-                                    </option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-2">
-                            <label for="">อำเภอ/เขต</label>
-                            <select class="form-select" wire:model.live="customer_amphur" <?php if(!$amphures): echo 'disabled'; endif; ?>>
-                                <option value="">-- เลือกอำเภอ --</option>
-                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $amphures; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($code); ?>"
-                                        <?php if($customer_amphur == $code): ?> selected <?php endif; ?>>
-                                        <?php echo e($name); ?>
-
-                                    </option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-2">
-                            <label for="">ตำบล/แขวง</label>
-                            <select class="form-select" wire:model.live="customer_district"
-                                <?php if(!$districts): echo 'disabled'; endif; ?>>
-                                <option value="">-- เลือกตำบล --</option>
-                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $districts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($code); ?>"
-                                        <?php if($customer_district == $code): ?> selected <?php endif; ?>>
-                                        <?php echo e($name); ?>
-
-                                    </option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-2">
-                            <label for="">รหัสไปรษณีย์ <span class="text-primary"
-                                    style="font-size:11px">*พิมพ์เพื่อค้นหา</span></label>
-                            <input type="text" wire:model.live.debounce.500ms="customer_zipcode" id=""
-                                class="form-control">
+                            <label for="">ที่อยู่</label>
+                            <textarea wire:model="customer_address" class="form-control" rows="3" placeholder="กรอกที่อยู่ลูกค้า เช่น 99/35 หมู่ 9 ซอยสุขใจ"></textarea>
                         </div>
                     </div>
 
@@ -138,8 +90,12 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
-                <button type="submit" class="btn btn-primary" <?php echo e($isDuplicateCustomer ? 'disabled' : ''); ?> form="CustomerUpdate">บันทึกข้อมูล</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    ปิด
+                </button>
+                <button type="submit" class="btn btn-primary" <?php echo e($isDuplicateCustomer ? 'disabled' : ''); ?> form="CustomerUpdate">
+                    บันทึกข้อมูลลูกค้า
+                </button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

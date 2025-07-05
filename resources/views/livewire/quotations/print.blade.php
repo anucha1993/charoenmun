@@ -34,6 +34,8 @@
         }
     </style>
 
+    
+
     @php
         $totalPages = ceil($quotation->items->count() / 8);
         $loopIndex = 1;
