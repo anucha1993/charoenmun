@@ -159,9 +159,8 @@
                                             <td>{{ $loopIndex++ }}</td>
                                              <td>{{ $item->quantity }}</td>
                                           
-
                                             <td>{{ $item->product_unit }}</td>
-                                            <td><b>{{ $item->product_name }} </b> {{$item->product_calculation??1}}<br />
+                                            <td><b>{{ $item->product_name }} </b> {{ ($item->product_calculation ?? 1) != 1 ? $item->product_calculation  : '' }}<br />
                                                 {{ $item->product_note }}
                                             </td>
                                             <td>{{ number_format($item->product_length) }} เมตร</td>

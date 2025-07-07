@@ -153,19 +153,18 @@
                                 </thead>
 
                                 <tbody>
-                                    
+                                  
                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
                                             <td><?php echo e($loopIndex++); ?></td>
                                              <td><?php echo e($item->quantity); ?></td>
                                           
-
                                             <td><?php echo e($item->product_unit); ?></td>
-                                            <td><b><?php echo e($item->product_name); ?> </b> <?php echo e($item->product_calculation??1); ?><br />
+                                            <td><b><?php echo e($item->product_name); ?> </b> <?php echo e(($item->product_calculation ?? 1) != 1 ? $item->product_calculation  : ''); ?><br />
                                                 <?php echo e($item->product_note); ?>
 
                                             </td>
-                                            <td><?php echo e(number_format($item->product_length)); ?> ตรม.</td>
+                                            <td><?php echo e(number_format($item->product_length)); ?> เมตร</td>
                                              <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
                                             <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                         </tr>
