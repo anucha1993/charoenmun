@@ -797,10 +797,7 @@
                                         <!--[if BLOCK]><![endif]--><?php if($selectedCustomer): ?>
                                             <div class="empty-delivery-state">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <div class="text-muted">
-                                                        <i class="ri-map-pin-line me-1"></i>
-                                                        ไม่พบที่อยู่
-                                                    </div>
+                                                    
                                                     <button type="button" class="btn btn-sm btn-outline"
                                                             onclick="Livewire.dispatch('open-delivery-modal', { customerId: <?php echo e($selectedCustomer->id); ?> }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('deliveryModal')); modal.show(); }, 100);"
                                                             title="เพิ่มที่อยู่จัดส่ง">
