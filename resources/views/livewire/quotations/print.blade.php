@@ -164,7 +164,7 @@
                                             <td><b>{{ $item->product_name }} </b> {{$item->product_calculation??1}}<br />
                                                 {{ $item->product_note }}
                                             </td>
-                                            <td>{{ number_format($item->product_length) }} ตรม.</td>
+                                            <td>{{ number_format($item->product_length) }} เมตร</td>
                                              <td>{{ number_format($item->unit_price, 2) }}</td>
                                             <td class="text-end">{{ number_format($item->total, 2) }}</td>
                                         </tr>
