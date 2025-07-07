@@ -153,29 +153,19 @@
                                 </thead>
 
                                 <tbody>
-                                    {{-- <tr>
-                                    <td class="">1</td>
-                                    <td>
-                                        <b>Laptop</b> <br />
-                                        Brand Model VGN-TXN27N/B
-                                        11.1" Notebook PC
-                                    </td>
-                                    <td>1</td>
-                                    <td>$1799.00</td>
-                                    <td class="text-end">$1799.00</td>
-                                </tr>
-                                 --}}
+                                  
                                     @foreach ($chunk as $item)
                                         <tr>
                                             <td>{{ $loopIndex++ }}</td>
-                                            <td>{{ number_format($item->unit_price, 2) }}</td>
+                                             <td>{{ $item->quantity }}</td>
+                                          
 
                                             <td>{{ $item->product_unit }}</td>
                                             <td><b>{{ $item->product_name }} </b> {{$item->product_calculation??1}}<br />
                                                 {{ $item->product_note }}
                                             </td>
                                             <td>{{ number_format($item->product_length) }} ตรม.</td>
-                                            <td>{{ $item->quantity }}</td>
+                                             <td>{{ number_format($item->unit_price, 2) }}</td>
                                             <td class="text-end">{{ number_format($item->total, 2) }}</td>
                                         </tr>
                                     @endforeach
