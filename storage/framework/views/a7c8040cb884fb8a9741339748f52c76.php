@@ -996,7 +996,8 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                             </strong>
                                         </td>
                                         <td class="text-center">
-                                            <!--[if BLOCK]><![endif]--><?php if(!$quotation?->quote_status == 'success'): ?>
+                                        
+                                           <!--[if BLOCK]><![endif]--><?php if($quotation?->quote_status->value != 'success'): ?>
                                                 <button type="button" class="btn btn-sm btn-outline" 
                                                     style="color: #ef4444; border-color: #fecaca;"
                                                     wire:click="removeItem(<?php echo e($i); ?>)"

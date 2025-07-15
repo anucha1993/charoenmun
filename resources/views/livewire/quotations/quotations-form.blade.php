@@ -963,7 +963,8 @@
                                             </strong>
                                         </td>
                                         <td class="text-center">
-                                            @if (!$quotation?->quote_status == 'success')
+                                        
+                                           @if ($quotation?->quote_status->value != 'success')
                                                 <button type="button" class="btn btn-sm btn-outline" 
                                                     style="color: #ef4444; border-color: #fecaca;"
                                                     wire:click="removeItem({{ $i }})"
