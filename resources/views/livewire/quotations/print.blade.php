@@ -131,7 +131,7 @@
                                 $quotation->customer->customer_province_name .
                                 ' ' .
                                 $quotation->customer->customer_zipcode }}<br>
-                            (+66) {{ $quotation->customer->customer_phone }}
+                               {{ $quotation->customer->customer_phone }}
                         </address>
                     </div> <!-- end col-->
 

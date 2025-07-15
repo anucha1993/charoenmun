@@ -128,7 +128,7 @@
                                 $quotation->customer->customer_province_name .
                                 ' ' .
                                 $quotation->customer->customer_zipcode); ?><br>
-                            (+66) <?php echo e($quotation->customer->customer_phone); ?>
+                               <?php echo e($quotation->customer->customer_phone); ?>
 
                         </address>
                     </div> <!-- end col-->
