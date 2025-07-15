@@ -5,6 +5,7 @@ namespace App\Models\Quotations;
 use App\Models\products\ProductModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Quotations\QuotationModel;
+use App\Models\globalsets\GlobalSetValueModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class QuotationItemModel extends Model
@@ -28,5 +29,18 @@ class QuotationItemModel extends Model
     {
         return $this->belongsTo(QuotationModel::class, 'quotation_id');
     }
-    public function product()   { return $this->belongsTo(ProductModel::class,'product_id'); }
+
+    public function product()
+    { 
+        return $this->belongsTo(ProductModel::class,'product_id'); 
+    }
+
+    public function globalSetValue()
+    {
+        // เชื่อม product_wire_type (ของ product) กับ id ของ GlobalSetValueModel แบบ manual
+        if ($this->product && $this->product->product_wire_type) {
+            return GlobalSetValueModel::where('id', $this->product->product_wire_type)->first();
+        }
+        return null;
+    }
 }

@@ -30,7 +30,30 @@
 
         body {
             font-family: 'THSarabunNew', sans-serif;
-            font-size: 16pt;
+            font-size: 18pt;
+        }
+        p, h4, h6, .fs-20, address, span, small, b, strong, td, th, div, .clearfix {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            line-height: 1.1 !important;
+        }
+        .table th, .table td {
+            padding-top: 2px !important;
+            padding-bottom: 2px !important;
+        }
+        .row, .col-6, .col-sm-6, .col-sm-4, .col-sm-12, .col-12 {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        .mt-1, .mt-0, .mb-0, .mb-1, .pt-3, .mt-sm-0, .mb-3, .mt-4, .mb-4, .pt-3, .pb-3, .pt-0, .pb-0 {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
         }
     </style>
 
@@ -42,13 +65,13 @@
     ?>
 
     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $quotation->items->chunk(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <div class="card row text-black" style="margin-top: 0px">
+        <div class="card row text-black" style="top: -30px">
             <div class="card-body">
                 <!-- Invoice Detail-->
                 <div class="clearfix">
                     <div class="float-start">
                         <img src="/images/logo-cmc.png" class="mb-1" alt="dark logo" height="60">
-                        <h4 class="m-0 mb-3">Quotation / ใบเสนอราคา</h4>
+                        <h3 class="m-0 mb-3">Quotation / ใบเสนอราคา</h3>
                     </div>
 
                     <div class="float-center">
@@ -70,7 +93,7 @@
                     <div class="col-sm-6">
                         <div class="float-start">
                             <p><b>บริษัท เจริญมั่น คอนกรีต จำกัด(สำนักงานใหญ่)</b></p>
-                            <p class=" fs-20" style="margin-top: -10px">ที่อยู่ 99/35 หมู่ 9 ตำบลละหาร อำเภอบางบัวทอง
+                            <p class="fs-30" style="margin-top: -10px">ที่อยู่ 99/35 หมู่ 9 ตำบลละหาร อำเภอบางบัวทอง
                                 จังหวัดนนทบุรี 11110 โทร
                                 082-4789197 </br>
                                 เลขประจำตัวผู้เสียภาษี 0125560015546
@@ -79,22 +102,22 @@
 
 
                     </div><!-- end col -->
-                    <div class="col-sm-4 offset-sm-2">
+                    <div class="col-sm-4 offset-sm-2 float-end">
                         <div class="mt-0 float-sm-end">
-                            <p class="fs-20"><strong>วันที่เสนอราคา: </strong> &nbsp;&nbsp;&nbsp;
+                            <p class="fs-25"><strong>วันที่เสนอราคา: </strong> &nbsp;&nbsp;&nbsp;
                                 <?php echo e(date('d/m/Y', strtotime($quotation->quote_date))); ?></p>
-                            <p class="fs-20"><strong>เลขที่ใบเสนอราคา </strong> &nbsp;&nbsp;&nbsp;
-                                <?php echo e($quotation->quote_number); ?></p>
-                            <p class="fs-20"><strong>ชื่อผู้ขาย (Sale) </strong> <span
+                            <p class="fs-25"><strong>เลขที่ใบเสนอราคา </strong><?php echo e($quotation->quote_number); ?></p>
+                            <p class="fs-25"><strong>ชื่อผู้ขาย (Sale) </strong> <span
                                     class="float-end"><?php echo e($quotation->sale->name); ?></span></p>
                         </div>
                     </div><!-- end col -->
                 </div>
                 <!-- end row -->
+                <hr>
 
                 <div class="row mt-1 ">
                     <div class="col-6">
-                        <h6 class="fs-20">ข้อมูลลูกค้า</h6>
+                        <h3 class="fs-50">ข้อมูลลูกค้า</h3>
                         <address>
                             <?php echo e($quotation->customer->customer_name); ?><br>
                             <?php echo e($quotation->customer->customer_address); ?><br>
@@ -111,7 +134,7 @@
                     </div> <!-- end col-->
 
                     <div class="col-6">
-                        <h6 class="fs-20">ที่อยู่จัดส่ง</h6>
+                        <h3 class="fs-30">ที่อยู่จัดส่ง</h3>
                         <address>
                             <!--[if BLOCK]><![endif]--><?php if($quotation->deliveryAddress): ?>
                                 <?php echo e($quotation->deliveryAddress->delivery_contact_name); ?>
@@ -161,6 +184,9 @@
                                           
                                             <td><?php echo e($item->product_unit); ?></td>
                                             <td><b><?php echo e($item->product_name); ?> </b> <?php echo e(($item->product_calculation ?? 1) != 1 ? $item->product_calculation  : ''); ?><br />
+                                                 <?php echo e($item->globalSetValue()->value ?? ''); ?>
+
+                                                <br />
                                                 <?php echo e($item->product_note); ?>
 
                                             </td>
@@ -207,21 +233,22 @@
                 <!-- end row-->
                 <hr>
                 <div class="row ">
-                    <div class="col-sm-6">
-                        <div class="clearfix pt-3">
-                            <span>ผู้เสนอราคา</span><br>
-                            <span><?php echo e($quotation->sale->name); ?></span><br>
-
-                        </div>
-                    </div> <!-- end col -->
-                    <div class="col-sm-6">
-                        <div class="float-end mt-sm-0">
+                     <div class="col-sm-6">
+                        <div class=" mt-sm-0">
                             <span>หมายเหตุ:เงื่อนไขการชำระเงิน</span><br>
                             <span>1. โอนก่อนจัดส่งสินค้า</span><br>
                             <span>2. ชำระเป็นเงินสด เมื่อตรวจรับสินค้าเรียบร้อย</span><br>
                         </div>
                         <div class="clearfix"></div>
                     </div> <!-- end col -->
+                    <div class="col-sm-6">
+                        <div class="float-end text-center clearfix pt-3">
+                            <span>ผู้เสนอราคา</span><br>
+                            <span><?php echo e($quotation->sale->name); ?></span><br>
+
+                        </div>
+                    </div> <!-- end col -->
+                   
                 </div>
 
                 <div class="d-print-none mt-4">
