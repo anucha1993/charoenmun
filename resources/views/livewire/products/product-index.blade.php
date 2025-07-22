@@ -69,6 +69,7 @@
                                         <th class="text-end">ราคา (฿)</th>
                                         <th>ประเภท</th>
                                         <th>หน่วย</th>
+                                        <th>มาตราวัด</th>
                                         <th>สถานะ</th>
                                         <th style="width:130px;" class="text-center">จัดการ</th>
                                     </tr>
@@ -84,6 +85,7 @@
                                             <td class="text-end">{{ number_format($p->product_price, 2) }}</td>
                                             <td>{{ $p->productType->value?? 'ไม่ระบุ' }}</td>
                                             <td>{{ $p->productUnit->value }}</td>
+                                            <td>{{ $p->productMeasure->value }}</td>
                                             <td>
                                                 <span
                                                     class="badge bg-{{ $p->product_status ? 'success' : 'secondary' }}">
@@ -210,7 +212,7 @@
                                             
 
                                             {{-- product_weight --}}
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <label class="form-label">น้ำหนัก (kg)</label>
                                                 <input type="number" step="0.01" wire:model.defer="product_weight" placeholder=".Kg"
                                                     class="form-control @error('product_weight') is-invalid @enderror">
@@ -218,13 +220,24 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
-                                               <div class="col-md-3">
-                                                <label class="form-label">ความยาว (เมตร)</label>
+                                               <div class="col-md-2">
+                                                <label class="form-label">ความยาว</label>
                                                 <input type="number" step="0.01" wire:model.defer="product_length" placeholder="20"
                                                     class="form-control @error('product_length') is-invalid @enderror">
                                                 @error('product_length')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
+                                            </div>
+
+                                              <div class="col-md-2">
+                                                <label class="form-label">มาตราวัด</label>
+                                                 <select wire:model.defer="product_measure" class="form-select @error('product_measure') is-invalid @enderror">
+                                                    <option value="0">ไม่เลือก</option>
+                                                    @foreach ($productMeasure as $option)
+                                                        <option value="{{ $option->id }}">{{ $option->value }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
                                             </div>
 
                                             {{-- product_price --}}

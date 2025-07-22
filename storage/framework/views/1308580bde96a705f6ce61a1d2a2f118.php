@@ -186,11 +186,13 @@
                                             <td><b><?php echo e($item->product_name); ?> </b> <?php echo e(($item->product_calculation ?? 1) != 1 ? $item->product_calculation  : ''); ?><br />
                                                  <?php echo e($item->globalSetValue()->value ?? ''); ?>
 
-                                                <br />
-                                                <?php echo e($item->product_note); ?>
+                                                 <!--[if BLOCK]><![endif]--><?php if($item->product_note): ?>
+                                                     <br /> <?php echo e($item->product_note); ?>
 
+                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                              
                                             </td>
-                                            <td><?php echo e(number_format($item->product_length)); ?> เมตร</td>
+                                            <td><?php echo e(number_format($item->product_length)); ?> <?php echo e($item->productMeasure->value); ?></td>
                                              <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
                                             <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                         </tr>

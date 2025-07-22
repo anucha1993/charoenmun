@@ -131,6 +131,7 @@ class QuotationsForm extends Component
                     'id' => $i->id,
                     'product_id' => $i->product_id,
                     'product_name' => $i->product_name,
+                    'product_measure' => $i->product_measure,
                     'product_note' => $i->product_note,
                     'product_type' => $i->product_type,
                     'product_unit' => $i->product_unit,
@@ -310,6 +311,7 @@ class QuotationsForm extends Component
             'product_length' => $product->product_length ?? null,
             'product_weight' => $product->product_weight,
             'product_detail' => $product->product_size,
+            'product_measure' => $product->product_measure,
             'quantity' => 1,
             'unit_price' => $product->product_price,
             'total' => $product->product_price,
@@ -466,6 +468,7 @@ class QuotationsForm extends Component
                         'product_length' => $row['product_length'],
                         'product_weight' => $row['product_weight'],
                         'product_calculation' => $row['product_calculation'],
+                        'product_measure' => $row['product_measure'],
                         'product_note' => $row['product_note'],
                         'quantity' => $row['quantity'],
                         'unit_price' => $row['unit_price'],
@@ -590,6 +593,7 @@ class QuotationsForm extends Component
             $this->items[$index]['product_calculation'] = $product->product_calculation;
             $this->items[$index]['product_unit'] = $product->productUnit->value;
             $this->items[$index]['product_length'] = $product->product_length ?? null;
+            $this->items[$index]['product_measure'] = $product->product_measure ?? null;
         }
 
         // ─── คำนวณยอดรวมใหม่ทุกครั้ง
@@ -839,6 +843,7 @@ class QuotationsForm extends Component
                     'product_vat' => $qItem->product_vat,
                     'product_note' => $qItem->product_note,
                     'product_calculation' => $qItem->product_calculation,
+                    'product_measure' => $qItem->product_measure,
                     'quantity' => $qItem->quantity,
                     'unit_price' => $qItem->unit_price,
                     'total' => $qItem->total,

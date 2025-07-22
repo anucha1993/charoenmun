@@ -14,7 +14,7 @@ class ProductModel extends Model
     protected $primaryKey = 'product_id';
 
     protected $fillable = [
-        'product_code','product_name','product_weight','product_price','product_length','product_calculation',
+        'product_code','product_name','product_weight','product_price','product_length','product_calculation','product_measure',
         'product_type','product_unit','product_note','product_status','product_wire_type','product_side_steel_type','product_size'
     ];
 
@@ -40,6 +40,10 @@ class ProductModel extends Model
        public function productUnit()
     {
         return $this->belongsTo(GlobalSetValueModel::class, 'product_unit');
+    }
+      public function productMeasure()
+    {
+        return $this->belongsTo(GlobalSetValueModel::class, 'product_measure');
     }
 
 }

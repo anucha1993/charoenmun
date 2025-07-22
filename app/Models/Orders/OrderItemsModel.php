@@ -6,6 +6,7 @@ use App\Models\Orders\OrderModel;
 use App\Models\products\ProductModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Orders\OrderDeliveryItems;
+use App\Models\globalsets\GlobalSetValueModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class OrderItemsModel extends Model
@@ -22,6 +23,7 @@ class OrderItemsModel extends Model
         'product_detail',
         'product_length',
         'product_weight',
+        'product_measure',
         'product_vat',
         'product_note',
         'added_reason', // เพิ่ม field นี้
@@ -50,5 +52,9 @@ class OrderItemsModel extends Model
     public function deliveryItems()
     {
         return $this->hasMany(OrderDeliveryItems::class, 'order_item_id');
+    }
+       public function productMeasure()
+    {
+        return $this->belongsTo(GlobalSetValueModel::class, 'product_measure');
     }
 }

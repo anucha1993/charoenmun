@@ -185,10 +185,12 @@
                                             <td>{{ $item->product_unit }}</td>
                                             <td><b>{{ $item->product_name }} </b> {{ ($item->product_calculation ?? 1) != 1 ? $item->product_calculation  : '' }}<br />
                                                  {{ $item->globalSetValue()->value ?? '' }}
-                                                <br />
-                                                {{ $item->product_note }}
+                                                 @if ($item->product_note)
+                                                     <br /> {{ $item->product_note }}
+                                                 @endif
+                                              
                                             </td>
-                                            <td>{{ number_format($item->product_length) }} เมตร</td>
+                                            <td>{{ number_format($item->product_length) }} {{$item->productMeasure->value}}</td>
                                              <td>{{ number_format($item->unit_price, 2) }}</td>
                                             <td class="text-end">{{ number_format($item->total, 2) }}</td>
                                         </tr>

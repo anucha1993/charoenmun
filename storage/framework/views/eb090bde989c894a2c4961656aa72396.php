@@ -69,6 +69,7 @@
                                         <th class="text-end">ราคา (฿)</th>
                                         <th>ประเภท</th>
                                         <th>หน่วย</th>
+                                        <th>มาตราวัด</th>
                                         <th>สถานะ</th>
                                         <th style="width:130px;" class="text-center">จัดการ</th>
                                     </tr>
@@ -84,6 +85,7 @@
                                             <td class="text-end"><?php echo e(number_format($p->product_price, 2)); ?></td>
                                             <td><?php echo e($p->productType->value?? 'ไม่ระบุ'); ?></td>
                                             <td><?php echo e($p->productUnit->value); ?></td>
+                                            <td><?php echo e($p->productMeasure->value); ?></td>
                                             <td>
                                                 <span
                                                     class="badge bg-<?php echo e($p->product_status ? 'success' : 'secondary'); ?>">
@@ -300,7 +302,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                             
 
                                             
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <label class="form-label">น้ำหนัก (kg)</label>
                                                 <input type="number" step="0.01" wire:model.defer="product_weight" placeholder=".Kg"
                                                     class="form-control <?php $__errorArgs = ['product_weight'];
@@ -322,8 +324,8 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                             </div>
-                                               <div class="col-md-3">
-                                                <label class="form-label">ความยาว (เมตร)</label>
+                                               <div class="col-md-2">
+                                                <label class="form-label">ความยาว</label>
                                                 <input type="number" step="0.01" wire:model.defer="product_length" placeholder="20"
                                                     class="form-control <?php $__errorArgs = ['product_length'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -343,6 +345,25 @@ $message = $__bag->first($__errorArgs[0]); ?>
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                                            </div>
+
+                                              <div class="col-md-2">
+                                                <label class="form-label">มาตราวัด</label>
+                                                 <select wire:model.defer="product_measure" class="form-select <?php $__errorArgs = ['product_measure'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                                                    <option value="0">ไม่เลือก</option>
+                                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $productMeasure; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <option value="<?php echo e($option->id); ?>"><?php echo e($option->value); ?>
+
+                                                        </option>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                                </select>
                                             </div>
 
                                             

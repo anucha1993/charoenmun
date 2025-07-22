@@ -14,7 +14,7 @@ class QuotationItemModel extends Model
      protected $table = 'quotation_items';
     protected $primaryKey = 'id';
      protected $fillable = [
-        'quotation_id','product_id','product_name','product_type',
+        'quotation_id','product_id','product_name','product_type','product_measure',
         'product_unit','product_length','product_weight',
         'quantity','unit_price','total','product_detail','product_calculation','product_vat','product_note'
     ];
@@ -42,5 +42,9 @@ class QuotationItemModel extends Model
             return GlobalSetValueModel::where('id', $this->product->product_wire_type)->first();
         }
         return null;
+    }
+       public function productMeasure()
+    {
+        return $this->belongsTo(GlobalSetValueModel::class, 'product_measure');
     }
 }
