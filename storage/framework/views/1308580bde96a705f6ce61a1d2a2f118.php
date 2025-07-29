@@ -30,26 +30,60 @@
 
         body {
             font-family: 'THSarabunNew', sans-serif;
-            font-size: 18pt;
+            font-size: 15pt;
         }
-        p, h4, h6, .fs-20, address, span, small, b, strong, td, th, div, .clearfix {
+
+        p,
+        h4,
+        h6,
+        .fs-20,
+        address,
+        span,
+        small,
+        b,
+        strong,
+        td,
+        th,
+        div,
+        .clearfix {
             margin-top: 0 !important;
             margin-bottom: 0 !important;
             padding-top: 0 !important;
             padding-bottom: 0 !important;
             line-height: 1.1 !important;
         }
-        .table th, .table td {
+
+        .table th,
+        .table td {
             padding-top: 2px !important;
             padding-bottom: 2px !important;
         }
-        .row, .col-6, .col-sm-6, .col-sm-4, .col-sm-12, .col-12 {
+
+        .row,
+        .col-6,
+        .col-sm-6,
+        .col-sm-4,
+        .col-sm-12,
+        .col-12 {
             margin-top: 0 !important;
             margin-bottom: 0 !important;
             padding-top: 0 !important;
             padding-bottom: 0 !important;
         }
-        .mt-1, .mt-0, .mb-0, .mb-1, .pt-3, .mt-sm-0, .mb-3, .mt-4, .mb-4, .pt-3, .pb-3, .pt-0, .pb-0 {
+
+        .mt-1,
+        .mt-0,
+        .mb-0,
+        .mb-1,
+        .pt-3,
+        .mt-sm-0,
+        .mb-3,
+        .mt-4,
+        .mb-4,
+        .pt-3,
+        .pb-3,
+        .pt-0,
+        .pb-0 {
             margin-top: 0 !important;
             margin-bottom: 0 !important;
             padding-top: 0 !important;
@@ -57,7 +91,7 @@
         }
     </style>
 
-    
+
 
     <?php
         $totalPages = ceil($quotation->items->count() / 8);
@@ -128,7 +162,7 @@
                                 $quotation->customer->customer_province_name .
                                 ' ' .
                                 $quotation->customer->customer_zipcode); ?><br>
-                               <?php echo e($quotation->customer->customer_phone); ?>
+                            <?php echo e($quotation->customer->customer_phone); ?>
 
                         </address>
                     </div> <!-- end col-->
@@ -168,7 +202,7 @@
                                         <th>ลำดับ</th>
                                         <th>จำนวน</th>
                                         <th>หน่วยนับ</th>
-                                        <th>รายการสินค้า</th>
+                                        <th style="width: 30%">รายการสินค้า</th>
                                         <th>ความยาว</th>
                                         <th>ราคาต่อหน่วย</th>
                                         <th class="text-end">จำนวนเงินรวม</th>
@@ -176,26 +210,72 @@
                                 </thead>
 
                                 <tbody>
-                                  
+
                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <tr>
-                                            <td><?php echo e($loopIndex++); ?></td>
-                                             <td><?php echo e($item->quantity); ?></td>
-                                          
-                                            <td><?php echo e($item->product_unit); ?></td>
-                                            <td><b><?php echo e($item->product_name); ?> </b> <?php echo e(($item->product_calculation ?? 1) != 1 ? $item->product_calculation  : ''); ?><br />
-                                                 <?php echo e($item->globalSetValue()->value ?? ''); ?>
+                                        <!--[if BLOCK]><![endif]--><?php if($item->product_unit === 'แผ่น'): ?>
+                                            <?php
+                                                $width = $item->unit_price; // ที่เก็บในฐานข้อมูล
+                                                $widthInMeter = $width / 10; // → 0.035 เมตร
+                                            ?>
+                                            <tr>
+                                                <td><?php echo e($loopIndex++); ?></td>
+                                                <td><?php echo e($item->quantity); ?></td>
 
-                                                 <!--[if BLOCK]><![endif]--><?php if($item->product_note): ?>
-                                                     <br /> <?php echo e($item->product_note); ?>
+                                                <td><?php echo e($item->product_unit); ?></td>
 
-                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                              
-                                            </td>
-                                            <td><?php echo e(number_format($item->product_length)); ?> <?php echo e($item->productMeasure->value); ?></td>
-                                             <td><?php echo e(number_format($item->unit_price, 2)); ?></td>
-                                            <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
-                                        </tr>
+                                                <td>
+
+                                                    <b><?php echo e($item->product_name); ?> </b>
+                                                   
+                                                    (<?php echo e(number_format($widthInMeter) . '/' . $item->productMeasure->value); ?>)<br />
+                                                    <p><?php echo e('ความหนา:'.$item->product_calculation); ?><br /></p>
+                                                     
+                                                    <?php echo e($item->globalSetValue()->value ?? ''); ?>
+
+                                                    <!--[if BLOCK]><![endif]--><?php if($item->product_note): ?>
+                                                        <br /> <?php echo e($item->product_note); ?>
+
+                                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+                                                </td>
+                                                <td><?php echo e(number_format($item->product_length)); ?>
+
+                                                    <?php echo e($item->productMeasure->value); ?></td>
+                                                <td><?php echo e(number_format(($widthInMeter*$item->product_calculation), 2)); ?>
+
+                                                </td>
+                                                <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
+                                            </tr>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td><?php echo e($loopIndex++); ?></td>
+                                                <td><?php echo e($item->quantity); ?></td>
+
+                                                <td><?php echo e($item->product_unit); ?></td>
+
+                                                <td>
+
+                                                    <b><?php echo e($item->product_name); ?> </b>
+                                                    <?php echo e(($item->product_calculation ?? 1) != 1 ? $item->product_calculation : ''); ?>
+
+                                                    (<?php echo e(number_format($item->unit_price) . '/' . $item->productMeasure->value); ?>)<br />
+                                                    <?php echo e($item->globalSetValue()->value ?? ''); ?>
+
+                                                    <!--[if BLOCK]><![endif]--><?php if($item->product_note): ?>
+                                                        <br /> <?php echo e($item->product_note); ?>
+
+                                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+                                                </td>
+                                                <td><?php echo e(number_format($item->product_length)); ?>
+
+                                                    <?php echo e($item->productMeasure->value); ?></td>
+                                                <td><?php echo e(number_format($item->unit_price * $item->product_length, 2)); ?>
+
+                                                </td>
+                                                <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
+                                            </tr>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
 
 
@@ -235,7 +315,7 @@
                 <!-- end row-->
                 <hr>
                 <div class="row ">
-                     <div class="col-sm-6">
+                    <div class="col-sm-6">
                         <div class=" mt-sm-0">
                             <span>หมายเหตุ:เงื่อนไขการชำระเงิน</span><br>
                             <span>1. โอนก่อนจัดส่งสินค้า</span><br>
@@ -250,7 +330,7 @@
 
                         </div>
                     </div> <!-- end col -->
-                   
+
                 </div>
 
                 <div class="d-print-none mt-4">

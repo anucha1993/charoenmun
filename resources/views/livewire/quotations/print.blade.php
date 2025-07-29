@@ -30,26 +30,60 @@
 
         body {
             font-family: 'THSarabunNew', sans-serif;
-            font-size: 18pt;
+            font-size: 15pt;
         }
-        p, h4, h6, .fs-20, address, span, small, b, strong, td, th, div, .clearfix {
+
+        p,
+        h4,
+        h6,
+        .fs-20,
+        address,
+        span,
+        small,
+        b,
+        strong,
+        td,
+        th,
+        div,
+        .clearfix {
             margin-top: 0 !important;
             margin-bottom: 0 !important;
             padding-top: 0 !important;
             padding-bottom: 0 !important;
             line-height: 1.1 !important;
         }
-        .table th, .table td {
+
+        .table th,
+        .table td {
             padding-top: 2px !important;
             padding-bottom: 2px !important;
         }
-        .row, .col-6, .col-sm-6, .col-sm-4, .col-sm-12, .col-12 {
+
+        .row,
+        .col-6,
+        .col-sm-6,
+        .col-sm-4,
+        .col-sm-12,
+        .col-12 {
             margin-top: 0 !important;
             margin-bottom: 0 !important;
             padding-top: 0 !important;
             padding-bottom: 0 !important;
         }
-        .mt-1, .mt-0, .mb-0, .mb-1, .pt-3, .mt-sm-0, .mb-3, .mt-4, .mb-4, .pt-3, .pb-3, .pt-0, .pb-0 {
+
+        .mt-1,
+        .mt-0,
+        .mb-0,
+        .mb-1,
+        .pt-3,
+        .mt-sm-0,
+        .mb-3,
+        .mt-4,
+        .mb-4,
+        .pt-3,
+        .pb-3,
+        .pt-0,
+        .pb-0 {
             margin-top: 0 !important;
             margin-bottom: 0 !important;
             padding-top: 0 !important;
@@ -57,7 +91,7 @@
         }
     </style>
 
-    
+
 
     @php
         $totalPages = ceil($quotation->items->count() / 8);
@@ -131,7 +165,7 @@
                                 $quotation->customer->customer_province_name .
                                 ' ' .
                                 $quotation->customer->customer_zipcode }}<br>
-                               {{ $quotation->customer->customer_phone }}
+                            {{ $quotation->customer->customer_phone }}
                         </address>
                     </div> <!-- end col-->
 
@@ -168,7 +202,7 @@
                                         <th>ลำดับ</th>
                                         <th>จำนวน</th>
                                         <th>หน่วยนับ</th>
-                                        <th>รายการสินค้า</th>
+                                        <th style="width: 30%">รายการสินค้า</th>
                                         <th>ความยาว</th>
                                         <th>ราคาต่อหน่วย</th>
                                         <th class="text-end">จำนวนเงินรวม</th>
@@ -176,24 +210,63 @@
                                 </thead>
 
                                 <tbody>
-                                  
+
                                     @foreach ($chunk as $item)
-                                        <tr>
-                                            <td>{{ $loopIndex++ }}</td>
-                                             <td>{{ $item->quantity }}</td>
-                                          
-                                            <td>{{ $item->product_unit }}</td>
-                                            <td><b>{{ $item->product_name }} </b> {{ ($item->product_calculation ?? 1) != 1 ? $item->product_calculation  : '' }}<br />
-                                                 {{ $item->globalSetValue()->value ?? '' }}
-                                                 @if ($item->product_note)
-                                                     <br /> {{ $item->product_note }}
-                                                 @endif
-                                              
-                                            </td>
-                                            <td>{{ number_format($item->product_length) }} {{$item->productMeasure->value}}</td>
-                                             <td>{{ number_format($item->unit_price, 2) }}</td>
-                                            <td class="text-end">{{ number_format($item->total, 2) }}</td>
-                                        </tr>
+                                        @if ($item->product_unit === 'แผ่น')
+                                            @php
+                                                $width = $item->unit_price; // ที่เก็บในฐานข้อมูล
+                                                $widthInMeter = $width / 10; // → 0.035 เมตร
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $loopIndex++ }}</td>
+                                                <td>{{ $item->quantity }}</td>
+
+                                                <td>{{ $item->product_unit }}</td>
+
+                                                <td>
+
+                                                    <b>{{ $item->product_name }} </b>
+                                                   
+                                                    ({{ number_format($widthInMeter) . '/' . $item->productMeasure->value }})<br />
+                                                    <p>{{ 'ความหนา:'.$item->product_calculation}}<br /></p>
+                                                     
+                                                    {{ $item->globalSetValue()->value ?? '' }}
+                                                    @if ($item->product_note)
+                                                        <br /> {{ $item->product_note }}
+                                                    @endif
+
+                                                </td>
+                                                <td>{{ number_format($item->product_length) }}
+                                                    {{ $item->productMeasure->value }}</td>
+                                                <td>{{ number_format(($widthInMeter*$item->product_calculation), 2) }}
+                                                </td>
+                                                <td class="text-end">{{ number_format($item->total, 2) }}</td>
+                                            </tr>
+                                        @else
+                                            <tr>
+                                                <td>{{ $loopIndex++ }}</td>
+                                                <td>{{ $item->quantity }}</td>
+
+                                                <td>{{ $item->product_unit }}</td>
+
+                                                <td>
+
+                                                    <b>{{ $item->product_name }} </b>
+                                                    {{ ($item->product_calculation ?? 1) != 1 ? $item->product_calculation : '' }}
+                                                    ({{ number_format($item->unit_price) . '/' . $item->productMeasure->value }})<br />
+                                                    {{ $item->globalSetValue()->value ?? '' }}
+                                                    @if ($item->product_note)
+                                                        <br /> {{ $item->product_note }}
+                                                    @endif
+
+                                                </td>
+                                                <td>{{ number_format($item->product_length) }}
+                                                    {{ $item->productMeasure->value }}</td>
+                                                <td>{{ number_format($item->unit_price * $item->product_length, 2) }}
+                                                </td>
+                                                <td class="text-end">{{ number_format($item->total, 2) }}</td>
+                                            </tr>
+                                        @endif
                                     @endforeach
 
 
@@ -232,7 +305,7 @@
                 <!-- end row-->
                 <hr>
                 <div class="row ">
-                     <div class="col-sm-6">
+                    <div class="col-sm-6">
                         <div class=" mt-sm-0">
                             <span>หมายเหตุ:เงื่อนไขการชำระเงิน</span><br>
                             <span>1. โอนก่อนจัดส่งสินค้า</span><br>
@@ -247,7 +320,7 @@
 
                         </div>
                     </div> <!-- end col -->
-                   
+
                 </div>
 
                 <div class="d-print-none mt-4">
