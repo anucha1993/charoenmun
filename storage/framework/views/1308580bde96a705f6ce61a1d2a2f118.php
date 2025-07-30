@@ -57,6 +57,7 @@
         .table td {
             padding-top: 2px !important;
             padding-bottom: 2px !important;
+            border: 1px solid #dee2e6 !important;
         }
 
         .row,
@@ -89,6 +90,7 @@
             padding-top: 0 !important;
             padding-bottom: 0 !important;
         }
+        .text-center { text-align: center !important; }
     </style>
 
 
@@ -99,7 +101,7 @@
     ?>
 
     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $quotation->items->chunk(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <div class="card row text-black" style="top: -30px">
+        <div class="card row text-black" style="top: -20px">
             <div class="card-body">
                 <!-- Invoice Detail-->
                 <div class="clearfix">
@@ -196,8 +198,8 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table table-sm table-centered table-hover  mb-0 mt-0">
-                                <thead class="border-top border-bottom border-start-0 border-end-0 border-primary">
+                            <table class="table table-sm table-centered table-hover  mb-0 mt-0 border">
+                                <thead class="border-top border-bottom  border-start-1 border-end-1 border-primary">
                                     <tr>
                                         <th>ลำดับ</th>
                                         <th>จำนวน</th>
@@ -218,16 +220,16 @@
                                                 $widthInMeter = $width / 10; // → 0.035 เมตร
                                             ?>
                                             <tr>
-                                                <td><?php echo e($loopIndex++); ?></td>
-                                                <td><?php echo e($item->quantity); ?></td>
+                                                <td class="text-center"><?php echo e($loopIndex++); ?></td>
+                                                <td class="text-center"><?php echo e($item->quantity); ?></td>
 
-                                                <td><?php echo e($item->product_unit); ?></td>
+                                                <td class="text-center"><?php echo e($item->product_unit); ?></td>
 
                                                 <td>
 
                                                     <b><?php echo e($item->product_name); ?> </b>
                                                    
-                                                    (<?php echo e(number_format($widthInMeter) . '/' . $item->productMeasure->value); ?>)<br />
+                                                    (<?php echo e(number_format($widthInMeter) . '/ตรม.'); ?>)<br />
                                                     <p><?php echo e('ความหนา:'.$item->product_calculation); ?><br /></p>
                                                      
                                                     <?php echo e($item->globalSetValue()->value ?? ''); ?>
@@ -238,20 +240,20 @@
                                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                                                 </td>
-                                                <td><?php echo e(number_format($item->product_length)); ?>
+                                                <td class="text-center"><?php echo e(number_format($item->product_length)); ?>
 
                                                     <?php echo e($item->productMeasure->value); ?></td>
-                                                <td><?php echo e(number_format(($widthInMeter*$item->product_calculation), 2)); ?>
+                                                <td class="text-center"><?php echo e(number_format(($widthInMeter*$item->product_calculation), 2)); ?>/<?php echo e($item->product_unit); ?>
 
                                                 </td>
                                                 <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                             </tr>
                                         <?php else: ?>
                                             <tr>
-                                                <td><?php echo e($loopIndex++); ?></td>
-                                                <td><?php echo e($item->quantity); ?></td>
+                                                <td class="text-center"><?php echo e($loopIndex++); ?></td>
+                                                <td class="text-center"><?php echo e($item->quantity); ?></td>
 
-                                                <td><?php echo e($item->product_unit); ?></td>
+                                                <td class="text-center"><?php echo e($item->product_unit); ?></td>
 
                                                 <td>
 
@@ -267,10 +269,10 @@
                                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                                                 </td>
-                                                <td><?php echo e(number_format($item->product_length)); ?>
+                                                <td class="text-center"><?php echo e(number_format($item->product_length)); ?>
 
                                                     <?php echo e($item->productMeasure->value); ?></td>
-                                                <td><?php echo e(number_format($item->unit_price * $item->product_length, 2)); ?>
+                                                <td><?php echo e(number_format($item->unit_price * $item->product_length, 2)); ?>/ <?php echo e($item->product_unit); ?>
 
                                                 </td>
                                                 <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>

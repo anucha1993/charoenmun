@@ -57,6 +57,7 @@
         .table td {
             padding-top: 2px !important;
             padding-bottom: 2px !important;
+            border: 1px solid #dee2e6 !important;
         }
 
         .row,
@@ -89,6 +90,7 @@
             padding-top: 0 !important;
             padding-bottom: 0 !important;
         }
+        .text-center { text-align: center !important; }
     </style>
 
 
@@ -99,7 +101,7 @@
     @endphp
 
     @foreach ($quotation->items->chunk(8) as $chunkIndex => $chunk)
-        <div class="card row text-black" style="top: -30px">
+        <div class="card row text-black" style="top: -20px">
             <div class="card-body">
                 <!-- Invoice Detail-->
                 <div class="clearfix">
@@ -196,8 +198,8 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table table-sm table-centered table-hover  mb-0 mt-0">
-                                <thead class="border-top border-bottom border-start-0 border-end-0 border-primary">
+                            <table class="table table-sm table-centered table-hover  mb-0 mt-0 border">
+                                <thead class="border-top border-bottom  border-start-1 border-end-1 border-primary">
                                     <tr>
                                         <th>ลำดับ</th>
                                         <th>จำนวน</th>
@@ -218,16 +220,16 @@
                                                 $widthInMeter = $width / 10; // → 0.035 เมตร
                                             @endphp
                                             <tr>
-                                                <td>{{ $loopIndex++ }}</td>
-                                                <td>{{ $item->quantity }}</td>
+                                                <td class="text-center">{{ $loopIndex++ }}</td>
+                                                <td class="text-center">{{ $item->quantity }}</td>
 
-                                                <td>{{ $item->product_unit }}</td>
+                                                <td class="text-center">{{ $item->product_unit }}</td>
 
                                                 <td>
 
                                                     <b>{{ $item->product_name }} </b>
                                                    
-                                                    ({{ number_format($widthInMeter) . '/' . $item->productMeasure->value }})<br />
+                                                    ({{ number_format($widthInMeter) . '/ตรม.' }})<br />
                                                     <p>{{ 'ความหนา:'.$item->product_calculation}}<br /></p>
                                                      
                                                     {{ $item->globalSetValue()->value ?? '' }}
@@ -236,18 +238,18 @@
                                                     @endif
 
                                                 </td>
-                                                <td>{{ number_format($item->product_length) }}
+                                                <td class="text-center">{{ number_format($item->product_length) }}
                                                     {{ $item->productMeasure->value }}</td>
-                                                <td>{{ number_format(($widthInMeter*$item->product_calculation), 2) }}
+                                                <td class="text-center">{{ number_format(($widthInMeter*$item->product_calculation), 2) }}/{{ $item->product_unit }}
                                                 </td>
                                                 <td class="text-end">{{ number_format($item->total, 2) }}</td>
                                             </tr>
                                         @else
                                             <tr>
-                                                <td>{{ $loopIndex++ }}</td>
-                                                <td>{{ $item->quantity }}</td>
+                                                <td class="text-center">{{ $loopIndex++ }}</td>
+                                                <td class="text-center">{{ $item->quantity }}</td>
 
-                                                <td>{{ $item->product_unit }}</td>
+                                                <td class="text-center">{{ $item->product_unit }}</td>
 
                                                 <td>
 
@@ -260,9 +262,9 @@
                                                     @endif
 
                                                 </td>
-                                                <td>{{ number_format($item->product_length) }}
+                                                <td class="text-center">{{ number_format($item->product_length) }}
                                                     {{ $item->productMeasure->value }}</td>
-                                                <td>{{ number_format($item->unit_price * $item->product_length, 2) }}
+                                                <td>{{ number_format($item->unit_price * $item->product_length, 2) }}/ {{ $item->product_unit }}
                                                 </td>
                                                 <td class="text-end">{{ number_format($item->total, 2) }}</td>
                                             </tr>
