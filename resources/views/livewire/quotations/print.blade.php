@@ -270,8 +270,6 @@
                                             </tr>
                                         @endif
                                     @endforeach
-
-
                                 </tbody>
                             </table>
                         </div> <!-- end table-responsive-->

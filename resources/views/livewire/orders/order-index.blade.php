@@ -497,10 +497,8 @@
                                 </td>
                                 <td style="text-align: center;">
                                     <div class="action-buttons">
-                                        <a href="{{ route('orders.show', $order->id) }}" class="btn-icon" title="ดูข้อมูล">
-                                            <i class="ri-eye-line"></i>
-                                        </a>
-                                        <a href="{{ route('orders.edit', $order->id) }}" class="btn-icon" title="แก้ไข">
+                                     
+                                        <a href="{{ route('orders.show', $order->id) }}" class="btn-icon" title="แก้ไข">
                                             <i class="ri-edit-line"></i>
                                         </a>
                                         <button class="btn-icon danger" onclick="confirmDelete({{ $order->id }})" title="ลบ">
