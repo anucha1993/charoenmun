@@ -82,66 +82,86 @@
         </div>
     </div>
     
+
 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $copies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $copyIndex => $copyName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $delivery->deliveryItems->chunk(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <div class="card row text-black page-copy" >
+        <?php
+            $isLastPage = ($copyIndex === count($copies) - 1) && ($chunkIndex === $delivery->deliveryItems->chunk(8)->count() - 1);
+        ?>
+        <div class="card row text-black page-copy container-fluid" >
             <div class="card-body">
                 <!-- Invoice Detail-->
                 <div class="clearfix">
                     <div class="float-start">
+                         <!--[if BLOCK]><![endif]--><?php if($isLastPage): ?>
                         <img src="/images/logo-cmc.png" class="mb-0" alt="dark logo" height="60">
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         <h4 class="m-0 mb-0">Order Delivery / ใบส่งสินค้า</h4>
                     </div>
+                      <!--[if BLOCK]><![endif]--><?php if($isLastPage): ?>
 
                     <div class="float-center">
 
                         <div class="float-end">
-
                             <img src="<?php echo e(route('qr.deliveries', $delivery->id)); ?>" alt="QR"
                                 style="height:100px;"><br>
-                            <small class="float-end">หน้า <?php echo e($copyIndex + 1); ?>/<?php echo e($totalPages); ?></small>
+                            <small class="float-center">หน้า <?php echo e($copyIndex + 1); ?>/<?php echo e($totalPages); ?></small>
                         </div>
 
                     </div>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                 </div>
 
 
                 <div class="row text-black">
-                    <div class="col-sm-6">
-                        <div class="float-start">
-                            <p><b>บริษัท เจริญมั่น คอนกรีต จำกัด(สำนักงานใหญ่)</b></p>
-                            <p class=" fs-13" style="margin-top: -10px">ที่อยู่ 99/35 หมู่ 9 ตำบลละหาร อำเภอบางบัวทอง
-                                จังหวัดนนทบุรี 11110 โทร
-                                082-4789197 </br>
-                                เลขประจำตัวผู้เสียภาษี 0125560015546
-                            </p>
-                            <!--[if BLOCK]><![endif]--><?php if($isCompleteDelivery): ?>
-                                <div class="badge bg-success p-2 mt-2" style="font-size: 16px;">
-                                    <i class="ri-check-double-line me-1"></i> ส่งของครบแล้ว
-                                </div>
-                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                    <div class="col-sm-4">
+                        
+                         <!--[if BLOCK]><![endif]--><?php if(!$isLastPage): ?>
+                         <div class="float-start">
+
+                        <div class="float-end">
+
+                            <img src="<?php echo e(route('qr.deliveries', $delivery->id)); ?>" alt="QR"
+                                style="height:100px;"><br>
+                            <small class="float-center">หน้า <?php echo e($copyIndex + 1); ?>/<?php echo e($totalPages); ?></small>
                         </div>
+                        
+
+                    </div>
+                    <br>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                    
                     </div>
 
-                    <div class="col-sm-4 offset-sm-2 mt-2">
+                    <div class="col-sm-6 offset-sm-2 mt-2">
                         <div class="mt-0 float-sm-end">
-                            <span class="fs-13"><strong>วันที่เสนอราคา: </strong>
+                            <span class="fs-16"><strong>วันที่เสนอราคา: </strong>
                                 &nbsp;&nbsp;&nbsp;<?php echo e(date('d/m/Y', strtotime($delivery->quote_date))); ?></span> <br>
-                            <span class="fs-13"><strong>เลขที่ใบส่งของ</strong>
+                            <span class="fs-16"><strong>เลขที่ใบส่งของ</strong>
                                 &nbsp;&nbsp;&nbsp;<?php echo e($delivery->order_delivery_number); ?></span><br>
-                            <span class="fs-13"><strong>เลขที่ใบสั่งซื้อ </strong>
-                                &nbsp;&nbsp;&nbsp;<?php echo e($delivery->order->order_number); ?></span><br>
-                            <span class="fs-13"><strong>ชื่อผู้ขาย (Sale) </strong><span class="float-end">
-                                    <?php echo e($delivery->sale->name); ?></span></span><br>
+                            <span class="fs-16"><strong>เลขที่ใบสั่งซื้อ </strong>
+                                &nbsp; &nbsp; &nbsp;&nbsp;<?php echo e($delivery->order->order_number); ?></span><br>
+                             <!--[if BLOCK]><![endif]--><?php if($isCompleteDelivery): ?>
+                                <span class="fs-16"><strong>สถานะส่งของ </strong>
+                                    <span class="">
+                                     &nbsp; &nbsp; &nbsp;ส่งของครบแล้ว
+                                    </span></span><br>
+                            <?php else: ?>
+                                <span class="fs-16"><strong>สถานะส่งของ </strong>
+                                    <span class="">
+                                     &nbsp; &nbsp; &nbsp;ยังไม่ครบ
+                                    </span></span><br>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
                         </div>
                     </div>
                 </div>
 
                 <div class="row mt-1 ">
                     <div class="col-6">
-                        <h6 class="fs-14">ข้อมูลลูกค้า</h6>
-                        <address>
+                        <h6 class="fs-16">ข้อมูลลูกค้า</h6>
+                        <address class="fs-16" >
                             <?php echo e($delivery->order->customer->customer_name); ?><br>
                             <?php echo e($delivery->order->customer->customer_address); ?><br>
                             <?php echo e($delivery->order->customer->customer_district_name .
@@ -157,9 +177,9 @@
                     </div> <!-- end col-->
 
                     <div class="col-6">
-                        <h6 class="fs-14">ที่อยู่จัดส่ง</h6>
+                        <h6 class="fs-16">ที่อยู่จัดส่ง</h6>
                         <!--[if BLOCK]><![endif]--><?php if($delivery->deliveryAddress): ?>
-                            <address>
+                            <address class="fs-16">
                                 <?php echo e($delivery->deliveryAddress->delivery_contact_name); ?>
 
                                 (<?php echo e($delivery->deliveryAddress->delivery_phone); ?>)<br>
@@ -191,33 +211,33 @@
                     <div class="col-12">
                         <div class="table-responsive">
                             <table class="table table-sm table-centered table-hover  mb-0 mt-0">
-                                <thead class="border-top border-bottom border-start-0 border-end-0 border-danger">
+                                <thead class="border-top border-bottom border-start-0 border-end-0 border-danger fs-16">
                                     <tr>
                                         <th>ลำดับ</th>
                                         <th>จำนวน</th>
                                         <th>หน่วยนับ</th>
                                         <th >รายการสินค้า</th>
-                                        <th class="price-section">ราคาต่อหน่วย</th>
-                                        <th class="text-end price-section">จำนวนเงินรวม</th>
+                                        <!--[if BLOCK]><![endif]--><?php if($isLastPage): ?>
+                                            <th class="price-section">ราคาต่อหน่วย</th>
+                                            <th class="text-end price-section">จำนวนเงินรวม</th>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     </tr>
                                 </thead>
-
-                                <tbody>
-
-                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tbody class="fs-16">
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td><?php echo e($loopIndex++); ?></td>
+                                            <td><?php echo e(++$key); ?></td>
                                             <td><?php echo e($item->quantity); ?></td>
                                             <td><?php echo e($item->orderItem->product_unit); ?></td>
                                             <td><b><?php echo e($item->orderItem->product_name); ?></b>
-                                                (<?php echo e($item->orderItem->product_detail); ?>)
+                                                (<?php echo e(number_format($item->orderItem->product_length) . ' ' . ($item->productMeasure?->value ?? 'เมตร')); ?>)
                                             </td>
-                                            <td class="price-section"><?php echo e(number_format($item->unit_price, 2)); ?></td>
-                                        <td class="text-end price-section"><?php echo e(number_format($item->total, 2)); ?></td>
+                                            <!--[if BLOCK]><![endif]--><?php if($isLastPage): ?>
+                                                <td class="price-section"><?php echo e(number_format($item->unit_price, 2)); ?></td>
+                                                <td class="text-end price-section"><?php echo e(number_format($item->total, 2)); ?></td>
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </tr>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-
-
                                 </tbody>
                             </table>
                         </div> <!-- end table-responsive-->
@@ -226,10 +246,11 @@
                 <!-- end row -->
                 <br>
 
+                <!--[if BLOCK]><![endif]--><?php if($isLastPage): ?>
                 <div class="row ">
                     <div class="col-sm-6">
                         <div class="clearfix pt-3">
-                            <h6 class="text-muted fs-14">หมายเหตุ:</h6>
+                            <h6 class="text-muted fs-16">หมายเหตุ:</h6>
                             <small>
                                 <?php echo e($delivery->order_deliver_note); ?>
 
@@ -253,16 +274,16 @@
                         <div class="clearfix"></div>
                     </div> <!-- end col -->
                 </div>
-                <!-- end row-->
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                 <hr>
                 <div class="row ">
                     <div class="col-sm-12">
                         <div class="clearfix">
-                            <span>เงือนไขการระบสินค้า :</span><br>
-                            <span>กรุณาตรวจสอบความถูกต้องของสินค้าและเซ็นรับสินค้าในวันที่ได้รับ
+                            <span class="fs-16">เงือนไขการระบสินค้า :</span><br>
+                            <span class="fs-16">กรุณาตรวจสอบความถูกต้องของสินค้าและเซ็นรับสินค้าในวันที่ได้รับ
                                 หากไม่มีการตรวจสอบหรือเซ็นรับสินค้า
-                                ทางบริษัทขอสงวนสิทธิ์ในการรับผิดชอบต่อความผิดพลาดทุกกรณ</span><br>
+                                ทางบริษัทขอสงวนสิทธิ์ในการรับผิดชอบต่อความผิดพลาดทุกกรณี</span><br>
 
                         </div>
                     </div>
@@ -271,13 +292,13 @@
                 <div class="row ">
                     <div class="col-sm-6">
                         <div class="clearfix pt-4">
-                            <span>ลงชื่อผู้รับสินค้า............................................................ผู้รับสินค้า</span><br>
+                            <span class="fs-16">ลงชื่อ............................................................ผู้รับสินค้า</span><br>
 
                         </div>
                     </div> <!-- end col -->
                     <div class="col-sm-6">
                         <div class="float-end mt-sm-0  pt-4">
-                            <span>ลงชื่อผู้รับเงิน............................................................ผู้รับเงิน</span><br>
+                            <span class="fs-16">ลงชื่อ............................................................ผู้ส่งสินค้า</span><br>
 
                         </div>
                         <div class="clearfix"></div>
@@ -290,14 +311,11 @@
             </div> <!-- end card-body-->
         </div> <!-- end card -->
 
-        
-
-
+        <!--[if BLOCK]><![endif]--><?php if(!$isLastPage): ?>
+            <div class="page-break"></div>
+        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-    <!--[if BLOCK]><![endif]--><?php if(!$loop->last): ?>
-        <div class="page-break"></div>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
     <!-- end row -->
     <style>
         @media print {
@@ -335,26 +353,24 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // กำหนดการแสดงราคาทันทีเมื่อโหลดหน้า
         setPagePriceVisibility();
     });
 
     function setPagePriceVisibility() {
         // ดึงทุกหน้า
         const allCopies = document.querySelectorAll('.page-copy');
-        
         allCopies.forEach((copyEl, index) => {
             const priceEls = copyEl.querySelectorAll('.price-section');
-            if (index < 3) {
-                // หน้า 1-3 ไม่แสดงราคา
-                priceEls.forEach(el => el.style.display = 'none');
-            } else {
-                // หน้า 4 แสดงราคาเสมอ
+            if (index === allCopies.length - 1) {
+                // เฉพาะหน้าสุดท้าย แสดงราคา
                 priceEls.forEach(el => el.style.display = '');
+            } else {
+                // หน้าอื่น ๆ ซ่อนราคา
+                priceEls.forEach(el => el.style.display = 'none');
             }
         });
     }
-    
+
     // กลับหลังจากพิมพ์
     window.addEventListener('afterprint', () => {
         history.back(); 
@@ -368,7 +384,6 @@
             if (watermark) {
                 watermark.style.display = 'none';
             }
-            
             // พิมพ์เอกสาร
             setTimeout(() => window.print(), 300);
         });

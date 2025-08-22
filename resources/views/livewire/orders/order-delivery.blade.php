@@ -51,10 +51,12 @@
                                     {{ $orderModel->customer->customer_address }}
                                 </div>
                                 <div style="font-size:13px; color:#9ca3af;">
+
                                     {{ $orderModel->customer->customer_district_name }}
                                     {{ $orderModel->customer->customer_amphur_name }}
                                     {{ $orderModel->customer->customer_province_name }}
                                     {{ $orderModel->customer->customer_zipcode }}
+                                    
                                 </div>
                                 <div style="font-size:14px; color:#6b7280; margin-top:4px;">
                                     <i class="ri-phone-line"></i> (+66) {{ $orderModel->customer->customer_phone }}

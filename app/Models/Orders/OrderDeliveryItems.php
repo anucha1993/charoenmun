@@ -5,6 +5,7 @@ namespace App\Models\Orders;
 use App\Models\Orders\OrderItemsModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Orders\OrderDeliverysModel;
+use App\Models\globalsets\GlobalSetValueModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class OrderDeliveryItems extends Model
@@ -29,5 +30,9 @@ class OrderDeliveryItems extends Model
     public function orderItem()
     {
         return $this->belongsTo(OrderItemsModel::class, 'order_item_id');
+    }
+        public function productMeasure()
+    {
+        return $this->belongsTo(GlobalSetValueModel::class, 'product_measure');
     }
 }
