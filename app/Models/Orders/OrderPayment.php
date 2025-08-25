@@ -22,7 +22,8 @@ class OrderPayment extends Model
         'transfer_at',
         'status',
         'sender_account_no',
-        'receiver_account_no'
+        'receiver_account_no',
+        'reject_reason',
     ];
     
     protected $casts = [
