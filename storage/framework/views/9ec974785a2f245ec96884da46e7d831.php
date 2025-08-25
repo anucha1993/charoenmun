@@ -2,7 +2,14 @@
 
     <!-- Sidebar Filter -->
     <div class="col-md-3 mb-3 mt-3">
-        <div class="list-group">
+            <!-- QR/Order Search Input -->
+            <div class="mb-3">
+               <input type="text" class="form-control" placeholder="ยิง QR หรือกรอกเลขที่ออเดอร์ แล้วกด Enter"
+                 wire:model.live.debounce.500ms="searchOrderInput" autofocus>
+                <div style="font-size:0.95rem; color:#888; margin-top:2px;">
+                    <b>DEBUG (frontend):</b> searchOrder = <code><?php echo e($searchOrder); ?></code> | Input = <code><?php echo e($searchOrderInput); ?></code>
+                </div>
+            </div><div class="list-group">
             <button class="list-group-item list-group-item-action <?php echo e($filterType === 'today' ? 'active' : ''); ?>"
                 wire:click="setFilter('today')">
                 <i class="mdi mdi-calendar-today"></i> สลิปวันนี้
@@ -58,6 +65,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-12 col-md-4">
                 <div class="card border-0 text-center"
                     style="background: #f9fafb; border-radius: 1.25rem; border: 1px solid #e5e7eb;">
@@ -79,14 +87,11 @@
 
     <div class="card">
         <div class="card-header">
-            <h4 class="mb-3">รายการขอยืนยันสลิป</h4>
 
-            <!--[if BLOCK]><![endif]--><?php if(session()->has('success')): ?>
-                <div class="alert alert-success"><?php echo e(session('success')); ?></div>
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-            <?php if(session()->has('error')): ?>
-                <div class="alert alert-danger"><?php echo e(session('error')); ?></div>
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <h4 class="mb-3">รายการขอยืนยันสลิป</h4>
+            <!-- QR/Order Search Input -->
+            
+
 
             <table class="table table-bordered table-hover align-middle"
                 style="border-radius:10px; overflow:hidden; background:white;">
@@ -104,6 +109,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    
                     <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $payments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr>
                             <td><?php echo e(\Carbon\Carbon::parse($payment->transfer_at)->format('d/m/Y H:i')); ?></td>
@@ -183,6 +189,7 @@
 <!-- SweetAlert2 CDN and the JavaScript for confirmRejectSweetAlert function -->
 <!-- ควรวางบล็อกสคริปต์นี้ไว้ที่ท้ายสุดของไฟล์ Blade ของคุณเสมอ (ก่อนแท็ก </body> ปิด) -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     document.addEventListener('livewire:initialized', () => {
         // เมื่อ Livewire ถูกโหลดและพร้อมใช้งาน

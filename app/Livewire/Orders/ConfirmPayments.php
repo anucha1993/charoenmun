@@ -5,6 +5,7 @@ use Livewire\Component;
 use App\Models\Orders\OrderPayment;
 use App\Models\Orders\OrderDeliverysModel;
 
+
 class ConfirmPayments extends Component
 {
     public $payments;
@@ -14,6 +15,8 @@ class ConfirmPayments extends Component
     public $showRejectModal = false;
     public $rejectingId = null;
     public $rejectReason = '';
+    public $searchOrder = '';
+    public $searchOrderInput = '';
 
     public function hideRejectModal()
     {
@@ -48,18 +51,50 @@ class ConfirmPayments extends Component
 
     public function loadPayments()
     {
-        $query = OrderPayment::with('order');
-        if ($this->filterType === 'today') {
-            $query->whereDate('transfer_at', $this->filterDate);
-        } elseif ($this->filterType === 'pending') {
-            $query->where('status', 'รอยืนยันยอด')
-                  ->whereDate('transfer_at', '!=', $this->filterDate);
-        } elseif ($this->filterType === 'approved') {
-            $query->where('status', 'ชำระเงินแล้ว');
-        } elseif ($this->filterType === 'rejected') {
-            $query->where('status', 'ปฏิเสธ');
+        $query = OrderPayment::query();
+        if ($this->searchOrder) {
+            // INNER JOIN orders table and filter by order_number
+            $query->join('orders', 'order_payments.order_id', '=', 'orders.id')
+                  ->where('orders.order_number', 'like', '%' . $this->searchOrder . '%')
+                  ->select('order_payments.*');
+        } else {
+            if ($this->filterType === 'today') {
+                $query->whereDate('transfer_at', $this->filterDate);
+            } elseif ($this->filterType === 'pending') {
+                $query->where('status', 'รอยืนยันยอด')
+                      ->whereDate('transfer_at', '!=', $this->filterDate);
+            } elseif ($this->filterType === 'approved') {
+                $query->where('status', 'ชำระเงินแล้ว');
+            } elseif ($this->filterType === 'rejected') {
+                $query->where('status', 'ปฏิเสธ');
+            }
         }
-        $this->payments = $query->latest()->get();
+        $this->payments = OrderPayment::with('order')->whereIn('id', $query->latest()->pluck('order_payments.id'))->get();
+
+        // Debug: flash search value, result count, and order numbers
+        if ($this->searchOrder) {
+            // Clone query for debug
+            $debugQuery = OrderPayment::with('order');
+            if ($this->filterType === 'today') {
+                $debugQuery->whereDate('transfer_at', $this->filterDate);
+            } elseif ($this->filterType === 'pending') {
+                $debugQuery->where('status', 'รอยืนยันยอด')
+                          ->whereDate('transfer_at', '!=', $this->filterDate);
+            } elseif ($this->filterType === 'approved') {
+                $debugQuery->where('status', 'ชำระเงินแล้ว');
+            } elseif ($this->filterType === 'rejected') {
+                $debugQuery->where('status', 'ปฏิเสธ');
+            }
+            $debugQuery->whereHas('order', function($q) {
+                $q->where('order_number', 'like', '%' . $this->searchOrder . '%');
+            });
+            $sql = $debugQuery->toSql();
+            $bindings = json_encode($debugQuery->getBindings());
+            $debugList = $this->payments->map(function($p) {
+                return ($p->order ? $p->order->order_number : '-') . ' (id:' . $p->id . ', status:' . $p->status . ')';
+            })->implode(', ');
+            session()->flash('error', 'DEBUG: searchOrder=' . $this->searchOrder . ', results=' . $this->payments->count() . ', list=[' . $debugList . '], SQL=' . $sql . ', bindings=' . $bindings);
+        }
 
         $this->stats = [
             'pending_count' => OrderPayment::where('status', 'รอยืนยันยอด')->count(),
@@ -69,6 +104,16 @@ class ConfirmPayments extends Component
             'rejected_count' => OrderPayment::where('status', 'ปฏิเสธ')->count(),
         ];
     }
+
+    public function updatedSearchOrderInput()
+    {
+        if ($this->searchOrderInput !== '') {
+            $this->searchOrder = $this->searchOrderInput;
+            $this->searchOrderInput = '';
+            $this->loadPayments();
+        }
+    }
+
     public function confirm($paymentId)
     {
         $payment = OrderPayment::find($paymentId);
@@ -117,6 +162,11 @@ class ConfirmPayments extends Component
             $this->loadPayments();
             session()->flash('success', 'เปลี่ยนสถานะเป็นรออนุมัติเรียบร้อยแล้ว');
         }
+    }
+
+    public function searchOrder()
+    {
+        $this->loadPayments();
     }
 
     public function render()
