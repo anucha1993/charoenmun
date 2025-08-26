@@ -1,0 +1,502 @@
+<div class="container-fluid py-3">
+    <div class="row">
+        <!-- Sidebar Filter -->
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">🔍 ตัวกรอง</h5>
+                    
+                    <div class="list-group mb-4">
+                        <button class="list-group-item list-group-item-action {{ $filterType === 'today' ? 'active' : '' }}"
+                            wire:click="setFilter('today')">
+                            <i class="ri-calendar-todo-fill"></i> รายการวันนี้
+                        </button>
+                        <button class="list-group-item list-group-item-action {{ $filterType === 'pending' ? 'active' : '' }}"
+                            wire:click="setFilter('pending')">
+                            <i class="ri-error-warning-fill"></i> รายการค้างตรวจสอบ
+                        </button>
+                        <button class="list-group-item list-group-item-action {{ $filterType === 'date-range' ? 'active' : '' }}"
+                            wire:click="setFilter('date-range')">
+                            <i class="ri-calendar-check-fill"></i> เลือกช่วงวันที่
+                        </button>
+                    </div>
+
+                    @if($filterType === 'date-range')
+                    <div class="mb-3">
+                        <label class="form-label">วันที่เริ่มต้น</label>
+                        <input type="date" class="form-control" wire:model.live="startDate">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">วันที่สิ้นสุด</label>
+                        <input type="date" class="form-control" wire:model.live="endDate">
+                    </div>
+                    @endif
+
+                    <div class="mb-3">
+                        <label class="form-label">สถานะการจัดส่ง</label>
+                        <select class="form-select" wire:model.live="deliveryStatus">
+                            <option value="">ทั้งหมด</option>
+                            <option value="pending">รอจัดส่ง</option>
+                            <option value="success">จัดส่งสำเร็จ</option>
+                            <option value="cancelled">ยกเลิก</option>
+                        </select>
+                    </div>
+
+                    <!-- รายการค้างตรวจสอบ -->
+                    @if($pendingDeliveries->isNotEmpty())
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">⚠️ รายการค้างตรวจสอบ</h6>
+                        <hr>
+                        @foreach($pendingDeliveries as $pending)
+                        <div class="mb-2">
+                            <strong>{{ $pending->order_delivery_number }}</strong><br>
+                            <small>{{ $pending->order->customer->customer_name }}<br>
+                                วันที่: {{ $pending->order_delivery_date->format('d/m/Y') }}<br>
+                                ยอด: {{ number_format($pending->order_delivery_grand_total, 2) }} บาท</small>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 bg-success bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-success mb-2">📅 รายการวันนี้</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['today']['count']) }} รายการ</h4>
+                                    <small class="text-success">{{ number_format($stats['today']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-warning bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-warning mb-2">⚠️ ค้างตรวจสอบ</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['pending']['count']) }} รายการ</h4>
+                                    <small class="text-warning">{{ number_format($stats['pending']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-primary bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-primary mb-2">✅ ตรวจสอบแล้ว</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['success']['count']) }} รายการ</h4>
+                                    <small class="text-primary">{{ number_format($stats['success']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly/Yearly Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 bg-info bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-info mb-2">📊 สถิติรายเดือน</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['monthly']['count']) }} รายการ</h4>
+                                    <small class="text-info">{{ number_format($stats['monthly']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 bg-secondary bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-secondary mb-2">📈 สถิติรายปี</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['yearly']['count']) }} รายการ</h4>
+                                    <small class="text-secondary">{{ number_format($stats['yearly']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scan Input -->
+            <div class="container-fluid py-3">
+    <div class="row">
+        <!-- Sidebar Filter -->
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">🔍 ตัวกรอง</h5>
+                    
+                    <div class="list-group mb-4">
+                        <button class="list-group-item list-group-item-action {{ $filterType === 'today' ? 'active' : '' }}"
+                            wire:click="setFilter('today')">
+                            <i class="ri-calendar-todo-fill"></i> รายการวันนี้
+                        </button>
+                        <button class="list-group-item list-group-item-action {{ $filterType === 'pending' ? 'active' : '' }}"
+                            wire:click="setFilter('pending')">
+                            <i class="ri-error-warning-fill"></i> รายการค้างตรวจสอบ
+                        </button>
+                        <button class="list-group-item list-group-item-action {{ $filterType === 'date-range' ? 'active' : '' }}"
+                            wire:click="setFilter('date-range')">
+                            <i class="ri-calendar-check-fill"></i> เลือกช่วงวันที่
+                        </button>
+                    </div>
+
+                    @if($filterType === 'date-range')
+                    <div class="mb-3">
+                        <label class="form-label">วันที่เริ่มต้น</label>
+                        <input type="date" class="form-control" wire:model.live="startDate">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">วันที่สิ้นสุด</label>
+                        <input type="date" class="form-control" wire:model.live="endDate">
+                    </div>
+                    @endif
+
+                    <div class="mb-3">
+                        <label class="form-label">สถานะการจัดส่ง</label>
+                        <select class="form-select" wire:model.live="deliveryStatus">
+                            <option value="">ทั้งหมด</option>
+                            <option value="pending">รอจัดส่ง</option>
+                            <option value="success">จัดส่งสำเร็จ</option>
+                            <option value="cancelled">ยกเลิก</option>
+                        </select>
+                    </div>
+
+                    <!-- รายการค้างตรวจสอบ -->
+                    @if($pendingDeliveries->isNotEmpty())
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">⚠️ รายการค้างตรวจสอบ</h6>
+                        <hr>
+                        @foreach($pendingDeliveries as $pending)
+                        <div class="mb-2">
+                            <strong>{{ $pending->order_delivery_number }}</strong><br>
+                            <small>{{ $pending->order->customer->customer_name }}<br>
+                                วันที่: {{ $pending->order_delivery_date->format('d/m/Y') }}<br>
+                                ยอด: {{ number_format($pending->order_delivery_grand_total, 2) }} บาท</small>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 bg-success bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-success mb-2">📅 รายการวันนี้</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['today']['count']) }} รายการ</h4>
+                                    <small class="text-success">{{ number_format($stats['today']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-warning bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-warning mb-2">⚠️ ค้างตรวจสอบ</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['pending']['count']) }} รายการ</h4>
+                                    <small class="text-warning">{{ number_format($stats['pending']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-primary bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-primary mb-2">✅ ตรวจสอบแล้ว</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['success']['count']) }} รายการ</h4>
+                                    <small class="text-primary">{{ number_format($stats['success']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly/Yearly Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 bg-info bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-info mb-2">📊 สถิติรายเดือน</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['monthly']['count']) }} รายการ</h4>
+                                    <small class="text-info">{{ number_format($stats['monthly']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 bg-secondary bg-opacity-10">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="text-secondary mb-2">📈 สถิติรายปี</h6>
+                                    <h4 class="mb-0">{{ number_format($stats['yearly']['count']) }} รายการ</h4>
+                                    <small class="text-secondary">{{ number_format($stats['yearly']['amount'], 2) }} บาท</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scan Input -->
+            <div class="container-fluid py-3">
+    <div class="row">
+        <!-- Sidebar Filter -->
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">🔍 ตัวกรอง</h5>
+
+            @if($currentDelivery)
+            <!-- Current Scanned Order -->
+            <div class="card mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">✅ ตรวจสอบล่าสุด</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>เลขที่บิล:</strong> {{ $currentDelivery->order_delivery_number }}</p>
+                            <p><strong>ลูกค้า:</strong> {{ $order->customer->customer_name }}</p>
+                            <p><strong>วันที่จัดส่ง:</strong> {{ $currentDelivery->order_delivery_date->format('d/m/Y') }}</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-warning" wire:click="cancelSuccess({{ $currentDelivery->id }})">
+                                <i class="ri-restart-line"></i> ยกเลิกการตรวจสอบ
+                            </button>
+                            <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info" target="_blank">
+                                <i class="ri-external-link-line"></i> ดูรายละเอียด
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if(!$currentDelivery && !$deliveries->count())
+            <div class="text-center py-5 text-muted">
+                <i class="ri-qr-scan-2-line" style="font-size: 64px;"></i>
+                <p class="mt-3">กรุณายิง QR Code หรือเลือกตัวกรองเพื่อดูรายการ</p>
+            </div>
+            @endif
+
+            <!-- Deliveries Table -->
+            @if($deliveries->count() > 0)
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">📋 รายการจัดส่ง</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>วันที่</th>
+                                    <th>เลขที่บิล</th>
+                                    <th>ลูกค้า</th>
+                                    <th>ยอดเงิน</th>
+                                    <th>สถานะ</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($deliveries as $delivery)
+                                <tr>
+                                    <td>{{ $delivery->order_delivery_date->format('d/m/Y') }}</td>
+                                    <td>{{ $delivery->order_delivery_number }}</td>
+                                    <td>{{ $delivery->order->customer->customer_name }}</td>
+                                    <td>{{ number_format($delivery->order_delivery_grand_total, 2) }}</td>
+                                    <td>
+                                        @if($delivery->order_delivery_status === 'success')
+                                            <span class="badge bg-success">ตรวจสอบแล้ว</span>
+                                        @elseif($delivery->order_delivery_status === 'pending')
+                                            <span class="badge bg-warning">รอตรวจสอบ</span>
+                                        @else
+                                            <span class="badge bg-danger">ยกเลิก</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($delivery->order_delivery_status === 'success')
+                                        <button class="btn btn-sm btn-warning" wire:click="cancelSuccess({{ $delivery->id }})">
+                                            ยกเลิกการตรวจสอบ
+                                        </button>
+                                        @endif
+                                        <a href="{{ route('orders.show', $delivery->order->id) }}" 
+                                           class="btn btn-sm btn-info" target="_blank">
+                                            ดูรายละเอียด
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4">
+                        {{ $deliveries->links() }}
+                    </div>
+                </div>
+            </div>
+            @endif
+        @php
+            $totalConfirmed = $order && $order->deliveries ? $order->deliveries->flatMap->payments->where('status', 'ชำระเงินแล้ว')->sum('amount') : 0;
+            $totalWaiting = $order && $order->deliveries ? $order->deliveries->flatMap->payments->where('status', 'รอยืนยันยอด')->sum('amount') : 0;
+        @endphp
+
+
+
+        @if($order)
+            <div class="card mb-0 shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📄 ใบสั่งซื้อ: {{ $order->order_number }}</h5>
+                    <span>{{ $order->order_date->format('d/m/Y') }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-0">
+                        <div class="col-md-6">
+                            <h6>👤 ข้อมูลลูกค้า</h6>
+                            @if($order->customer)
+                                <p class="mb-1"><strong>{{ $order->customer->customer_name }}</strong></p>
+                                <p class="mb-1">{{ $order->customer->customer_address }}</p>
+                                <p class="mb-1">
+                                    {{ $order->customer->customer_district_name }},
+                                    {{ $order->customer->customer_amphur_name }},
+                                    {{ $order->customer->customer_province_name }} {{ $order->customer->customer_zipcode }}
+                                </p>
+                                <p>โทร: {{ $order->customer->customer_phone }}</p>
+                            @else
+                                <p class="text-muted">ไม่พบข้อมูลลูกค้า</p>
+                            @endif
+                        </div>
+                        <div class="col-md-6">
+                            <h6>🚚 ที่อยู่จัดส่ง</h6>
+                            @if ($order->deliveryAddress)
+                                <p class="mb-1">{{ $order->deliveryAddress->delivery_contact_name }}
+                                    ({{ $order->deliveryAddress->delivery_phone }})</p>
+                                <p class="mb-1">{{ $order->deliveryAddress->delivery_number }}</p>
+                                <p>
+                                    {{ $order->deliveryAddress->delivery_address }}
+                                </p>
+                            @else
+                                <span class="text-muted">ไม่ได้ระบุที่อยู่จัดส่ง</span>
+                            @endif
+                        </div>
+                    </div>
+                    <hr>
+
+                    <div class="row mb-0">
+                        <div class="col-md-6">
+                            <h6>💳 สถานะการเงิน</h6>
+                            <p>สถานะใบสั่งซื้อ: {!! order_status_badge($order->order_status) !!}</p>
+                            <p>สถานะชำระเงิน: {!! payment_status_badge($order->payment_status) !!}</p>
+                            <p>รอยืนยันยอด: <span class="text-warning">{{ number_format($totalWaiting, 2) }} บาท</span></p>
+                            <p>ชำระแล้ว: <span class="text-success">{{ number_format($totalConfirmed, 2) }} บาท</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>💰 สรุปยอด</h6>
+                            <p>ส่วนลด: {{ number_format($order->order_discount, 2) }} บาท</p>
+                            <p>VAT: {{ number_format($order->order_vat, 2) }} บาท</p>
+                            <p><strong>รวมทั้งหมด: {{ number_format($order->order_grand_total, 2) }} บาท</strong></p>
+                        </div>
+                    </div>
+
+                    @if($order->items)
+                        <h6 class="mb-2">📦 รายการสินค้า</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>สินค้า</th>
+                                        <th>รายละเอียด</th>
+                                        <th>จำนวนสั่ง</th>
+                                        <th>หน่วย</th>
+                                        <th>ราคา/หน่วย</th>
+                                        <th class="text-end">ยอดรวม</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($order->items as $idx => $item)
+                                        @php
+                                            $delivered = $deliveredQtyMap[$item->product_id] ?? 0;
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $idx + 1 }}</td>
+                                            <td>{{ $item->product_name }}</td>
+                                            <td>{{ $item->product_detail }}</td>
+                                            <td>{{ $item->quantity }} {{ $delivered > 0 ? '(' . $delivered . ')' : '' }}</td>
+                                            <td>{{ $item->product_unit }}</td>
+                                            <td>{{ number_format($item->unit_price, 2) }}</td>
+                                            <td class="text-end">{{ number_format($item->total, 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
+                <h6 class="mt-4">🚚 รายการจัดส่ง</h6>
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>เลขบิลย่อย</th>
+                            <th>ยอดรวม</th>
+                            <th>สถานะจัดส่ง</th>
+                            <th>สถานะชำระเงิน</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($order && $order->deliveries)
+                        @foreach ($order->deliveries as $delivery)
+                            <tr>
+                                <td>{{ $delivery->order_delivery_date->format('d/m/Y') }}</td>
+                                <td>{{ $delivery->order_delivery_number }}</td>
+                                <td>{{ number_format($delivery->order_delivery_grand_total, 2) }}</td>
+                                <td>{!! order_delivery_status_badge($delivery->order_delivery_status) !!}</td>
+                                <td>{!! payment_status_badge($delivery->payment_status) !!}</td>
+                            </tr>
+                        @endforeach
+                    @endif
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        @endif
+    </div>
+</div>

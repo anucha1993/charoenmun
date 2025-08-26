@@ -147,68 +147,28 @@
                 </div>
             </div>
 
-            @if($currentDelivery || $todayApprovedDeliveries->isNotEmpty())
-            <!-- Current Scanned Order and Today's Approved -->
+            @if($currentDelivery)
+            <!-- Current Scanned Order -->
             <div class="card mb-4 border-success">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">✅ ตรวจสอบล่าสุด</h5>
                 </div>
                 <div class="card-body">
-                    @if($currentDelivery)
-                    <div class="alert alert-success mb-4">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p class="mb-1"><strong>เลขที่บิล:</strong> {{ $currentDelivery->order_delivery_number }}</p>
-                                <p class="mb-1"><strong>ลูกค้า:</strong> {{ $currentDelivery->order->customer->customer_name }}</p>
-                                <p class="mb-0"><strong>วันที่จัดส่ง:</strong> {{ $currentDelivery->order_delivery_date->format('d/m/Y') }}</p>
-                            </div>
-                            <div class="col-md-6 text-end">
-                                <button class="btn btn-warning" wire:click="cancelSuccess({{ $currentDelivery->id }})">
-                                    <i class="ri-restart-line"></i> ยกเลิกการตรวจสอบ
-                                </button>
-                                <a href="{{ route('orders.show', $currentDelivery->order->id) }}" class="btn btn-info" target="_blank">
-                                    <i class="ri-external-link-line"></i> ดูรายละเอียด
-                                </a>
-                            </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>เลขที่บิล:</strong> {{ $currentDelivery->order_delivery_number }}</p>
+                            <p><strong>ลูกค้า:</strong> {{ $currentDelivery->order->customer->customer_name }}</p>
+                            <p><strong>วันที่จัดส่ง:</strong> {{ $currentDelivery->order_delivery_date->format('d/m/Y') }}</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-warning" wire:click="cancelSuccess({{ $currentDelivery->id }})">
+                                <i class="ri-restart-line"></i> ยกเลิกการตรวจสอบ
+                            </button>
+                            <a href="{{ route('orders.show', $currentDelivery->order->id) }}" class="btn btn-info" target="_blank">
+                                <i class="ri-external-link-line"></i> ดูรายละเอียด
+                            </a>
                         </div>
                     </div>
-                    @endif
-
-                    @if($todayApprovedDeliveries->isNotEmpty())
-                    <h6 class="mb-3">รายการที่ตรวจสอบวันนี้:</h6>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>เวลา</th>
-                                    <th>เลขที่บิล</th>
-                                    <th>ลูกค้า</th>
-                                    <th>ยอดเงิน</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($todayApprovedDeliveries as $delivery)
-                                <tr>
-                                    <td>{{ $delivery->order_delivery_status_date ? $delivery->order_delivery_status_date->format('H:i') : '-' }}</td>
-                                    <td>{{ $delivery->order_delivery_number }}</td>
-                                    <td>{{ $delivery->order->customer->customer_name }}</td>
-                                    <td>{{ number_format($delivery->order_delivery_grand_total, 2) }}</td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-warning" wire:click="cancelSuccess({{ $delivery->id }})">
-                                            ยกเลิก
-                                        </button>
-                                        <a href="{{ route('orders.show', $delivery->order->id) }}" 
-                                           class="btn btn-sm btn-info" target="_blank">
-                                            ดูรายละเอียด
-                                        </a>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    @endif
                 </div>
             </div>
             @endif
@@ -301,5 +261,3 @@
     });
 </script>
 @endPushOnce
-
-

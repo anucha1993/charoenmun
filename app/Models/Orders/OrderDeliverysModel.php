@@ -37,10 +37,12 @@ class OrderDeliverysModel extends Model
         'order_delivery_grand_total',
         'order_delivery_enable_vat',
         'order_delivery_vat_included',
+        'order_delivery_status_date',
     ];
 
     protected $casts = [
         'order_delivery_date' => 'date',
+        'order_delivery_status_date' => 'datetime',
         'recommended_truck_type' => TruckType::class,
         'selected_truck_type' => TruckType::class,
         'total_weight_kg' => 'decimal:2',

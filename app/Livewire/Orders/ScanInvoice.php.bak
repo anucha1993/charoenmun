@@ -16,7 +16,6 @@ class ScanInvoice extends Component
     public ?OrderDeliverysModel $currentDelivery = null;
     public ?OrderModel $order = null;
     public array $deliveredQtyMap = [];
-    public $todayApprovedDeliveries = [];
     
     // Filter properties
     public $filterType = 'today'; // today, date-range, pending, all
@@ -55,12 +54,7 @@ class ScanInvoice extends Component
             return;
         }
 
-        $delivery = OrderDeliverysModel::with([
-                'order.customer',
-                'order.items',
-                'order.deliveryAddress',
-                'order.deliveries.deliveryItems'
-            ])
+        $delivery = OrderDeliverysModel::with(['order.customer', 'order.items', 'order.deliveryAddress', 'order.deliveries.payments'])
             ->where('order_delivery_number', $this->scanInput)
             ->first();
 
@@ -74,11 +68,9 @@ class ScanInvoice extends Component
             $this->order = $delivery->order;
 
             // Update deliveredQtyMap only if we have data
-            if ($this->order) {
-                $this->deliveredQtyMap = OrderDeliverysModel::where('order_id', $this->order->id)
-                    ->with('deliveryItems')
-                    ->get()
-                    ->flatMap(fn($delivery) => $delivery->deliveryItems)
+            if ($this->order && $this->order->deliveries) {
+                $this->deliveredQtyMap = $this->order->deliveries
+                    ->flatMap->items
                     ->groupBy('product_id')
                     ->map(fn($group) => $group->sum('quantity'))
                     ->toArray();
@@ -119,13 +111,6 @@ class ScanInvoice extends Component
 
     private function loadStats()
     {
-        // Load today's approved deliveries
-        $this->todayApprovedDeliveries = OrderDeliverysModel::with(['order.customer'])
-            ->whereDate('order_delivery_status_date', today())
-            ->where('order_delivery_status', 'success')
-            ->latest('order_delivery_status_date')
-            ->get();
-
         // Today's stats
         $this->stats['today'] = [
             'count' => OrderDeliverysModel::whereDate('order_delivery_date', today())->count(),
@@ -207,4 +192,4 @@ class ScanInvoice extends Component
         ]);
     }
 }
-
+}

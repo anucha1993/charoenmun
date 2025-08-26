@@ -121,9 +121,6 @@ Route::middleware(['auth'])->group(function () {
      Route::get('/orders/{order}/payment', OrderPaymentForm::class)->name('orders.payment.livewire');
 });
 
-
-
-
 Route::get('/quotations/{quotation}/print', QuotationPrint::class)->middleware('auth')->name('quotations.print');
 
 // routes/web.php
