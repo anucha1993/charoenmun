@@ -100,7 +100,6 @@ Route::middleware(['auth'])->group(function () {
     // 1) แสดงรายการ Order / ดู Order / แก้ไข Order
     Route::get('/orders', OrderIndex::class)->name('orders.index');
     Route::get('/orders/{order}', OrderShow::class)->name('orders.show');
-    Route::get('/orders/{order}/edit', OrderForm::class)->name('orders.edit');
 
     Route::get('/orders/{order}/show', OrderShow::class)->name('order.show');
     

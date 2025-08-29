@@ -12,9 +12,9 @@
                         <i class="ri-eye-line widget-icon"></i>
                     </div>
                     <h6 class="text-uppercase mt-0" title="Customers">ยอดคำสั่งซื้อ</h6>
-                    <h2 class="my-2">{{ number_format($totalOrderAmount, 2) }}</h2>
+                    <h2 class="my-2"><?php echo e(number_format($totalOrderAmount, 2)); ?></h2>
                     <p class="mb-0">
-                        <span class="badge bg-white bg-opacity-10 me-1">จำนวน {{ $totalOrders }} รายการ</span>
+                        <span class="badge bg-white bg-opacity-10 me-1">จำนวน <?php echo e($totalOrders); ?> รายการ</span>
                         <span class="text-nowrap">แสดงราคาทั้งหมดของคำสั่งซื้อ</span>
                     </p>
 
@@ -30,7 +30,7 @@
                         <i class="ri-wallet-2-line widget-icon"></i>
                     </div>
                     <h6 class="text-uppercase mt-0" title="Customers">จำนวนใบสั่งซื้อ</h6>
-                    <h2 class="my-2">{{ $totalOrders }} รายการ</h2>
+                    <h2 class="my-2"><?php echo e($totalOrders); ?> รายการ</h2>
                     <p class="mb-0">
                         <span class="badge bg-white bg-opacity-10 me-1">รายการ</span>
                         <span class="text-nowrap">แสดงจำนวนใบสั่งซื้อทั้งหมด</span>
@@ -48,7 +48,7 @@
                         <i class="ri-shopping-basket-line widget-icon"></i>
                     </div>
                     <h6 class="text-uppercase mt-0" title="Customers">สินค้ารอส่ง</h6>
-                    <h2 class="my-2">{{ $pendingDeliveries }} รายการ</h2>
+                    <h2 class="my-2"><?php echo e($pendingDeliveries); ?> รายการ</h2>
                     <p class="mb-0">
                         <span class="badge bg-white bg-opacity-25 me-1">จำนวนใบสั่งซื้อรอจัดส่ง</span>
                         <span class="text-nowrap">คิดจากคำสั่งซื้อทั้งหมด</span>
@@ -66,7 +66,7 @@
                     </div>
                     <h6 class="text-uppercase mt-0" title="Customers">Pocket Money</h6>
                     <h2 class="my-2">
-                        <strong>{{ number_format($customer_pocket_money, 2) }} บาท</strong>
+                        <strong><?php echo e(number_format($customer_pocket_money, 2)); ?> บาท</strong>
                     </h2>
                     <p class="mb-0">
                         <span class="badge bg-white bg-opacity-10 me-1">จำนเงินคงเหลือ</span>
@@ -109,18 +109,18 @@
                                     <label for="">ประเภทลูกค้า <span class="text-danger">*</span></label>
                                     <select class="form-select" wire:model="customer_type" required>
                                         <option value="">--กรุณาเลือก--</option>
-                                                                                @foreach ($customerType as $option)
-                                            <option value="{{ $option['id'] }}">{{ $option['value'] }}</option>
-                                        @endforeach
+                                                                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customerType; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($option['id']); ?>"><?php echo e($option['value']); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-2">
                                     <label for="">ระดับลุกค้า <span class="text-danger">*</span></label>
                                     <select class="form-select" wire:model="customer_level" required>
                                         <option value="">--กรุณาเลือก--</option>
-                                        @foreach ($customerLevel as $option)
-                                            <option value="{{ $option['id'] }}">{{ $option['value'] }}</option>
-                                        @endforeach
+                                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customerLevel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($option['id']); ?>"><?php echo e($option['value']); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-2">
@@ -196,7 +196,7 @@
                 </div>
                 <div class="card-body">
                     <div class="responsive">
-                        @if($paymentHistory && count($paymentHistory) > 0)
+                        <!--[if BLOCK]><![endif]--><?php if($paymentHistory && count($paymentHistory) > 0): ?>
                                 <div class="table-responsive">
                                     <table class="table table-centered table-nowrap mb-0">
                                         <thead>
@@ -210,59 +210,60 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($paymentHistory as $type => $payments)
-                                                @foreach($payments as $payment)
+                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $paymentHistory; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type => $payments): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $payments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <tr>
-                                                        <td>{{ \Carbon\Carbon::parse($payment['created_at'])->format('d/m/Y H:i') }}</td>
+                                                        <td><?php echo e(\Carbon\Carbon::parse($payment['created_at'])->format('d/m/Y H:i')); ?></td>
                                                         <td>
-                                                            <a href="{{ route('orders.show', $payment['order']['id']) }}" class="text-body fw-bold">
-                                                                {{ $payment['order']['order_number'] }}
+                                                            <a href="<?php echo e(route('orders.show', $payment['order']['id'])); ?>" class="text-body fw-bold">
+                                                                <?php echo e($payment['order']['order_number']); ?>
+
                                                             </a>
                                                         </td>
                                                         <td>
-                                                            @switch($type)
-                                                                @case('cash')
+                                                            <!--[if BLOCK]><![endif]--><?php switch($type):
+                                                                case ('cash'): ?>
                                                                     <span class="badge bg-success">เงินสด</span>
-                                                                    @break
-                                                                @case('transfer')
+                                                                    <?php break; ?>
+                                                                <?php case ('transfer'): ?>
                                                                     <span class="badge bg-info">โอนเงิน</span>
-                                                                    @break
-                                                                @case('pocket_money')
+                                                                    <?php break; ?>
+                                                                <?php case ('pocket_money'): ?>
                                                                     <span class="badge bg-warning">Pocket Money</span>
-                                                                    @break
-                                                            @endswitch
+                                                                    <?php break; ?>
+                                                            <?php endswitch; ?><!--[if ENDBLOCK]><![endif]-->
                                                         </td>
-                                                        <td>{{ number_format($payment['amount'], 2) }}</td>
+                                                        <td><?php echo e(number_format($payment['amount'], 2)); ?></td>
                                                         <td>
-                                                            @switch($payment['status'])
-                                                                @case('ชำระเงินแล้ว')
+                                                            <!--[if BLOCK]><![endif]--><?php switch($payment['status']):
+                                                                case ('ชำระเงินแล้ว'): ?>
                                                                     <span class="badge bg-success">ชำระแล้ว</span>
-                                                                    @break
-                                                                @case('รอยืนยันยอด')
+                                                                    <?php break; ?>
+                                                                <?php case ('รอยืนยันยอด'): ?>
                                                                     <span class="badge bg-warning">รอยืนยัน</span>
-                                                                    @break
-                                                                @default
-                                                                    <span class="badge bg-secondary">{{ $payment['status'] }}</span>
-                                                            @endswitch
+                                                                    <?php break; ?>
+                                                                <?php default: ?>
+                                                                    <span class="badge bg-secondary"><?php echo e($payment['status']); ?></span>
+                                                            <?php endswitch; ?><!--[if ENDBLOCK]><![endif]-->
                                                         </td>
                                                         <td>
-                                                            @if(isset($payment['slip_path']) && $payment['slip_path'])
-                                                                <a href="javascript:void(0);" onclick="showSlipModal('{{ Storage::url($payment['slip_path']) }}')" class="btn btn-sm btn-info">
+                                                            <!--[if BLOCK]><![endif]--><?php if(isset($payment['slip_path']) && $payment['slip_path']): ?>
+                                                                <a href="javascript:void(0);" onclick="showSlipModal('<?php echo e(Storage::url($payment['slip_path'])); ?>')" class="btn btn-sm btn-info">
                                                                     <i class="ri-image-line"></i> ดูสลิป
                                                                 </a>
-                                                            @else
+                                                            <?php else: ?>
                                                                 -
-                                                            @endif
+                                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                         </td>
                                                     </tr>
-                                                @endforeach
-                                            @endforeach
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                         </tbody>
                                     </table>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <p class="text-muted text-center mb-0">ไม่พบประวัติการชำระเงิน</p>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                     </div>
                 </div>
             </div>
@@ -284,27 +285,29 @@
                     </button>
                     <div class="row">
 
-                        @foreach ($deliveryAddresses as $index => $address)
+                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $deliveryAddresses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $address): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <ul class="list-group" style="font-size: 16px">
                                 <li class="list-group-item">
-                                    <b>ชื่อลูกค้า : {{ $address['delivery_contact_name'] ?? '-' }}
-                                        ({{ $address['delivery_phone'] ?? '-' }})
+                                    <b>ชื่อลูกค้า : <?php echo e($address['delivery_contact_name'] ?? '-'); ?>
+
+                                        (<?php echo e($address['delivery_phone'] ?? '-'); ?>)
                                     </b> </br>
-                                    เลขที่ {{ $address['delivery_number'] ?? '-' }} </br>
-                                    {{ $address['delivery_address'] ?? '-' }}
+                                    เลขที่ <?php echo e($address['delivery_number'] ?? '-'); ?> </br>
+                                    <?php echo e($address['delivery_address'] ?? '-'); ?>
+
                                     </br>
                                     <button type="button" class="btn btn-sm btn-info"
-                                        wire:click="openDeliveryModal({{ $index }})">แก้ไข</button>
+                                        wire:click="openDeliveryModal(<?php echo e($index); ?>)">แก้ไข</button>
                                     <button type="button"
                                         onclick="if (confirm('คุณต้องการลบรายการนี้หรือไม่?') === false) event.stopImmediatePropagation();"
-                                        wire:click="removeDelivery({{ $index }})"
+                                        wire:click="removeDelivery(<?php echo e($index); ?>)"
                                         class="btn btn-sm btn-danger">
                                         ลบ
                                     </button>
                                 </li>
 
                             </ul>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
 
                     </div>
                 </div>
@@ -442,31 +445,7 @@
         });
     </script>
 
-    {{-- <script>
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('notify', ({
-                message,
-                type = 'success'
-            }) => {
-                toastr.options = {
-                    "closeButton": true,
-                    "progressBar": true,
-                    "positionClass": "toast-top-right",
-                    "timeOut": "3000"
-                };
-
-                if (type === 'error') {
-                    toastr.error(message);
-                } else if (type === 'warning') {
-                    toastr.warning(message);
-                } else if (type === 'info') {
-                    toastr.info(message);
-                } else {
-                    toastr.success(message);
-                }
-            });
-        });
-    </script> --}}
+    
 
     <!-- Modal แสดงรูปสลิป -->
     <div class="modal fade" id="slipModal" tabindex="-1" role="dialog" aria-labelledby="slipModalLabel" aria-hidden="true">
@@ -490,3 +469,4 @@
         }
     </script>
 
+<?php /**PATH C:\laragon\www\charoenmun\resources\views/livewire/customers/customer-edit.blade.php ENDPATH**/ ?>

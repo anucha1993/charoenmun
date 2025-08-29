@@ -5,12 +5,23 @@ namespace App\Livewire\Orders;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Log;
 use App\Models\Orders\OrderModel;
 use App\Models\Orders\OrderDeliverysModel;
 
 class ScanInvoice extends Component
 {
     use WithPagination;
+
+    protected $paginationTheme = 'bootstrap';
+    
+    protected $queryString = [
+        'filterType' => ['except' => 'today'],
+        'startDate' => ['except' => ''],
+        'endDate' => ['except' => ''],
+        'deliveryStatus' => ['except' => ''],
+        'page' => ['except' => 1],
+    ];
 
     public $scanInput = '';
     public ?OrderDeliverysModel $currentDelivery = null;
@@ -42,8 +53,11 @@ class ScanInvoice extends Component
 
     public function mount()
     {
+        // กำหนดค่าเริ่มต้น
         $this->startDate = now()->format('Y-m-d');
         $this->endDate = now()->format('Y-m-d');
+        $this->filterType = 'today';  // เริ่มต้นด้วยรายการวันนี้
+        $this->deliveryStatus = '';   // เริ่มต้นแสดงทุกสถานะ
         $this->resetScanData();
         $this->loadStats();
     }
@@ -96,8 +110,56 @@ class ScanInvoice extends Component
 
     public function setFilter($type)
     {
+        // รีเซ็ตตัวกรองเก่า
+        $this->reset(['deliveryStatus']);
+        
+        // กำหนดประเภทตัวกรองใหม่
         $this->filterType = $type;
+        
+        // ถ้าเป็นช่วงวันที่ ให้กำหนดค่าเริ่มต้น
+        if ($type === 'date-range') {
+            $this->startDate = now()->format('Y-m-d');
+            $this->endDate = now()->format('Y-m-d');
+        }
+
         $this->resetPage();
+        $this->dispatch('filter-changed');  // ส่ง event แจ้งว่ามีการเปลี่ยนตัวกรอง
+    }
+
+    public function updatedDeliveryStatus($value)
+    {
+        $this->resetPage();
+        $this->dispatch('refresh-list');
+    }
+
+    public function updatedStartDate($value)
+    {
+        if ($this->filterType === 'date-range') {
+            $this->validateDates();
+            $this->resetPage();
+            $this->dispatch('refresh-list');
+        }
+    }
+
+    public function updatedEndDate($value)
+    {
+        if ($this->filterType === 'date-range') {
+            $this->validateDates();
+            $this->resetPage();
+            $this->dispatch('refresh-list');
+        }
+    }
+
+    protected function validateDates()
+    {
+        if ($this->startDate && $this->endDate) {
+            $start = Carbon::parse($this->startDate);
+            $end = Carbon::parse($this->endDate);
+            
+            if ($end->lt($start)) {
+                $this->endDate = $this->startDate;
+            }
+        }
     }
 
     public function cancelSuccess($deliveryId)
@@ -169,23 +231,46 @@ class ScanInvoice extends Component
 
     public function getDeliveriesProperty()
     {
-        $query = OrderDeliverysModel::with(['order.customer'])
-            ->when($this->filterType === 'today', function($q) {
-                $q->whereDate('order_delivery_date', today());
-            })
-            ->when($this->filterType === 'date-range', function($q) {
-                $q->whereBetween('order_delivery_date', [$this->startDate, $this->endDate]);
-            })
-            ->when($this->filterType === 'pending', function($q) {
-                $q->where('order_delivery_date', '<', today())
-                  ->where('order_delivery_status', '!=', 'success');
-            })
-            ->when($this->deliveryStatus !== '', function($q) {
-                $q->where('order_delivery_status', $this->deliveryStatus);
-            })
-            ->latest('order_delivery_date');
+        $query = OrderDeliverysModel::query()
+            ->with(['order.customer']);
 
-        return $query->paginate(10);
+        // กรองตามประเภท
+        switch ($this->filterType) {
+            case 'today':
+                $today = now()->format('Y-m-d');
+                $query->whereRaw("DATE(order_delivery_date) = ?", [$today]);
+                break;
+            case 'pending':
+                // รายการที่ยังไม่เสร็จสิ้น (pending หรือ processing)
+                $query->whereIn('order_delivery_status', ['pending', 'processing']);
+                break;
+            case 'date-range':
+                if ($this->startDate && $this->endDate) {
+                    $start = Carbon::parse($this->startDate)->startOfDay();
+                    $end = Carbon::parse($this->endDate)->endOfDay();
+                    $query->whereBetween('order_delivery_date', [$start, $end]);
+                }
+                break;
+        }
+
+        // กรองตามสถานะ
+        if ($this->deliveryStatus !== '') {
+            $query->where('order_delivery_status', $this->deliveryStatus);
+        }
+
+        // Debug: แสดง SQL query
+        \Log::info('Delivery Query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+            'filter_type' => $this->filterType,
+            'delivery_status' => $this->deliveryStatus,
+            'start_date' => $this->startDate,
+            'end_date' => $this->endDate
+        ]);
+
+        // เรียงลำดับและแบ่งหน้า
+        return $query->latest('order_delivery_date')
+                    ->paginate(10);
     }
 
     public function getPendingDeliveriesProperty()

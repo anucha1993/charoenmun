@@ -41,14 +41,7 @@
         </div>
 
         <ul class="topbar-menu d-flex align-items-center gap-3">
-            
-
-            
-
-            
-
-            
-
+           
             <li class="dropdown">
                 <a class="nav-link dropdown-toggle arrow-none nav-user" data-bs-toggle="dropdown" href="#" role="button"
                     aria-haspopup="false" aria-expanded="false">
@@ -66,8 +59,7 @@
                         <h6 class="text-overflow m-0">Welcome !</h6>
                     </div>
 
-                    <!-- item-->
-                    
+                  
 
                     <!-- item-->
                     <a href="auth-logout-2.html" class="dropdown-item">

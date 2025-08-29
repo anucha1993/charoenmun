@@ -4,12 +4,12 @@
         <nav class="navbar navbar-expand-lg" >
             <div class="collapse navbar-collapse" id="topnav-menu-content">
                 <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
+                    {{-- <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="{{route('any', 'index')}}" id="topnav-dashboards" role="button" aria-haspopup="true" aria-expanded="false">
                             <i class="ri-dashboard-3-line"></i>Dashboards
                         </a>
-                    </li>
-                    <li class="nav-item dropdown">
+                    </li> --}}
+                    {{-- <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-apps" role="button"
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="ri-pages-line"></i>Pages <div class="arrow-down"></div>
@@ -48,7 +48,7 @@
                             <a href="{{ route('second', ['pages', 'pricing']) }}" class="dropdown-item">Pricing</a>
                             <a href="{{ route('second', ['pages', 'maintenance']) }}" class="dropdown-item">Maintenance</a>
                         </div>
-                    </li>
+                    </li> --}}
 
                      {{-- <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="{{route('quotations.index')}}"  role="button"

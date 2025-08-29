@@ -323,6 +323,26 @@
                 page-break-before: always;
             }
         }
+        
+        /* Disable text selection and context menu */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-print-color-adjust: exact !important;
+        }
+
+        /* Hide print dialog elements */
+        @media print {
+            @page {
+                margin: 0;
+                size: auto;
+            }
+            body {
+                margin: 1.6cm;
+            }
+        }
 
         .watermark {
         position: fixed;
@@ -388,6 +408,55 @@
             setTimeout(() => window.print(), 300);
         });
     });
+</script>
+
+<script>
+// ...existing code...
+
+// Block Ctrl+P
+// Block all printing shortcuts and context menu
+document.addEventListener('keydown', function(e) {
+    // Block Ctrl+P
+    if (e.ctrlKey && (e.key === 'p' || e.key === 'P')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+    // Block Cmd+P (Mac)
+    if (e.metaKey && (e.key === 'p' || e.key === 'P')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+});
+
+// Disable right-click context menu
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+
+// Override browser's print function
+window.print = function() {
+    return false;
+};
+
+// Add custom print button handler
+document.querySelector('.btn-danger').addEventListener('click', function(e) {
+    const watermark = document.querySelector('.watermark');
+    if (watermark) {
+        watermark.style.display = 'none';
+    }
+    window.print();
+});
+
+// Return after print
+window.addEventListener('afterprint', () => {
+    const watermark = document.querySelector('.watermark');
+    if (watermark) {
+        watermark.style.display = 'block'; 
+    }
+});
 </script>
 
 
