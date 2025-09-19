@@ -96,8 +96,11 @@
                             <i class="ri-layout-line"></i>ตั้งค่าระบบ <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-layouts">
-                            <a href="{{ route('products.index') }}" class="dropdown-item" >สิ้นค้าทั้งหมด</a>
-                            <a href="{{ route('global-sets.index') }}" class="dropdown-item" >GlobalSets</a>
+                            <a href="{{ route('products.index') }}" class="dropdown-item">สิ้นค้าทั้งหมด</a>
+                            <a href="{{ route('global-sets.index') }}" class="dropdown-item">GlobalSets</a>
+                            @if(auth()->user()->isAdmin())
+                                <a href="{{ route('users.index') }}" class="dropdown-item">จัดการผู้ใช้งาน</a>
+                            @endif
                         </div>
                     </li>
                 </ul>

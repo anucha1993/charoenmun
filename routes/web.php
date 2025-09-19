@@ -1,7 +1,6 @@
 <?php
 
 use App\Livewire\Dashboards;
-
 use App\Livewire\Orders\OrderForm;
 
 // use App\Livewire\Customers\CustomerEdit;
@@ -33,6 +32,7 @@ use App\Livewire\Quotations\QuotationPrint;
 use App\Livewire\Quotations\QuotationsForm;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Livewire\Globalsets\GlobalSetManager;
+use App\Livewire\Users\UserIndex;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +83,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/global-sets', GlobalSetManager::class)->name('global-sets.index');
+    
+    // User Management (Admin Only)
+    Route::group(['middleware' => 'admin'], function () {
+        Route::get('/users', \App\Livewire\Users\UserIndex::class)->name('users.index');
+        Route::get('/users/create', \App\Livewire\Users\UserForm::class)->name('users.create');
+        Route::get('/users/{user}/edit', \App\Livewire\Users\UserForm::class)->name('users.edit');
+    });
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
