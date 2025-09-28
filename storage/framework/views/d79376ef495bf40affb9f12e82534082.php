@@ -4,28 +4,28 @@
             font-family: 'THSarabunNew';
             font-style: normal;
             font-weight: normal;
-            src: url('{{ asset('fonts/THSarabunNew.ttf') }}') format("truetype");
+            src: url('<?php echo e(asset('fonts/THSarabunNew.ttf')); ?>') format("truetype");
         }
 
         @font-face {
             font-family: 'THSarabunNew';
             font-style: normal;
             font-weight: bold;
-            src: url('{{ asset('fonts/THSarabunNew Bold.ttf') }}') format("truetype");
+            src: url('<?php echo e(asset('fonts/THSarabunNew Bold.ttf')); ?>') format("truetype");
         }
 
         @font-face {
             font-family: 'THSarabunNew';
             font-style: italic;
             font-weight: normal;
-            src: url('{{ asset('fonts/THSarabunNew Italic.ttf') }}') format("truetype");
+            src: url('<?php echo e(asset('fonts/THSarabunNew Italic.ttf')); ?>') format("truetype");
         }
 
         @font-face {
             font-family: 'THSarabunNew';
             font-style: italic;
             font-weight: bold;
-            src: url('{{ asset('fonts/THSarabunNew BoldItalic.ttf') }}') format("truetype");
+            src: url('<?php echo e(asset('fonts/THSarabunNew BoldItalic.ttf')); ?>') format("truetype");
         }
 
         body {
@@ -95,12 +95,12 @@
 
 
 
-    @php
+    <?php
         $totalPages = ceil($quotation->items->count() / 8);
         $loopIndex = 1;
-    @endphp
+    ?>
 
-    @foreach ($quotation->items->chunk(8) as $chunkIndex => $chunk)
+    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $quotation->items->chunk(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <div class="card row text-black" style="top: -20px">
             <div class="card-body">
                 <!-- Invoice Detail-->
@@ -111,16 +111,13 @@
                     </div>
 
                     <div class="float-center">
-                        {{-- <div class="text-center">
-                        <h4 class="m-0 ">Quotation / ใบเสนอราคา</h4>
-           
-                    </div> --}}
+                        
 
                         <div class="float-end">
 
-                            <img src="{{ route('qr.quotation', $quotation->id) }}" alt="QR"
+                            <img src="<?php echo e(route('qr.quotation', $quotation->id)); ?>" alt="QR"
                                 style="height:100px;"><br>
-                            <small class="float-end">หน้า {{ $chunkIndex + 1 }}/{{ $totalPages }}</small>
+                            <small class="float-end">หน้า <?php echo e($chunkIndex + 1); ?>/<?php echo e($totalPages); ?></small>
                         </div>
 
                     </div>
@@ -144,10 +141,10 @@
                     <div class="col-sm-4 offset-sm-2 float-end">
                         <div class="mt-0 float-sm-end">
                             <p class="fs-25"><strong>วันที่เสนอราคา: </strong> &nbsp;&nbsp;&nbsp;
-                                {{ date('d/m/Y', strtotime($quotation->quote_date)) }}</p>
-                            <p class="fs-25"><strong>เลขที่ใบเสนอราคา </strong>{{ $quotation->quote_number }}</p>
+                                <?php echo e(date('d/m/Y', strtotime($quotation->quote_date))); ?></p>
+                            <p class="fs-25"><strong>เลขที่ใบเสนอราคา </strong><?php echo e($quotation->quote_number); ?></p>
                             <p class="fs-25"><strong>ชื่อผู้ขาย (Sale) </strong> <span
-                                    class="float-end">{{ $quotation->sale->name }}</span></p>
+                                    class="float-end"><?php echo e($quotation->sale->name); ?></span></p>
                         </div>
                     </div><!-- end col -->
                 </div>
@@ -158,38 +155,41 @@
                     <div class="col-6">
                         <h3 class="fs-50">ข้อมูลลูกค้า</h3>
                         <address>
-                            {{ $quotation->customer->customer_name }}<br>
-                            {{ $quotation->customer->customer_address }}<br>
-                            {{ $quotation->customer->customer_district_name .
+                            <?php echo e($quotation->customer->customer_name); ?><br>
+                            <?php echo e($quotation->customer->customer_address); ?><br>
+                            <?php echo e($quotation->customer->customer_district_name .
                                 ' ' .
                                 $quotation->customer->customer_amphur_name .
                                 ' ' .
                                 $quotation->customer->customer_province_name .
                                 ' ' .
-                                $quotation->customer->customer_zipcode }}<br>
-                            {{ $quotation->customer->customer_phone }}
+                                $quotation->customer->customer_zipcode); ?><br>
+                            <?php echo e($quotation->customer->customer_phone); ?>
+
                         </address>
                     </div> <!-- end col-->
 
                     <div class="col-6">
                         <h3 class="fs-30">ที่อยู่จัดส่ง</h3>
                         <address>
-                            @if ($quotation->deliveryAddress)
-                                {{ $quotation->deliveryAddress->delivery_contact_name }}
-                                ({{ $quotation->deliveryAddress->delivery_phone }})<br>
-                                {{ $quotation->deliveryAddress->delivery_address }}<br>
-                            @else
-                                {{ $quotation->customer->customer_name }}<br>
-                                {{ $quotation->customer->customer_address }}<br>
-                                {{ $quotation->customer->customer_district_name .
+                            <!--[if BLOCK]><![endif]--><?php if($quotation->deliveryAddress): ?>
+                                <?php echo e($quotation->deliveryAddress->delivery_contact_name); ?>
+
+                                (<?php echo e($quotation->deliveryAddress->delivery_phone); ?>)<br>
+                                <?php echo e($quotation->deliveryAddress->delivery_address); ?><br>
+                            <?php else: ?>
+                                <?php echo e($quotation->customer->customer_name); ?><br>
+                                <?php echo e($quotation->customer->customer_address); ?><br>
+                                <?php echo e($quotation->customer->customer_district_name .
                                     ' ' .
                                     $quotation->customer->customer_amphur_name .
                                     ' ' .
                                     $quotation->customer->customer_province_name .
                                     ' ' .
-                                    $quotation->customer->customer_zipcode }}<br>
-                                (+66) {{ $quotation->customer->customer_phone }}
-                            @endif
+                                    $quotation->customer->customer_zipcode); ?><br>
+                                (+66) <?php echo e($quotation->customer->customer_phone); ?>
+
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </address>
                     </div> <!-- end col-->
                 </div>
@@ -213,63 +213,72 @@
 
                                 <tbody>
 
-                                    @foreach ($chunk as $item)
-                                        @if ($item->product_unit === 'แผ่น')
-                                            @php
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <!--[if BLOCK]><![endif]--><?php if($item->product_unit === 'แผ่น'): ?>
+                                            <?php
                                                 $width = $item->unit_price; // ที่เก็บในฐานข้อมูล
                                                 $widthInMeter = $width / 10; // → 0.035 เมตร
-                                            @endphp
+                                            ?>
                                             <tr>
-                                                <td class="text-center">{{ $loopIndex++ }}</td>
-                                                <td class="text-center">{{ $item->quantity }}</td>
+                                                <td class="text-center"><?php echo e($loopIndex++); ?></td>
+                                                <td class="text-center"><?php echo e($item->quantity); ?></td>
 
-                                                <td class="text-center">{{ $item->product_unit }}</td>
+                                                <td class="text-center"><?php echo e($item->product_unit); ?></td>
 
                                                 <td>
 
-                                                    <b>{{ $item->product_name }} </b>
+                                                    <b><?php echo e($item->product_name); ?> </b>
                                                    
-                                                    ({{ number_format($widthInMeter) . '/ตรม.' }})<br />
-                                                    <p>{{ 'ความหนา:'.$item->product_calculation}}<br /></p>
+                                                    (<?php echo e(number_format($widthInMeter) . '/ตรม.'); ?>)<br />
+                                                    <p><?php echo e('ความหนา:'.$item->product_calculation); ?><br /></p>
                                                      
-                                                    {{ $item->globalSetValue()?->value ?? '' }}
-                                                    @if ($item->product_note)
-                                                        <br /> {{ $item->product_note }}
-                                                    @endif
+                                                    <?php echo e($item->globalSetValue()?->value ?? ''); ?>
+
+                                                    <!--[if BLOCK]><![endif]--><?php if($item->product_note): ?>
+                                                        <br /> <?php echo e($item->product_note); ?>
+
+                                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                                                 </td>
-                                                <td class="text-center">{{ number_format($item->product_length) }}
-                                                    {{ $item->productMeasure?->value ?? '' }}</td>
-                                                <td class="text-center">{{ number_format(($widthInMeter*$item->product_calculation), 2) }}/{{ $item->product_unit }}
+                                                <td class="text-center"><?php echo e(number_format($item->product_length)); ?>
+
+                                                    <?php echo e($item->productMeasure?->value ?? ''); ?></td>
+                                                <td class="text-center"><?php echo e(number_format(($widthInMeter*$item->product_calculation), 2)); ?>/<?php echo e($item->product_unit); ?>
+
                                                 </td>
-                                                <td class="text-end">{{ number_format($item->total, 2) }}</td>
+                                                <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                             </tr>
-                                        @else
+                                        <?php else: ?>
                                             <tr>
-                                                <td class="text-center">{{ $loopIndex++ }}</td>
-                                                <td class="text-center">{{ $item->quantity }}</td>
+                                                <td class="text-center"><?php echo e($loopIndex++); ?></td>
+                                                <td class="text-center"><?php echo e($item->quantity); ?></td>
 
-                                                <td class="text-center">{{ $item->product_unit }}</td>
+                                                <td class="text-center"><?php echo e($item->product_unit); ?></td>
 
                                                 <td>
 
-                                                    <b>{{ $item->product_name }} </b>
-                                                    {{ ($item->product_calculation ?? 1) != 1 ? $item->product_calculation : '' }}
-                                                    ({{ number_format($item->unit_price) . '/' . ($item->productMeasure?->value ?? '') }})<br />
-                                                    {{ $item->globalSetValue()?->value ?? '' }}
-                                                    @if ($item->product_note)
-                                                        <br /> {{ $item->product_note }}
-                                                    @endif
+                                                    <b><?php echo e($item->product_name); ?> </b>
+                                                    <?php echo e(($item->product_calculation ?? 1) != 1 ? $item->product_calculation : ''); ?>
+
+                                                    (<?php echo e(number_format($item->unit_price) . '/' . $item->productMeasure->value); ?>)<br />
+                                                    <?php echo e($item->globalSetValue()->value ?? ''); ?>
+
+                                                    <!--[if BLOCK]><![endif]--><?php if($item->product_note): ?>
+                                                        <br /> <?php echo e($item->product_note); ?>
+
+                                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                                                 </td>
-                                                <td class="text-center">{{ number_format($item->product_length) }}
-                                                    {{ $item->productMeasure?->value ?? '' }}</td>
-                                                <td>{{ number_format($item->unit_price * $item->product_length, 2) }}/ {{ $item->product_unit }}
+                                                <td class="text-center"><?php echo e(number_format($item->product_length)); ?>
+
+                                                    <?php echo e($item->productMeasure->value); ?></td>
+                                                <td><?php echo e(number_format($item->unit_price * $item->product_length, 2)); ?>/ <?php echo e($item->product_unit); ?>
+
                                                 </td>
-                                                <td class="text-end">{{ number_format($item->total, 2) }}</td>
+                                                <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                             </tr>
-                                        @endif
-                                    @endforeach
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                 </tbody>
                             </table>
                         </div> <!-- end table-responsive-->
@@ -283,20 +292,21 @@
                         <div class="clearfix pt-3">
                             <h6 class="text-muted fs-20">หมายเหตุ:</h6>
                             <small>
-                                {{ $quotation->quote_note }}
+                                <?php echo e($quotation->quote_note); ?>
+
                             </small>
                         </div>
                     </div> <!-- end col -->
                     <div class="col-sm-6">
                         <div class="float-end mt-sm-0">
                             <p><b>จำนวนเงินรวม :</b> <span
-                                    class="float-end">{{ number_format($quotation->quote_subtotal, 2) }}</span></p>
+                                    class="float-end"><?php echo e(number_format($quotation->quote_subtotal, 2)); ?></span></p>
                             <p><b>ส่วนลด:</b> <span
-                                    class="float-end">{{ number_format($quotation->quote_discount, 2) }}</span></p>
+                                    class="float-end"><?php echo e(number_format($quotation->quote_discount, 2)); ?></span></p>
                             <p><b>ภาษีมูลค่าเพิ่ม:</b> <span
-                                    class="float-end">{{ number_format($quotation->quote_vat, 2) }}</span></p>
+                                    class="float-end"><?php echo e(number_format($quotation->quote_vat, 2)); ?></span></p>
                             <p><b>จำนวนเงินทั้งสิ้น: &nbsp; </b> <span
-                                    class="float-end">{{ number_format($quotation->quote_grand_total, 2) }}</span></p>
+                                    class="float-end"><?php echo e(number_format($quotation->quote_grand_total, 2)); ?></span></p>
 
                         </div>
                         <div class="clearfix"></div>
@@ -316,7 +326,7 @@
                     <div class="col-sm-6">
                         <div class="float-end text-center clearfix pt-3">
                             <span>ผู้เสนอราคา</span><br>
-                            <span>{{ $quotation->sale->name }}</span><br>
+                            <span><?php echo e($quotation->sale->name); ?></span><br>
 
                         </div>
                     </div> <!-- end col -->
@@ -334,7 +344,7 @@
 
             </div> <!-- end card-body-->
         </div> <!-- end card -->
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
     <!-- end row -->
 </div>
 
@@ -349,7 +359,7 @@
             history.back();
 
             // หรือ วิธี B: redirect ไป index โดยตรง
-            // location.href = "{{ route('quotations.index') }}";
+            // location.href = "<?php echo e(route('quotations.index')); ?>";
         };
 
         /* 1) เรียก dialog พิมพ์ทันที */
@@ -360,3 +370,4 @@
         window.onafterprint = goBack; // Safari/Firefox fallback
     });
 </script>
+<?php /**PATH /Users/ap.dev/Desktop/Projects/charoenmun/resources/views/livewire/quotations/print.blade.php ENDPATH**/ ?>

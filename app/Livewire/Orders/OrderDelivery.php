@@ -74,7 +74,9 @@ class OrderDelivery extends Component
         } else {
             $this->editing = false;
             $this->order_delivery_note = '';
-            $this->addEmptyItem();
+            
+            // Create mode: สร้างรายการสินค้าทั้งหมดที่มี stock เหลือ
+            $this->createAllAvailableItems();
         }
 
         $this->refreshStocksLeft();
@@ -99,6 +101,7 @@ class OrderDelivery extends Component
                     'product_type' => $oi->product_type,
                     'product_unit' => $oi->product_unit,
                     'product_detail' => $oi->product_detail,
+                    'product_note' => $di->product_note ?? '', // Edit mode: ดึงจาก delivery_items
                     'product_length' => $oi->product_length,
                     'product_weight' => $oi->product_weight,
                     'product_calculation' => $di->product_calculation,
@@ -173,11 +176,46 @@ class OrderDelivery extends Component
             'product_length' => 1,
             'product_weight' => null,
             'product_detail' => null,
+            'product_note' => '',
             'quantity' => 1,
             'unit_price' => 0,
             'total' => 0,
         ];
         $this->refreshStocksLeft();
+    }
+
+    private function createAllAvailableItems(): void
+    {
+        $this->items = []; // Clear existing items
+
+        foreach ($this->orderItems as $oi) {
+            $baseStock = $this->stocks[$oi->product_id] ?? 0;
+            $delivered = $this->getDeliveredByOthers($oi->product_id);
+            $availableStock = max(0, $baseStock - $delivered);
+            
+            // เพิ่มรายการเฉพาะสินค้าที่มี stock เหลือ
+            if ($availableStock > 0) {
+                $this->items[] = [
+                    'product_id' => $oi->product_id,
+                    'product_name' => $oi->product_name,
+                    'product_type' => $oi->product_type,
+                    'product_unit' => $oi->product_unit,
+                    'product_calculation' => $oi->product_calculation ?? 1,
+                    'product_length' => $oi->product_length ?? 1,
+                    'product_weight' => $oi->product_weight,
+                    'product_detail' => $oi->product_detail,
+                    'product_note' => $oi->product_note ?? '',
+                    'quantity' => $availableStock, // ใส่จำนวนที่เหลือทั้งหมด
+                    'unit_price' => $oi->unit_price,
+                    'total' => 0,
+                ];
+            }
+        }
+
+        // หากไม่มี stock เหลือเลย ให้เพิ่ม empty item
+        if (empty($this->items)) {
+            $this->addEmptyItem();
+        }
     }
 
     public function updatedItems($value, $key): void
@@ -198,6 +236,7 @@ class OrderDelivery extends Component
                     'product_length' => 1,
                     'product_weight' => null,
                     'product_detail' => null,
+                    'product_note' => '',
                     'quantity' => 1,
                     'unit_price' => 0,
                     'total' => 0,
@@ -213,27 +252,9 @@ class OrderDelivery extends Component
                 }
 
                 if (($row['product_id'] ?? null) === $productId) {
-                    $oi = $this->orderItems->firstWhere('product_id', $productId);
-                    if (!$oi) {
-                        $this->dispatch('error', message: 'ไม่พบสินค้าในรายการออเดอร์');
-                        $this->items[$index]['product_id'] = null;
-                        $this->recalculateTotals();
-                        $this->refreshStocksLeft();
-                        return;
-                    }
-
-                    $baseStock = $this->stocks[$productId] ?? 0;
-                    $delivered = $this->getDeliveredByOthers($productId);
-
-                    $usedInForm = collect($this->items)->filter(fn($r, $j) => $j !== $index && $j !== $i && ($r['product_id'] ?? null) === $productId)->sum('quantity');
-
-                    $maxAllowed = max(0, $baseStock - $delivered - $usedInForm);
-
-                    $this->items[$i]['quantity'] = max(1, min($row['quantity'] + $maxAllowed, $baseStock));
-
-                    unset($this->items[$index]);
-                    $this->items = array_values($this->items);
-
+                    // ถ้าเลือกสินค้าที่มีอยู่แล้ว ให้แจ้งเตือนและไม่เปลี่ยนแปลง
+                    $this->dispatch('error', message: 'สินค้านี้มีในรายการแล้ว กรุณาแก้ไขจำนวนในรายการเดิม');
+                    $this->items[$index]['product_id'] = null;
                     $this->recalculateTotals();
                     $this->refreshStocksLeft();
                     return;
@@ -269,6 +290,7 @@ class OrderDelivery extends Component
                 'product_id' => $productId,
                 'product_name' => $oi->product_name,
                 'product_detail' => $oi->product_detail,
+                'product_note' => $oi->product_note ?? '', // Create mode: ดึงจาก order_items
                 'product_type' => $oi->product_type,
                 'product_length' => $oi->product_length ?? 1,
                 'product_calculation' => $oi->product_calculation ?? 1,
@@ -428,6 +450,15 @@ class OrderDelivery extends Component
         }
     }
 
+    public function resetToAllItems(): void
+    {
+        if (!$this->editing) {
+            $this->createAllAvailableItems();
+            $this->calculateTotals();
+            $this->refreshStocksLeft();
+        }
+    }
+
     public function updatedOrderDeliveryDiscount(): void
     {
         $this->calculateTotals();
@@ -455,6 +486,7 @@ class OrderDelivery extends Component
                     'product_type' => $row['product_type'],
                     'product_unit' => $row['product_unit'],
                     'product_detail' => $row['product_detail'],
+                    'product_note' => $row['product_note'] ?? '', // บันทึกใน delivery_items
                     'product_length' => $row['product_length'],
                     'product_weight' => $row['product_weight'],
                     'product_calculation' => $row['product_calculation'],

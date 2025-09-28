@@ -610,30 +610,31 @@
 
     <div class="page-container">
         <div class="content-wrapper">
-            {{-- Page Header --}}
+            
             <div class="page-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h1 class="page-title">
-                            @if($this->isCreate) 
+                            <!--[if BLOCK]><![endif]--><?php if($this->isCreate): ?> 
                                 <i class="ri-add-circle-line me-3"></i>สร้างใบเสนอราคา 
-                            @else 
+                            <?php else: ?> 
                                 <i class="ri-edit-line me-3"></i>แก้ไขใบเสนอราคา 
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </h1>
                         <p class="page-subtitle">จัดการข้อมูลใบเสนอราคา รวดเร็วและแม่นยำ</p>
                     </div>
-                    @if (!$this->isCreate)
+                    <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
                         <div class="d-flex gap-3 align-items-center">
-                            <div class="status-badge">{{ $quotation->quote_number }}</div>
-                            {!! quote_status_badge($quotation->quote_status) !!}
+                            <div class="status-badge"><?php echo e($quotation->quote_number); ?></div>
+                            <?php echo quote_status_badge($quotation->quote_status); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
             </div>
 
             <form wire:submit.prevent="save" id="quotation-form">
-                {{-- Company Info --}}
+                
                 <div class="form-section">
                     <div class="company-info">
                         <div class="row align-items-center">
@@ -648,42 +649,43 @@
                                 </div>
                             </div>
                             <div class="col-md-4 text-end">
-                                @if (!$this->isCreate)
-                                    <img src="{{ route('qr.quotation', $quotation->id) }}" alt="QR Code" style="height:80px; border-radius: 8px;">
-                                @endif
+                                <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
+                                    <img src="<?php echo e(route('qr.quotation', $quotation->id)); ?>" alt="QR Code" style="height:80px; border-radius: 8px;">
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
                     </div>
 
-                    {{-- Quote Date & Approval --}}
+                    
                     <div class="form-grid-date">
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="ri-calendar-line me-2"></i>วันที่ออกใบเสนอราคา
                             </label>
                             <input type="date" class="form-control"
-                                   {{ $quote_status === 'success' ? 'disabled' : '' }}
+                                   <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
                                    wire:model="quote_date">
                         </div>
                         <div></div>
-                        @if ($quotation && $quote_status === 'wait')
+                        <!--[if BLOCK]><![endif]--><?php if($quotation && $quote_status === 'wait'): ?>
                             <div class="d-flex gap-2">
                                 <button type="button" class="btn btn-success"
-                                        wire:click="approveQuotation({{ $quotation->id }})"
-                                        onclick="return confirm('ยืนยันการอนุมัติใบเสนอราคา เลขที่ {{ $quotation->quote_number }} ?')">
+                                        wire:click="approveQuotation(<?php echo e($quotation->id); ?>)"
+                                        onclick="return confirm('ยืนยันการอนุมัติใบเสนอราคา เลขที่ <?php echo e($quotation->quote_number); ?> ?')">
                                     <i class="ri-check-line me-2"></i>อนุมัติใบเสนอราคา
                                 </button>
                                 <button type="button" class="btn btn-outline-danger"
-                                        wire:click="rejectQuotation({{ $quotation->id }})"
-                                        onclick="return confirm('ยืนยันการไม่อนุมัติใบเสนอราคา เลขที่ {{ $quotation->quote_number }} ?')">
+                                        wire:click="rejectQuotation(<?php echo e($quotation->id); ?>)"
+                                        onclick="return confirm('ยืนยันการไม่อนุมัติใบเสนอราคา เลขที่ <?php echo e($quotation->quote_number); ?> ?')">
                                     <i class="ri-close-line me-2"></i>ไม่อนุมัติใบเสนอราคา
                                 </button>
                             </div>
-                        @endif
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                     </div>
                 </div>
 
-                {{-- Customer & Delivery Section --}}
+                
                 <div class="form-section">
                     <div class="section-title">
                         <i class="ri-user-heart-line"></i>ข้อมูลลูกค้าและการจัดส่ง
@@ -691,7 +693,7 @@
                     
                     <div class="customer-section">
                         <div class="customer-row">
-                            {{-- Customer Column --}}
+                            
                             <div class="customer-column">
                                 <div class="d-flex align-items-center gap-2 mb-0">
                                     <i class="ri-user-line" style="color: #667eea;"></i>
@@ -702,13 +704,14 @@
                                     <label class="form-label">เลือกลูกค้า</label>
                                     <div class="input-group-modern">
                                         <select id="customerSelect" class="form-select"
-                                            {{ $quote_status === 'success' ? 'disabled' : '' }}>
+                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
                                             <option value="">-- เลือกลูกค้า --</option>
-                                            @foreach ($customers as $c)
-                                                <option value="{{ $c->id }}" @selected($c->id == $customer_id)>
-                                                    {{ $c->customer_name }}
+                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($c->id); ?>" <?php if($c->id == $customer_id): echo 'selected'; endif; ?>>
+                                                    <?php echo e($c->customer_name); ?>
+
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                         </select>
                                         <button type="button" class="btn btn-outline btn-icon" 
                                                 onclick="Livewire.dispatch('create-customer'); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('customerModal')); modal.show(); }, 100);"
@@ -719,37 +722,32 @@
                                 </div>
 
                                 <div class="customer-info">
-                                    @if ($selectedCustomer)
+                                    <!--[if BLOCK]><![endif]--><?php if($selectedCustomer): ?>
                                         <div class="d-flex justify-content-between align-items-start mb-0">
-                                            <div class="customer-name">{{ $selectedCustomer->customer_contract_name }}</div>
-                                            @if ($customer_id)
+                                            <div class="customer-name"><?php echo e($selectedCustomer->customer_contract_name); ?></div>
+                                            <!--[if BLOCK]><![endif]--><?php if($customer_id): ?>
                                                 <button type="button" class="btn btn-sm btn-outline"
-                                                        onclick="Livewire.dispatch('edit-customer', { id: {{ $customer_id }} }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('customerModal')); modal.show(); }, 100);"
+                                                        onclick="Livewire.dispatch('edit-customer', { id: <?php echo e($customer_id); ?> }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('customerModal')); modal.show(); }, 100);"
                                                         title="แก้ไขข้อมูลลูกค้า">
                                                     <i class="ri-edit-line"></i>
                                                 </button>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </div>
-                                        <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone?? 'ไม่พบข้อมูล' }}</div>
-                                        <div class="customer-detail">📍 {{ $selectedCustomer->customer_address?? 'ไม่พบข้อมูล' }}</div>
-                                        <div class="customer-detail">🏢 {{ $selectedCustomer->customer_taxid?? 'ไม่พบข้อมูล' }}</div>
+                                        <div class="customer-detail">📞 <?php echo e($selectedCustomer->customer_phone?? 'ไม่พบข้อมูล'); ?></div>
+                                        <div class="customer-detail">📍 <?php echo e($selectedCustomer->customer_address?? 'ไม่พบข้อมูล'); ?></div>
+                                        <div class="customer-detail">🏢 <?php echo e($selectedCustomer->customer_taxid?? 'ไม่พบข้อมูล'); ?></div>
 
-                                        {{-- @if ($selectedCustomer->customer_wholesale ?? false)
-                                            <div class="customer-detail">💼 <span class="badge bg-success">โฮลเซลล์</span></div>
-                                        @endif
-                                        @if ($selectedCustomer->customer_country)
-                                            <div class="customer-detail">🌍 {{ $selectedCustomer->customer_country }}</div>
-                                        @endif --}}
-                                    @else
+                                        
+                                    <?php else: ?>
                                         <div class="empty-state">
                                             <i class="ri-user-add-line"></i>
                                             <p class="mb-0">กรุณาเลือกลูกค้า</p>
                                         </div>
-                                    @endif
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
                             </div>
 
-                            {{-- Delivery Column --}}
+                            
                             <div class="customer-column">
                                 <div class="d-flex align-items-center gap-2 mb-0">
                                     <i class="ri-truck-line" style="color: #667eea;"></i>
@@ -760,75 +758,73 @@
                                     <label class="form-label">เลือกที่อยู่จัดส่ง</label>
                                     <div class="input-group-modern">
                                         <select wire:model.live="selected_delivery_id" class="form-select"
-                                            {{ $quote_status === 'success' ? 'disabled' : '' }}>
+                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
                                             <option value="">-- เลือกที่อยู่จัดส่ง --</option>
-                                            @foreach ($customerDelivery as $delivery)
-                                                <option value="{{ $delivery->id }}" @if ($delivery->id == $selected_delivery_id) selected @endif>
-                                                    {{ $delivery->delivery_contact_name }} - {{ $delivery->delivery_phone }}
+                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customerDelivery; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $delivery): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($delivery->id); ?>" <?php if($delivery->id == $selected_delivery_id): ?> selected <?php endif; ?>>
+                                                    <?php echo e($delivery->delivery_contact_name); ?> - <?php echo e($delivery->delivery_phone); ?>
+
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                         </select>
-                                        @if ($selectedCustomer)
+                                        <!--[if BLOCK]><![endif]--><?php if($selectedCustomer): ?>
                                             <button type="button" class="btn btn-outline btn-icon" 
-                                                    wire:click="openDeliveryModal({{ $customer_id }})"
+                                                    wire:click="openDeliveryModal(<?php echo e($customer_id); ?>)"
                                                     title="เพิ่มที่อยู่จัดส่ง">
                                                 <i class="ri-add-line"></i>
                                             </button>
-                                        @else
+                                        <?php else: ?>
                                             <button type="button" class="btn btn-outline btn-icon" disabled title="เลือกลูกค้าก่อน">
                                                 <i class="ri-add-line"></i>
                                             </button>
-                                        @endif
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     </div>
                                 </div>
 
                                 <div class="customer-info">
-                                    @if ($selectedDelivery)
+                                    <!--[if BLOCK]><![endif]--><?php if($selectedDelivery): ?>
                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div class="customer-name">{{ $selectedDelivery->delivery_contact_name }}</div>
+                                            <div class="customer-name"><?php echo e($selectedDelivery->delivery_contact_name); ?></div>
                                             <button type="button" class="btn btn-sm btn-outline"
-                                                    onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: {{ $selectedDelivery->id }} }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('deliveryModal')); modal.show(); }, 100);"
+                                                    onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: <?php echo e($selectedDelivery->id); ?> }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('deliveryModal')); modal.show(); }, 100);"
                                                     title="แก้ไขที่อยู่จัดส่ง">
                                                 <i class="ri-edit-line"></i>
                                             </button>
                                         </div>
-                                        <div class="customer-detail">📞 {{ $selectedDelivery->delivery_phone }}</div>
-                                        <div class="customer-detail">📍 {{ $selectedDelivery->delivery_address }}</div>
-                                    @else
-                                        @if ($selectedCustomer)
+                                        <div class="customer-detail">📞 <?php echo e($selectedDelivery->delivery_phone); ?></div>
+                                        <div class="customer-detail">📍 <?php echo e($selectedDelivery->delivery_address); ?></div>
+                                    <?php else: ?>
+                                        <!--[if BLOCK]><![endif]--><?php if($selectedCustomer): ?>
                                             <div class="empty-delivery-state">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    {{-- <div class="text-muted">
-                                                        <i class="ri-map-pin-line me-1"></i>
-                                                        ไม่พบที่อยู่
-                                                    </div> --}}
+                                                    
                                                     <button type="button" class="btn btn-sm btn-outline"
-                                                            onclick="Livewire.dispatch('open-delivery-modal', { customerId: {{ $selectedCustomer->id }} }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('deliveryModal')); modal.show(); }, 100);"
+                                                            onclick="Livewire.dispatch('open-delivery-modal', { customerId: <?php echo e($selectedCustomer->id); ?> }); setTimeout(() => { const modal = new bootstrap.Modal(document.getElementById('deliveryModal')); modal.show(); }, 100);"
                                                             title="เพิ่มที่อยู่จัดส่ง">
                                                         <i class="ri-edit-line"></i>
                                                     </button>
                                                 </div>
                                                 <div class="warning-box">
                                                     <div class="customer-detail text-warning"><strong>⚠️ ใช้ที่อยู่ลูกค้า</strong></div>
-                                                    <div class="customer-name">{{ $selectedCustomer->customer_contract_name ?? 'ไม่พบข้อมูล' }}</div>
-                                                    <div class="customer-detail">📞 {{ $selectedCustomer->customer_phone ?? 'ไม่พบข้อมูล' }}</div>
-                                                    <div class="customer-detail">📍 {{ $selectedCustomer->customer_address ?? 'ไม่พบข้อมูล' }}</div>
+                                                    <div class="customer-name"><?php echo e($selectedCustomer->customer_contract_name ?? 'ไม่พบข้อมูล'); ?></div>
+                                                    <div class="customer-detail">📞 <?php echo e($selectedCustomer->customer_phone ?? 'ไม่พบข้อมูล'); ?></div>
+                                                    <div class="customer-detail">📍 <?php echo e($selectedCustomer->customer_address ?? 'ไม่พบข้อมูล'); ?></div>
                                                 </div>
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <div class="empty-state">
                                                 <i class="ri-truck-line"></i>
                                                 <p class="mb-0">เลือกลูกค้าเพื่อดูที่อยู่จัดส่ง</p>
                                             </div>
-                                        @endif
-                                    @endif
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Products Section --}}
+                
                 <div class="form-section">
                     <div class="section-title">
                         <i class="ri-shopping-cart-line"></i>รายการสินค้า
@@ -852,129 +848,166 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($items as $i => $item)
-                                    <tr wire:key="row-{{ $i }}">
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <tr wire:key="row-<?php echo e($i); ?>">
                                         <td class="text-center">
-                                            <span class="badge bg-light text-dark">{{ $i + 1 }}</span>
+                                            <span class="badge bg-light text-dark"><?php echo e($i + 1); ?></span>
                                         </td>
                                         <td>
                                             <div class="product-search-container">
                                                 <div class="d-flex gap-2 mb-2">
-                                                    <input type="text" class="form-control @error('items.' . $i . '.product_id') is-invalid @enderror @error('items.' . $i . '.product_search') is-invalid @enderror"
-                                                        {{ $quote_status === 'success' ? 'disabled' : '' }}
+                                                    <input type="text" class="form-control <?php $__errorArgs = ['items.' . $i . '.product_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?> <?php $__errorArgs = ['items.' . $i . '.product_search'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                                        <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
                                                         placeholder="🔍 ค้นหาสินค้า..."
-                                                        wire:model.live.debounce.500ms="items.{{ $i }}.product_search"
-                                                        wire:keydown.escape="$set('items.{{ $i }}.product_results_visible', false)"
-                                                        wire:focus="$set('items.{{ $i }}.product_results_visible', true)"
-                                                        wire:key="search-{{ $i }}" />
+                                                        wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.product_search"
+                                                        wire:keydown.escape="$set('items.<?php echo e($i); ?>.product_results_visible', false)"
+                                                        wire:focus="$set('items.<?php echo e($i); ?>.product_results_visible', true)"
+                                                        wire:key="search-<?php echo e($i); ?>" />
                                                     
-                                                    @if (!empty($item['product_id']))
+                                                    <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_id'])): ?>
                                                         <button type="button" class="btn btn-outline-secondary btn-sm" 
-                                                            wire:click="clearProductSelection({{ $i }})"
+                                                            wire:click="clearProductSelection(<?php echo e($i); ?>)"
                                                             title="เคลียร์การเลือกสินค้า"
-                                                            {{ $quote_status === 'success' ? 'disabled' : '' }}>
+                                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>>
                                                             <i class="ri-close-line"></i>
                                                         </button>
-                                                    @endif
+                                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                 </div>
                                                 
-                                                @error('items.' . $i . '.product_id')
+                                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['items.' . $i . '.product_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                                     <div class="invalid-feedback d-block">
-                                                        <small class="text-danger">{{ $message }}</small>
+                                                        <small class="text-danger"><?php echo e($message); ?></small>
                                                     </div>
-                                                @enderror
+                                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                 
-                                                @error('items.' . $i . '.product_search')
+                                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['items.' . $i . '.product_search'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                                     <div class="invalid-feedback d-block">
-                                                        <small class="text-danger">{{ $message }}</small>
+                                                        <small class="text-danger"><?php echo e($message); ?></small>
                                                     </div>
-                                                @enderror
+                                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                 
                                                 <input type="text" class="form-control"
-                                                    wire:model="items.{{ $i }}.product_note"
+                                                    wire:model="items.<?php echo e($i); ?>.product_note"
                                                     placeholder="💬 หมายเหตุ">
 
-                                                @if (!empty($item['product_results_visible']) && !empty($item['product_results']))
+                                                <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_results_visible']) && !empty($item['product_results'])): ?>
                                                     <div class="product-search-dropdown">
-                                                        @foreach ($item['product_results'] as $result)
+                                                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $item['product_results']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $result): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                             <div class="product-search-item"
-                                                                wire:click="selectProduct({{ $i }}, {{ $result->product_id }}, @js($result->product_name))">
+                                                                wire:click="selectProduct(<?php echo e($i); ?>, <?php echo e($result->product_id); ?>, <?php echo \Illuminate\Support\Js::from($result->product_name)->toHtml() ?>)">
                                                                 <div class="d-flex justify-content-between align-items-start">
                                                                     <div>
-                                                                        <div class="product-search-title">{{ $result->product_name }}</div>
+                                                                        <div class="product-search-title"><?php echo e($result->product_name); ?></div>
                                                                         <div class="product-search-detail">
-                                                                            {{ $result->product_size }} | {{ $result->productWireType?->value ?? '-' }}
+                                                                            <?php echo e($result->product_size); ?> | <?php echo e($result->productWireType?->value ?? '-'); ?>
+
                                                                         </div>
                                                                     </div>
                                                                     <i class="ri-arrow-right-s-line" style="color: #9ca3af;"></i>
                                                                 </div>
                                                             </div>
-                                                        @endforeach
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                                     </div>
-                                                @endif
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             </div>
                                         </td>
                                         <td>
-                                            @if ($item['product_calculation'] != 1)
+                                            <!--[if BLOCK]><![endif]--><?php if($item['product_calculation'] != 1): ?>
                                                 <input type="number" step="0.01" class="form-control text-center"
-                                                    wire:model.live.debounce.300ms="items.{{ $i }}.product_calculation"
-                                                    {{ $quote_status === 'success' ? 'disabled' : '' }}
+                                                    wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.product_calculation"
+                                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
                                                     placeholder="ความหนา/จำนวนที่ใช้คำนวณ" />
-                                            @else
+                                            <?php else: ?>
                                                 <div class="text-muted small text-center">
-                                                    {!! $item['product_detail'] ?? '-' !!}
+                                                    <?php echo $item['product_detail'] ?? '-'; ?>
+
                                                 </div>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </td>
                                         <td class="text-center">
                                             <div class="form-check d-flex justify-content-center">
                                                 <input class="form-check-input" type="checkbox"
-                                                    wire:model.live="items.{{ $i }}.product_vat"
+                                                    wire:model.live="items.<?php echo e($i); ?>.product_vat"
                                                     wire:change="refreshVat">
                                             </div>
                                         </td>
                                         <td>
                                             <input type="text" class="form-control text-center"
-                                                {{ $quote_status === 'success' ? 'disabled' : '' }}
-                                                wire:model.live.debounce.300ms="items.{{ $i }}.product_length"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
+                                                wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.product_length"
                                                 placeholder="ยาว">
                                         </td>
                                         <td>
                                             <input type="number" min="1" class="form-control text-center"
-                                                {{ $quote_status === 'success' ? 'disabled' : '' }}
-                                                wire:model.live.debounce.300ms="items.{{ $i }}.quantity"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
+                                                wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.quantity"
                                                 placeholder="จำนวน" />
                                         </td>
                                         <td>
                                             <input type="text" class="form-control text-center"
-                                                {{ $quote_status === 'success' ? 'disabled' : '' }}
-                                                wire:model.live="items.{{ $i }}.product_unit"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
+                                                wire:model.live="items.<?php echo e($i); ?>.product_unit"
                                                 readonly style="background: #f8fafc; font-size: 12px;">
                                         </td>
                                         <td>
                                             <input type="number" min="0" step="0.01" class="form-control text-end"
-                                                {{ $quote_status === 'success' ? 'disabled' : '' }}
-                                                wire:model.live.debounce.300ms="items.{{ $i }}.unit_price"
+                                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
+                                                wire:model.live.debounce.300ms="items.<?php echo e($i); ?>.unit_price"
                                                 placeholder="0.00" />
                                         </td>
                                         <td class="text-end">
                                             <strong style="color: #059669; font-size: 15px;">
-                                                ฿{{ number_format((floatval($item['unit_price'] ?? 0)) * (floatval($item['product_calculation'] ?? 1)) * (floatval($item['product_length'] ?? 1)) * (intval($item['quantity'] ?? 0)), 2) }}
+                                                ฿<?php echo e(number_format((floatval($item['unit_price'] ?? 0)) * (floatval($item['product_calculation'] ?? 1)) * (floatval($item['product_length'] ?? 1)) * (intval($item['quantity'] ?? 0)), 2)); ?>
+
                                             </strong>
                                         </td>
                                         <td class="text-center">
                                         
-                                           @if ($quotation?->quote_status->value != 'success')
+                                           <!--[if BLOCK]><![endif]--><?php if($quotation?->quote_status->value != 'success'): ?>
                                                 <button type="button" class="btn btn-sm btn-outline" 
                                                     style="color: #ef4444; border-color: #fecaca;"
-                                                    wire:click="removeItem({{ $i }})"
+                                                    wire:click="removeItem(<?php echo e($i); ?>)"
                                                     title="ลบรายการ">
                                                     <i class="ri-delete-bin-line"></i>
                                                 </button>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </tbody>
                         </table>
 
@@ -987,7 +1020,7 @@
                     </div>
                 </div>
 
-                {{-- Summary Section --}}
+                
                 <div class="form-section">
                     <div class="section-title">
                         <i class="ri-calculator-line"></i>สรุปยอดเงินและหมายเหตุ
@@ -1004,22 +1037,14 @@
                                 <div class="form-check mb-2" style="padding: 8px; background: #f8fafc; border-radius: 6px;">
                                     <input class="form-check-input" type="checkbox" 
                                         wire:model.live="quote_enable_vat"
-                                        {{ $quote_status === 'success' ? 'disabled' : '' }} 
+                                        <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?> 
                                         id="enableVatCheck">
                                     <label class="form-check-label" for="enableVatCheck" style="font-weight: 600; font-size: 14px;">
                                         <i class="ri-percent-line me-2"></i>คำนวณ VAT 7%
                                     </label>
                                 </div>
 
-                                {{-- <div class="form-check mb-3" style="padding: 8px; background: #f0f9ff; border-radius: 6px; border: 1px solid #bae6fd;">
-                                    <input class="form-check-input" type="checkbox" 
-                                        wire:model.live="quote_request_print_format"
-                                        {{ $quote_status === 'success' ? 'disabled' : '' }} 
-                                        id="requestPrintFormatCheck">
-                                    <label class="form-check-label" for="requestPrintFormatCheck" style="font-weight: 600; font-size: 14px;">
-                                        <i class="ri-printer-line me-2"></i>ขอแบบพิมพ์สำหรับใบเสนอราคา
-                                    </label>
-                                </div> --}}
+                                
                                 
                                 <label class="form-label">
                                     <i class="ri-file-text-line me-2"></i>หมายเหตุ
@@ -1027,7 +1052,8 @@
                                 <textarea wire:model="quote_note" 
                                     class="form-control" 
                                     rows="4" 
-                                    {{ $quote_status === 'success' ? 'disabled' : '' }}
+                                    <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
                                     placeholder="💬 หมายเหตุเพิ่มเติม เช่น เงื่อนไขการชำระเงิน, การจัดส่ง, การรับประกัน..."
                                     style="resize: vertical; font-size: 14px;"></textarea>
                             </div>
@@ -1042,7 +1068,7 @@
                             </div>
                             <div class="summary-row">
                                 <span><i class="ri-shopping-bag-line me-2"></i>ยอดรวมก่อนหักส่วนลด:</span>
-                                <span style="font-weight: 600; color: #888;">฿{{ number_format($quote_subtotal_before_discount, 2) }}</span>
+                                <span style="font-weight: 600; color: #888;">฿<?php echo e(number_format($quote_subtotal_before_discount, 2)); ?></span>
                             </div>
                             <div class="summary-row">
                                 <span><i class="ri-coupon-line me-2"></i>ส่วนลด:</span>
@@ -1050,7 +1076,8 @@
                                     <div class="input-group input-group-sm">
                                         <input type="number"
                                             wire:model.live.debounce.300ms="quote_discount"
-                                            {{ $quote_status === 'success' ? 'disabled' : '' }}
+                                            <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
                                             class="form-control text-end"
                                             min="0"
                                             step="0.01"
@@ -1062,15 +1089,15 @@
                             </div>
                             <div class="summary-row">
                                 <span><i class="ri-shopping-bag-line me-2"></i>ยอดสุทธิหลังหักส่วนลด:</span>
-                                <span style="font-weight: 600; color: #059669;">฿{{ number_format($quote_subtotal_before_discount - $quote_discount, 2) }}</span>
+                                <span style="font-weight: 600; color: #059669;">฿<?php echo e(number_format($quote_subtotal_before_discount - $quote_discount, 2)); ?></span>
                             </div>
                             <div class="summary-row">
                                 <span><i class="ri-percent-line me-2"></i>ภาษีมูลค่าเพิ่ม (7%):</span>
-                                <span style="font-weight: 600;">฿{{ number_format($quote_vat, 2) }}</span>
+                                <span style="font-weight: 600;">฿<?php echo e(number_format($quote_vat, 2)); ?></span>
                             </div>
                             <div class="summary-row summary-total">
                                 <span><i class="ri-money-dollar-box-line me-2"></i>จำนวนเงินทั้งสิ้น:</span>
-                                <span>฿{{ number_format(($quote_subtotal_before_discount - $quote_discount) + $quote_vat, 2) }}</span>
+                                <span>฿<?php echo e(number_format(($quote_subtotal_before_discount - $quote_discount) + $quote_vat, 2)); ?></span>
                             </div>
 
                            
@@ -1079,28 +1106,29 @@
                 </div>
             </form>
 
-            {{-- Action Buttons --}}
+            
             <div class="action-buttons">
                 <div class="d-flex justify-content-center gap-3">
-                    @if (!$this->isCreate)
-                        <a href="{{ route('quotations.print', $quotation_id) }}" 
+                    <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
+                        <a href="<?php echo e(route('quotations.print', $quotation_id)); ?>" 
                            class="btn btn-outline">
                             <i class="ri-printer-line me-2"></i>พิมพ์ใบเสนอราคา
                         </a>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                    @if (!$this->isCreate)
+                    <!--[if BLOCK]><![endif]--><?php if(!$this->isCreate): ?>
                         <button type="submit" 
                                 class="btn btn-primary"
-                                {{ $quote_status === 'success' ? 'disabled' : '' }}
+                                <?php echo e($quote_status === 'success' ? 'disabled' : ''); ?>
+
                                 form="quotation-form">
                             <i class="ri-save-line me-2"></i>บันทึกการแก้ไข
                         </button>
-                    @else
+                    <?php else: ?>
                         <button type="submit" class="btn btn-primary" form="quotation-form">
                             <i class="ri-add-circle-line me-2"></i>สร้างใบเสนอราคา
                         </button>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
             </div>
         </div>
@@ -1128,11 +1156,41 @@
             }
         </style>
 
-        {{-- Modals --}}
-        <livewire:quotations.customer-modal />
-        <livewire:quotations.delivery-address-modal />
+        
+        <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('quotations.customer-modal', []);
 
-        {{-- Scripts --}}
+$__html = app('livewire')->mount($__name, $__params, 'lw-328510549-0', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
+        <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('quotations.delivery-address-modal', []);
+
+$__html = app('livewire')->mount($__name, $__params, 'lw-328510549-1', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
+
+        
         <script>
         // Helper function to safely find Livewire component
         function safeLivewireFind() {
@@ -1515,4 +1573,4 @@
             });
         });
     </script>
-</div>
+</div><?php /**PATH /Users/ap.dev/Desktop/Projects/charoenmun/resources/views/livewire/quotations/quotations-form.blade.php ENDPATH**/ ?>

@@ -19,6 +19,7 @@ class OrderDeliveryItems extends Model
         'quantity',
         'unit_price',
         'product_calculation',
+        'product_note',
         'total',
     ];
 

@@ -23,7 +23,7 @@
                         <div class="input-group flex-nowrap mb-2">
                             <span class="input-group-text bg-warning text-dark border-0">เลขที่บิลหลัก</span>
                             <input type="text" class="form-control col-form-label-lg bg-light"
-                                value="{{ $orderModel->order_number }}" disabled>
+                                value="<?php echo e($orderModel->order_number); ?>" disabled>
                         </div>
                         <div class="input-group flex-nowrap">
                             <span class="input-group-text bg-warning text-dark border-0">วันที่จัดส่ง</span>
@@ -45,24 +45,32 @@
                                 </h5>
                                 <div
                                     style="font-size:16px; font-weight:700; color:#374151;">
-                                    {{ $orderModel->customer->customer_name }}
+                                    <?php echo e($orderModel->customer->customer_name); ?>
+
                                 </div>
                                 <div style="font-size:14px; color:#6b7280;">
-                                    {{ $orderModel->customer->customer_address }}
+                                    <?php echo e($orderModel->customer->customer_address); ?>
+
                                 </div>
                                 <div style="font-size:13px; color:#9ca3af;">
 
-                                    {{ $orderModel->customer->customer_district_name }}
-                                    {{ $orderModel->customer->customer_amphur_name }}
-                                    {{ $orderModel->customer->customer_province_name }}
-                                    {{ $orderModel->customer->customer_zipcode }}
+                                    <?php echo e($orderModel->customer->customer_district_name); ?>
+
+                                    <?php echo e($orderModel->customer->customer_amphur_name); ?>
+
+                                    <?php echo e($orderModel->customer->customer_province_name); ?>
+
+                                    <?php echo e($orderModel->customer->customer_zipcode); ?>
+
                                     
                                 </div>
                                 <div style="font-size:14px; color:#6b7280; margin-top:4px;">
-                                    <i class="ri-phone-line"></i> (+66) {{ $orderModel->customer->customer_phone }}
+                                    <i class="ri-phone-line"></i> (+66) <?php echo e($orderModel->customer->customer_phone); ?>
+
                                 </div>
                                 <div style="font-size:13px; color:#b45309; margin-top:4px;">
-                                    เลขประจำตัวผู้เสียภาษี: {{ $orderModel->customer->customer_taxid }}
+                                    เลขประจำตัวผู้เสียภาษี: <?php echo e($orderModel->customer->customer_taxid); ?>
+
                                 </div>
                             </div>
                         </div>
@@ -75,40 +83,49 @@
                                 </h5>
                                 <div>
                                     <a href="#"
-                                        wire:click.prevent="openDeliveryModal({{ $orderModel->customer->id }})"
+                                        wire:click.prevent="openDeliveryModal(<?php echo e($orderModel->customer->id); ?>)"
                                         style="font-size:13px; color:#b45309;">+ เพิ่มที่อยู่จัดส่ง</a>
                                 </div>
                                 <select wire:model.live="selected_delivery_id" name="selected_delivery_id"
                                     class="form-select mt-2">
                                     <option value="">-- เลือกที่อยู่จัดส่ง --</option>
-                                    @foreach ($customerDelivery as $delivery)
-                                    <option value="{{ $delivery->id }}" wire:key="delivery-{{ $delivery->id }}"
-                                        @selected($delivery->id == (string) $selected_delivery_id)>
-                                        {{ $delivery->delivery_contact_name }} - {{ $delivery->delivery_phone }}
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $customerDelivery; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $delivery): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($delivery->id); ?>" wire:key="delivery-<?php echo e($delivery->id); ?>"
+                                        <?php if($delivery->id == (string) $selected_delivery_id): echo 'selected'; endif; ?>>
+                                        <?php echo e($delivery->delivery_contact_name); ?> - <?php echo e($delivery->delivery_phone); ?>
+
                                     </option>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                 </select>
                                 <address class="mt-2">
-                                    @if ($selectedDelivery)
-                                    <b>ชื่อผู้ติดต่อ</b> {{ $selectedDelivery->delivery_contact_name }}
-                                    ({{ $selectedDelivery->delivery_phone }})<br>
-                                    <b>ที่อยู่:</b> {{ $selectedDelivery->delivery_number }}<br>
-                                    {{ $selectedDelivery->delivery_address }}
+                                    <!--[if BLOCK]><![endif]--><?php if($selectedDelivery): ?>
+                                    <b>ชื่อผู้ติดต่อ</b> <?php echo e($selectedDelivery->delivery_contact_name); ?>
+
+                                    (<?php echo e($selectedDelivery->delivery_phone); ?>)<br>
+                                    <b>ที่อยู่:</b> <?php echo e($selectedDelivery->delivery_number); ?><br>
+                                    <?php echo e($selectedDelivery->delivery_address); ?>
+
                                     <a href="javascript: void(0);"
-                                        onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: {{ $selectedDelivery->id }} })"
+                                        onclick="Livewire.dispatch('edit-delivery-modal', { deliveryId: <?php echo e($selectedDelivery->id); ?> })"
                                         style="font-size:13px; color:#b45309;">แก้ไข</a>
-                                    @else
-                                    @if ($orderModel->customer->customer_name)
-                                    <b>ชื่อร้านค้า/ชื่อลูกค้า:</b> {{ $orderModel->customer->customer_contract_name }}
-                                    ({{ $orderModel->customer->customer_phone }})<br>
-                                    <b>ที่อยู่:</b> {{ $orderModel->customer->customer_address }}
-                                    {{ $orderModel->customer->customer_district_name }}
-                                    {{ $orderModel->customer->customer_amphur_name }}
-                                    {{ $orderModel->customer->customer_province_name }}
-                                    {{ $orderModel->customer->customer_zipcode }}<br>
-                                    <b>เลขประจำตัวผู้เสียภาษี:</b> {{ $orderModel->customer->customer_taxid }}
-                                    @endif
-                                    @endif
+                                    <?php else: ?>
+                                    <!--[if BLOCK]><![endif]--><?php if($orderModel->customer->customer_name): ?>
+                                    <b>ชื่อร้านค้า/ชื่อลูกค้า:</b> <?php echo e($orderModel->customer->customer_contract_name); ?>
+
+                                    (<?php echo e($orderModel->customer->customer_phone); ?>)<br>
+                                    <b>ที่อยู่:</b> <?php echo e($orderModel->customer->customer_address); ?>
+
+                                    <?php echo e($orderModel->customer->customer_district_name); ?>
+
+                                    <?php echo e($orderModel->customer->customer_amphur_name); ?>
+
+                                    <?php echo e($orderModel->customer->customer_province_name); ?>
+
+                                    <?php echo e($orderModel->customer->customer_zipcode); ?><br>
+                                    <b>เลขประจำตัวผู้เสียภาษี:</b> <?php echo e($orderModel->customer->customer_taxid); ?>
+
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 </address>
                             </div>
                         </div>
@@ -133,79 +150,81 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($items as $i => $item)
-                                        <tr class="align-top" wire:key="row-{{ $i }}">
-                                            <td class="align-top">{{ $i + 1 }}</td>
+                                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <tr class="align-top" wire:key="row-<?php echo e($i); ?>">
+                                            <td class="align-top"><?php echo e($i + 1); ?></td>
                                             <td style="min-width: 250px;">
                                                 <select class="form-select form-select-sm"
-                                                    wire:model.live="items.{{ $i }}.product_id">
+                                                    wire:model.live="items.<?php echo e($i); ?>.product_id">
                                                     <option value="">-- เลือกสินค้า --</option>
-                                                    @foreach ($orderItems as $oi )
-                                                    @php $left = $stocksLeft[$oi->product_id] ?? 0; @endphp
-                                                    <option value="{{ $oi->product_id }}" @disabled($left === 0)>
-                                                        {{ $oi->product->product_name }}ขนาด{{ $oi->product->product_length}} เมตร
-                                                        ({{ $left }}) {{$oi->product_calculation}}
+                                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $orderItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $oi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php $left = $stocksLeft[$oi->product_id] ?? 0; ?>
+                                                    <option value="<?php echo e($oi->product_id); ?>" <?php if($left === 0): echo 'disabled'; endif; ?>>
+                                                        <?php echo e($oi->product->product_name); ?>ขนาด<?php echo e($oi->product->product_length); ?> เมตร
+                                                        (<?php echo e($left); ?>) <?php echo e($oi->product_calculation); ?>
+
                                                     </option>
-                                                    @endforeach
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                                 </select>
                                                 <div class="mt-2">
                                                     <input type="text" class="form-control form-control-sm"
-                                                        wire:model="items.{{ $i }}.product_note"
+                                                        wire:model="items.<?php echo e($i); ?>.product_note"
                                                         placeholder="💬 หมายเหตุ"
                                                         style="background-color: #f8f9fa; border: 1px solid #fbbf24;">
                                                 </div>
                                             </td>
-                                            <td style="min-width: 180px;">{!! $item['product_detail'] ?? '' !!}</td>
+                                            <td style="min-width: 180px;"><?php echo $item['product_detail'] ?? ''; ?></td>
                                             <td style="width: 90px">
                                                 <input type="text"
-                                                    wire:model.live.debounce.500ms="items.{{ $i }}.product_length"
+                                                    wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.product_length"
                                                     class="form-control form-control-sm">
                                             </td>
                                             <td style="width: 90px">
                                                 <input type="number" min="1"
-                                                    wire:model.live.debounce.500ms="items.{{ $i }}.product_weight"
+                                                    wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.product_weight"
                                                     class="form-control form-control-sm" />
                                             </td>
                                             <td style="width: 90px">
                                                 <input type="number" min="1"
-                                                    wire:model.live.debounce.500ms="items.{{ $i }}.quantity"
+                                                    wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.quantity"
                                                     class="form-control form-control-sm" />
                                             </td>
                                             <td style="width: 90px">
                                                 <input type="text"
-                                                    wire:model.live="items.{{ $i }}.product_unit"
+                                                    wire:model.live="items.<?php echo e($i); ?>.product_unit"
                                                     class="form-control form-control-sm"
                                                     style="background-color: aliceblue" readonly>
                                             </td>
                                             <td style="width: 120px">
                                                 <input type="number" min="0" step="0.01" readonly
                                                     style="background-color: aliceblue"
-                                                    wire:model.live.debounce.500ms="items.{{ $i }}.unit_price"
+                                                    wire:model.live.debounce.500ms="items.<?php echo e($i); ?>.unit_price"
                                                     class="form-control form-control-sm text-end" />
                                             </td>
                                             <td class="text-end">
-                                                {{ number_format($item['total'], 2) }}
+                                                <?php echo e(number_format($item['total'], 2)); ?>
+
                                             </td>
                                             <td>
                                                 <a href="javascript: void(0);"
-                                                    wire:click="removeItem({{ $i }})"><i
+                                                    wire:click="removeItem(<?php echo e($i); ?>)"><i
                                                         class="mdi mdi-trash-can text-danger"
                                                         style="font-size: 22px"></i></a>
                                             </td>
                                         </tr>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                     </tbody>
                                 </table>
                                 <button type="button" class="btn btn-outline-warning btn-sm mt-2"
                                     wire:click="addEmptyItem">
                                     ➕ เพิ่มรายการสินค้า
                                 </button>
-                                @if(!$editing)
+                                <!--[if BLOCK]><![endif]--><?php if(!$editing): ?>
                                 <button type="button" class="btn btn-outline-info btn-sm mt-2 ms-2"
                                     wire:click="resetToAllItems">
                                     🔄 รีเซ็ตเป็นรายการทั้งหมด
                                 </button>
-                                @endif
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
                     </div>
@@ -225,7 +244,7 @@
                                     คำนวณ VAT 7%
                                 </label>
                             </div>
-                            @if ($order_delivery_enable_vat)
+                            <!--[if BLOCK]><![endif]--><?php if($order_delivery_enable_vat): ?>
                             <div class="form-check mt-2 ms-3">
                                 <input class="form-check-input" type="checkbox" wire:model.live="order_delivery_vat_included"
                                     id="vatIncludedCheck">
@@ -233,23 +252,24 @@
                                     💡 คิดรวม VAT ในราคารวม (VAT-In)
                                 </label>
                             </div>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                         <div class="col-md-6">
                             <div class="row g-2">
                                 <div class="col-8 text-end"><b>จำนวนเงินรวม:</b></div>
-                                <div class="col-4 text-end">{{ number_format($order_delivery_subtotal, 2) }}</div>
+                                <div class="col-4 text-end"><?php echo e(number_format($order_delivery_subtotal, 2)); ?></div>
                                 <div class="col-8 text-end"><b>ส่วนลด:</b></div>
                                 <div class="col-4 text-end">
                                     <input type="number" wire:model.live.debounce.300ms="order_delivery_discount"
                                         class="form-control text-end form-control-sm" min="0" step="0.01">
                                 </div>
                                 <div class="col-8 text-end"><b>ภาษีมูลค่าเพิ่ม:</b></div>
-                                <div class="col-4 text-end">{{ number_format($order_delivery_vat, 2) }}</div>
+                                <div class="col-4 text-end"><?php echo e(number_format($order_delivery_vat, 2)); ?></div>
                                 <div class="col-8 text-end"><b>จำนวนเงินทั้งสิ้น:</b></div>
                                 <div class="col-4 text-end">
                                     <span style="font-weight:700; color:#b45309;">
-                                        {{ number_format($order_delivery_grand_total, 2) }}
+                                        <?php echo e(number_format($order_delivery_grand_total, 2)); ?>
+
                                     </span>
                                 </div>
                             </div>
@@ -258,19 +278,19 @@
                     <div class="d-print-none mt-4">
                         <div class="text-center">
                             <button type="submit"
-                                class="btn {{ $editing ? 'btn-success' : 'btn-warning' }} px-4 py-2"
+                                class="btn <?php echo e($editing ? 'btn-success' : 'btn-warning'); ?> px-4 py-2"
                                 style="font-weight:600; font-size:1.1rem;"
-                                @if(empty($selected_delivery_id)) disabled @endif
+                                <?php if(empty($selected_delivery_id)): ?> disabled <?php endif; ?>
                             >
-                                @if($editing)
+                                <!--[if BLOCK]><![endif]--><?php if($editing): ?>
                                     <i class="ri-save-line me-1"></i> บันทึกการแก้ไข
-                                @else
+                                <?php else: ?>
                                     <i class="ri-file-list-3-line me-1"></i> สร้างใบส่งสินค้า
-                                @endif
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </button>
-                            @if(empty($selected_delivery_id))
-                                <div class="text-danger mt-2">กรุณาเลือกที่อยู่จัดส่งก่อน{{ $editing ? 'บันทึก' : 'สร้างใบส่งสินค้า' }}</div>
-                            @endif
+                            <!--[if BLOCK]><![endif]--><?php if(empty($selected_delivery_id)): ?>
+                                <div class="text-danger mt-2">กรุณาเลือกที่อยู่จัดส่งก่อน<?php echo e($editing ? 'บันทึก' : 'สร้างใบส่งสินค้า'); ?></div>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                     </div>
                 </form>
@@ -278,9 +298,39 @@
         </div>
     </div>
 
-    <livewire:quotations.customer-modal />
+    <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('quotations.customer-modal', []);
 
-    <livewire:quotations.delivery-address-modal />
+$__html = app('livewire')->mount($__name, $__params, 'lw-2759676399-0', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
+
+    <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('quotations.delivery-address-modal', []);
+
+$__html = app('livewire')->mount($__name, $__params, 'lw-2759676399-1', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
 
 
 
@@ -405,3 +455,4 @@
         });
     </script>
 </div>
+<?php /**PATH /Users/ap.dev/Desktop/Projects/charoenmun/resources/views/livewire/orders/order-delivery.blade.php ENDPATH**/ ?>
