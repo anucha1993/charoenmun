@@ -57,4 +57,6 @@ class OrderItemsModel extends Model
     {
         return $this->belongsTo(GlobalSetValueModel::class, 'product_measure');
     }
+
+    
 }

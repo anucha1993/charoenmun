@@ -231,11 +231,14 @@
                                 <tbody class="fs-16">
                                     @foreach ($chunk as $key => $item)
                                         <tr>
-                                            <td>{{ ++$key }}</td>
+                                            <td>{{ $item->id}}</td>
                                             <td>{{ $item->quantity }}</td>
                                             <td>{{ $item->orderItem->product_unit }}</td>
                                             <td><b>{{ $item->orderItem->product_name }}</b>
                                                 ({{ number_format($item->orderItem->product_length) . ' ' . ($item->productMeasure?->value ?? 'เมตร') }})
+                                                @if($item->orderItem->product?->productWireType?->value)
+                                                    <br>{{ $item->orderItem->product->productWireType->value }}
+                                                @endif
                                                 @if($item->product_note)
                                                     <br><small class="text-muted">💬 {{ $item->product_note }}</small>
                                                 @endif
@@ -293,33 +296,39 @@
                 </div>
                 @endif
 
-                <hr>
-                <div class="row ">
-                    <div class="col-sm-12">
-                        <div class="clearfix">
-                            <span class="fs-16">เงือนไขการระบสินค้า :</span><br>
-                            <span class="fs-16">กรุณาตรวจสอบความถูกต้องของสินค้าและเซ็นรับสินค้าในวันที่ได้รับ
-                                หากไม่มีการตรวจสอบหรือเซ็นรับสินค้า
-                                ทางบริษัทขอสงวนสิทธิ์ในการรับผิดชอบต่อความผิดพลาดทุกกรณี</span><br>
+                <!-- ส่วนเนื้อหาหลักจบที่นี่ -->
+                <div class="content-spacer"></div>
+                
+                <!-- ส่วนท้ายที่ต้องอยู่ล่างสุดเสมอ -->
+                <div class="footer-section">
+                    <hr>
+                    <div class="row ">
+                        <div class="col-sm-12">
+                            <div class="clearfix">
+                                <span class="fs-16">เงื่อนไขการระบสินค้า :</span><br>
+                                <span class="fs-16">กรุณาตรวจสอบความถูกต้องของสินค้าและเซ็นรับสินค้าในวันที่ได้รับ
+                                    หากไม่มีการตรวจสอบหรือเซ็นรับสินค้า
+                                    ทางบริษัทขอสงวนสิทธิ์ในการรับผิดชอบต่อความผิดพลาดทุกกรณี</span><br>
 
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="row ">
-                    <div class="col-sm-6">
-                        <div class="clearfix pt-4">
-                            <span class="fs-16">ลงชื่อ............................................................ผู้รับสินค้า</span><br>
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="clearfix pt-4">
+                                <span class="fs-16">ลงชื่อ............................................................ผู้รับสินค้า</span><br>
 
-                        </div>
-                    </div> <!-- end col -->
-                    <div class="col-sm-6">
-                        <div class="float-end mt-sm-0  pt-4">
-                            <span class="fs-16">ลงชื่อ............................................................ผู้ส่งสินค้า</span><br>
+                            </div>
+                        </div> <!-- end col -->
+                        <div class="col-sm-6">
+                            <div class="float-end mt-sm-0  pt-4">
+                                <span class="fs-16">ลงชื่อ............................................................ผู้ส่งสินค้า</span><br>
 
-                        </div>
-                        <div class="clearfix"></div>
-                    </div> <!-- end col -->
+                            </div>
+                            <div class="clearfix"></div>
+                        </div> <!-- end col -->
+                    </div>
                 </div>
 
                 {{-- <div class="d-print-none mt-4">
@@ -341,10 +350,221 @@
 @endforeach
     <!-- end row -->
     <style>
+        /* Font Family - Angsana New */
+        * {
+            font-family: 'Angsana New', 'TH Sarabun New', 'Arial', sans-serif !important;
+        }
+        
         @media print {
             .page-break {
                 page-break-before: always;
             }
+            
+            /* A4 Print Layout - พอดีขอบกระดาษ */
+            @page {
+                size: A4;
+                margin: 0.25in 0.1in;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                font-size: 15pt;
+                line-height: 1.2;
+                background-color: white !important;
+            }
+            
+            .page-copy {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                page-break-inside: avoid;
+                background-color: white !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0;
+                padding: 0;
+                background-color: white !important;
+            }
+            
+            .card-body {
+                padding: 0 !important;
+                display: flex;
+                flex-direction: column;
+                height: calc(100vh - 0.5in); /* ปรับให้เหมาะสมกับ margin ใหม่ */
+                max-height: calc(100vh - 0.5in); /* จำกัดความสูงไม่ให้เกิน */
+                background-color: white !important;
+            }
+            
+            /* ส่วนที่ยืดเพื่อดัน footer ลงล่าง */
+            .content-spacer {
+                flex-grow: 1;
+                min-height: 0; /* ป้องกันไม่ให้ขยายเกินไป */
+            }
+            
+            /* ส่วนท้ายที่ต้องอยู่ล่างสุด */
+            .footer-section {
+                margin-top: auto;
+                flex-shrink: 0; /* ป้องกันการย่อ */
+            }
+            
+            /* Optimize table spacing */
+            .table-responsive {
+                overflow: visible;
+                margin: 0;
+                padding: 0;
+            }
+            
+            table {
+                width: 100%;
+                font-size: 13pt;
+                background-color: white !important;
+            }
+            
+            th, td {
+                padding: 4px 4px;
+                vertical-align: top;
+                background-color: white !important;
+            }
+            
+            thead th {
+                background-color: white !important;
+                border-color: #dc3545 !important;
+            }
+            
+            /* Adjust header spacing */
+            h4 {
+                font-size: 16pt;
+                margin-bottom: 0.15rem;
+                margin-top: 0.1rem;
+            }
+            
+            h6 {
+                font-size: 14pt;
+                margin-bottom: 0.15rem;
+            }
+            
+            /* Address sections */
+            address {
+                font-size: 13pt;
+                line-height: 1.2;
+                margin-bottom: 0.3rem;
+            }
+            
+            /* Font size adjustments */
+            .fs-16 {
+                font-size: 13pt !important;
+            }
+            
+            .fs-14 {
+                font-size: 12pt !important;
+            }
+            
+            /* Signature section - ลด padding */
+            .pt-4 {
+                padding-top: 0.5rem !important;
+            }
+            
+            /* QR Code */
+            img[alt="QR"] {
+                height: 70px !important;
+            }
+            
+            /* Logo */
+            img[alt="dark logo"] {
+                height: 40px !important;
+            }
+            
+            /* Compact spacing - ลด margin เพื่อใช้พื้นที่ให้เต็มที่ */
+            .mt-2 {
+                margin-top: 0.2rem !important;
+            }
+            
+            .mb-0 {
+                margin-bottom: 0 !important;
+            }
+            
+            .mt-1 {
+                margin-top: 0.1rem !important;
+            }
+            
+            .row {
+                margin: 0 !important;
+            }
+            
+            /* ลด spacing สำหรับส่วนราคา */
+            .price-section p {
+                margin-bottom: 0.2rem !important;
+            }
+            
+            /* ลด spacing สำหรับ footer */
+            .footer-section hr {
+                margin: 0.3rem 0 !important;
+            }
+            
+            .footer-section .row {
+                margin-bottom: 0.2rem !important;
+            }
+            
+            .col-6, .col-sm-6, .col-sm-4, .col-sm-12, .col-12 {
+                padding-left: 0.2rem !important;
+                padding-right: 0.2rem !important;
+            }
+            
+            .container-fluid {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                max-width: 100% !important;
+            }
+            
+            br {
+                line-height: 1.1;
+            }
+        }
+        
+        /* Screen display - Angsana New font */
+        body {
+            font-family: 'Angsana New', 'TH Sarabun New', 'Arial', sans-serif;
+            background-color: white !important;
+        }
+        
+        /* พื้นหลังสีขาวสำหรับฟอร์ม */
+        .page-copy {
+            background-color: white !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+        .card {
+            background-color: white !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+        .card-body {
+            background-color: white !important;
+            padding: 0 !important;
+        }
+        
+        /* ตารางพื้นหลังสีขาว */
+        .table {
+            background-color: white !important;
+        }
+        
+        .table th,
+        .table td {
+            background-color: white !important;
+            border-color: #dee2e6;
+        }
+        
+        .table thead th {
+            background-color: white !important;
+            border-color: #dc3545; /* เก็บสีแดงของ border-danger */
         }
         
         /* Disable text selection and context menu */
@@ -354,17 +574,6 @@
             -ms-user-select: none;
             user-select: none;
             -webkit-print-color-adjust: exact !important;
-        }
-
-        /* Hide print dialog elements */
-        @media print {
-            @page {
-                margin: 0;
-                size: auto;
-            }
-            body {
-                margin: 1.6cm;
-            }
         }
 
         .watermark {

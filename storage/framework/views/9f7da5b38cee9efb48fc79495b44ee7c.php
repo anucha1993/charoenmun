@@ -166,6 +166,12 @@
                                                     </option>
                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                                 </select>
+                                                <div class="mt-2">
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        wire:model="items.<?php echo e($i); ?>.product_note"
+                                                        placeholder="💬 หมายเหตุ"
+                                                        style="background-color: #f8f9fa; border: 1px solid #fbbf24;">
+                                                </div>
                                             </td>
                                             <td style="min-width: 180px;"><?php echo $item['product_detail'] ?? ''; ?></td>
                                             <td style="width: 90px">
@@ -213,6 +219,12 @@
                                     wire:click="addEmptyItem">
                                     ➕ เพิ่มรายการสินค้า
                                 </button>
+                                <!--[if BLOCK]><![endif]--><?php if(!$editing): ?>
+                                <button type="button" class="btn btn-outline-info btn-sm mt-2 ms-2"
+                                    wire:click="resetToAllItems">
+                                    🔄 รีเซ็ตเป็นรายการทั้งหมด
+                                </button>
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
                     </div>
