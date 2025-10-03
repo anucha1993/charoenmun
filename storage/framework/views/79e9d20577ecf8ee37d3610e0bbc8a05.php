@@ -227,7 +227,7 @@
                                 <tbody class="fs-16">
                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td><?php echo e($item->id); ?></td>
+                                            <td><?php echo e(++$key); ?></td>
                                             <td><?php echo e($item->quantity); ?></td>
                                             <td><?php echo e($item->orderItem->product_unit); ?></td>
                                             <td><b><?php echo e($item->orderItem->product_name); ?></b>
@@ -303,7 +303,7 @@
                     <div class="row ">
                         <div class="col-sm-12">
                             <div class="clearfix">
-                                <span class="fs-16">เงื่อนไขการระบสินค้า :</span><br>
+                                <span class="fs-16">เงื่อนไขการรับสินค้า :</span><br>
                                 <span class="fs-16">กรุณาตรวจสอบความถูกต้องของสินค้าและเซ็นรับสินค้าในวันที่ได้รับ
                                     หากไม่มีการตรวจสอบหรือเซ็นรับสินค้า
                                     ทางบริษัทขอสงวนสิทธิ์ในการรับผิดชอบต่อความผิดพลาดทุกกรณี</span><br>

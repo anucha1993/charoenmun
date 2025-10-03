@@ -231,7 +231,7 @@
                                 <tbody class="fs-16">
                                     @foreach ($chunk as $key => $item)
                                         <tr>
-                                            <td>{{ $item->id}}</td>
+                                            <td>{{ ++$key}}</td>
                                             <td>{{ $item->quantity }}</td>
                                             <td>{{ $item->orderItem->product_unit }}</td>
                                             <td><b>{{ $item->orderItem->product_name }}</b>
@@ -305,7 +305,7 @@
                     <div class="row ">
                         <div class="col-sm-12">
                             <div class="clearfix">
-                                <span class="fs-16">เงื่อนไขการระบสินค้า :</span><br>
+                                <span class="fs-16">เงื่อนไขการรับสินค้า :</span><br>
                                 <span class="fs-16">กรุณาตรวจสอบความถูกต้องของสินค้าและเซ็นรับสินค้าในวันที่ได้รับ
                                     หากไม่มีการตรวจสอบหรือเซ็นรับสินค้า
                                     ทางบริษัทขอสงวนสิทธิ์ในการรับผิดชอบต่อความผิดพลาดทุกกรณี</span><br>
