@@ -235,8 +235,8 @@
                                             <td>{{ $item->quantity }}</td>
                                             <td>{{ $item->orderItem->product_unit ?? '' }}</td>
                                             <td><b>{{ $item->orderItem->product_name ?? '' }}</b>
-                                                @if(isset($item->orderItem->product_length))
-                                                    ({{ number_format($item->orderItem->product_length) . ' ' . ($item->productMeasure?->value ?? 'เมตร') }})
+                                                @if($item->orderItem->product_length)
+                                                    ({{ $item->orderItem->product_length . ' ' . ($item->orderItem->productMeasure?->value ?? 'เมตร') }})
                                                 @endif
                                                 @if(isset($item->orderItem->product) && $item->orderItem->product->productWireType?->value)
                                                     <br>{{ $item->orderItem->product->productWireType->value }}

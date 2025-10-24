@@ -227,12 +227,14 @@
                                 <tbody class="fs-16">
                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td><?php echo e(++$key); ?></td>
+                                            <td><?php echo e($key + 1); ?></td>
                                             <td><?php echo e($item->quantity); ?></td>
-                                            <td><?php echo e($item->orderItem->product_unit); ?></td>
-                                            <td><b><?php echo e($item->orderItem->product_name); ?></b>
-                                                (<?php echo e(number_format($item->orderItem->product_length) . ' ' . ($item->productMeasure?->value ?? 'เมตร')); ?>)
-                                                <!--[if BLOCK]><![endif]--><?php if($item->orderItem->product?->productWireType?->value): ?>
+                                            <td><?php echo e($item->orderItem->product_unit ?? ''); ?></td>
+                                            <td><b><?php echo e($item->orderItem->product_name ?? ''); ?></b>
+                                                <!--[if BLOCK]><![endif]--><?php if($item->orderItem->product_length): ?>
+                                                    (<?php echo e($item->orderItem->product_length . ' ' . ($item->orderItem->productMeasure?->value ?? 'เมตร')); ?>)
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                <!--[if BLOCK]><![endif]--><?php if(isset($item->orderItem->product) && $item->orderItem->product->productWireType?->value): ?>
                                                     <br><?php echo e($item->orderItem->product->productWireType->value); ?>
 
                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
