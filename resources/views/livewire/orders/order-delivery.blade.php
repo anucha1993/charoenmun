@@ -138,13 +138,13 @@
                                             <td class="align-top">{{ $i + 1 }}</td>
                                             <td style="min-width: 250px;">
                                                 <select class="form-select form-select-sm"
-                                                    wire:model.live="items.{{ $i }}.product_id">
+                                                    wire:model.live="items.{{ $i }}.order_item_id">
                                                     <option value="">-- เลือกสินค้า --</option>
                                                     @foreach ($orderItems as $oi )
-                                                    @php $left = $stocksLeft[$oi->product_id] ?? 0; @endphp
-                                                    <option value="{{ $oi->product_id }}" @disabled($left === 0)>
+                                                    @php $left = $stocksLeft[$oi->id] ?? 0; @endphp
+                                                    <option value="{{ $oi->id }}" @disabled($left === 0)>
                                                         {{ $oi->product->product_name }}ขนาด{{ $oi->product->product_length}} เมตร
-                                                        ({{ $left }}) {{$oi->product_calculation}}
+                                                        (เหลือ: {{ $left }})
                                                     </option>
                                                     @endforeach
                                                 </select>

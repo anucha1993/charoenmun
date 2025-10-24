@@ -231,12 +231,14 @@
                                 <tbody class="fs-16">
                                     @foreach ($chunk as $key => $item)
                                         <tr>
-                                            <td>{{ ++$key}}</td>
+                                            <td>{{ $key + 1 }}</td>
                                             <td>{{ $item->quantity }}</td>
-                                            <td>{{ $item->orderItem->product_unit }}</td>
-                                            <td><b>{{ $item->orderItem->product_name }}</b>
-                                                ({{ number_format($item->orderItem->product_length) . ' ' . ($item->productMeasure?->value ?? 'เมตร') }})
-                                                @if($item->orderItem->product?->productWireType?->value)
+                                            <td>{{ $item->orderItem->product_unit ?? '' }}</td>
+                                            <td><b>{{ $item->orderItem->product_name ?? '' }}</b>
+                                                @if(isset($item->orderItem->product_length))
+                                                    ({{ number_format($item->orderItem->product_length) . ' ' . ($item->productMeasure?->value ?? 'เมตร') }})
+                                                @endif
+                                                @if(isset($item->orderItem->product) && $item->orderItem->product->productWireType?->value)
                                                     <br>{{ $item->orderItem->product->productWireType->value }}
                                                 @endif
                                                 @if($item->product_note)

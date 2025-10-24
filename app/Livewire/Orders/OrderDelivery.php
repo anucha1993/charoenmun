@@ -55,9 +55,9 @@ class OrderDelivery extends Component
         $this->customer_id = $this->orderModel->customer_id;
         $this->customerDelivery = $this->customer_id ? deliveryAddressModel::where('customer_id', $this->customer_id)->get() : collect();
 
-        // Initialize base stocks from the order items
+        // Initialize base stocks from the order items (ใช้ order_item_id เป็น key)
         foreach ($this->orderItems as $oi) {
-            $this->stocks[$oi->product_id] = $oi->quantity;
+            $this->stocks[$oi->id] = $oi->quantity; // ใช้ order_item_id แทน product_id
         }
 
         if ($delivery && $delivery->id !== null) {
@@ -168,6 +168,7 @@ class OrderDelivery extends Component
     public function addEmptyItem(): void
     {
         $this->items[] = [
+            'order_item_id' => null,
             'product_id' => null,
             'product_name' => '',
             'product_type' => '',
@@ -189,13 +190,14 @@ class OrderDelivery extends Component
         $this->items = []; // Clear existing items
 
         foreach ($this->orderItems as $oi) {
-            $baseStock = $this->stocks[$oi->product_id] ?? 0;
-            $delivered = $this->getDeliveredByOthers($oi->product_id);
+            $baseStock = $this->stocks[$oi->id] ?? 0; // ใช้ order_item_id
+            $delivered = $this->getDeliveredByOthers($oi->id); // ส่ง order_item_id
             $availableStock = max(0, $baseStock - $delivered);
             
             // เพิ่มรายการเฉพาะสินค้าที่มี stock เหลือ
             if ($availableStock > 0) {
                 $this->items[] = [
+                    'order_item_id' => $oi->id, // เพิ่ม order_item_id
                     'product_id' => $oi->product_id,
                     'product_name' => $oi->product_name,
                     'product_type' => $oi->product_type,
@@ -223,11 +225,12 @@ class OrderDelivery extends Component
         [$index, $field] = explode('.', str_replace('items.', '', $key), 2);
         $index = (int) $index;
 
-        if ($field === 'product_id') {
-            $productId = (int) $value;
+        if ($field === 'order_item_id') {
+            $orderItemId = (int) $value;
 
-            if (!$productId) {
+            if (!$orderItemId) {
                 $this->items[$index] = [
+                    'order_item_id' => null,
                     'product_id' => null,
                     'product_name' => '',
                     'product_type' => '',
@@ -251,9 +254,10 @@ class OrderDelivery extends Component
                     continue;
                 }
 
-                if (($row['product_id'] ?? null) === $productId) {
-                    // ถ้าเลือกสินค้าที่มีอยู่แล้ว ให้แจ้งเตือนและไม่เปลี่ยนแปลง
-                    $this->dispatch('error', message: 'สินค้านี้มีในรายการแล้ว กรุณาแก้ไขจำนวนในรายการเดิม');
+                if (($row['order_item_id'] ?? null) === $orderItemId) {
+                    // ถ้าเลือก order item ที่มีอยู่แล้ว ให้แจ้งเตือนและไม่เปลี่ยนแปลง
+                    $this->dispatch('error', message: 'รายการนี้มีในรายการแล้ว กรุณาแก้ไขจำนวนในรายการเดิม');
+                    $this->items[$index]['order_item_id'] = null;
                     $this->items[$index]['product_id'] = null;
                     $this->recalculateTotals();
                     $this->refreshStocksLeft();
@@ -261,25 +265,27 @@ class OrderDelivery extends Component
                 }
             }
 
-            $oi = $this->orderItems->firstWhere('product_id', $productId);
+            $oi = $this->orderItems->firstWhere('id', $orderItemId);
             if (!$oi) {
-                $this->dispatch('error', message: 'ไม่พบสินค้าในรายการออเดอร์');
+                $this->dispatch('error', message: 'ไม่พบรายการในออเดอร์');
+                $this->items[$index]['order_item_id'] = null;
                 $this->items[$index]['product_id'] = null;
                 $this->recalculateTotals();
                 $this->refreshStocksLeft();
                 return;
             }
 
-            $baseStock = $this->stocks[$productId] ?? 0;
-            $delivered = $this->getDeliveredByOthers($productId);
+            $baseStock = $this->stocks[$orderItemId] ?? 0;
+            $delivered = $this->getDeliveredByOthers($orderItemId);
 
-            $usedInForm = collect($this->items)->filter(fn($r, $j) => $j !== $index && ($r['product_id'] ?? null) === $productId)->sum('quantity');
+            $usedInForm = collect($this->items)->filter(fn($r, $j) => $j !== $index && ($r['order_item_id'] ?? null) === $orderItemId)->sum('quantity');
 
             $maxAllowed = max(0, $baseStock - $delivered - $usedInForm);
 
             if ($maxAllowed <= 0) {
                 $actualStockLeft = max(0, $baseStock - $delivered);
                 $this->dispatch('qty-over', max: $actualStockLeft, name: $oi->product_name);
+                $this->items[$index]['order_item_id'] = null;
                 $this->items[$index]['product_id'] = null;
                 $this->recalculateTotals();
                 $this->refreshStocksLeft();
@@ -287,7 +293,8 @@ class OrderDelivery extends Component
             }
 
             $this->items[$index] = [
-                'product_id' => $productId,
+                'order_item_id' => $orderItemId,
+                'product_id' => $oi->product_id,
                 'product_name' => $oi->product_name,
                 'product_detail' => $oi->product_detail,
                 'product_note' => $oi->product_note ?? '', // Create mode: ดึงจาก order_items
@@ -307,14 +314,14 @@ class OrderDelivery extends Component
         }
 
         if ($field === 'quantity') {
-            $productId = $this->items[$index]['product_id'] ?? null;
-            if ($productId) {
+            $orderItemId = $this->items[$index]['order_item_id'] ?? null;
+            if ($orderItemId) {
                 $qty = (int) $value;
 
-                $baseStock = $this->stocks[$productId] ?? 0;
-                $delivered = $this->getDeliveredByOthers($productId);
+                $baseStock = $this->stocks[$orderItemId] ?? 0;
+                $delivered = $this->getDeliveredByOthers($orderItemId);
 
-                $usedInForm = collect($this->items)->filter(fn($r, $j) => $j !== $index && ($r['product_id'] ?? null) === $productId)->sum('quantity');
+                $usedInForm = collect($this->items)->filter(fn($r, $j) => $j !== $index && ($r['order_item_id'] ?? null) === $orderItemId)->sum('quantity');
 
                 $maxAllowed = max(0, $baseStock - $delivered - $usedInForm);
 
@@ -341,9 +348,12 @@ class OrderDelivery extends Component
         $this->refreshStocksLeft();
     }
 
-    private function getDeliveredByOthers(int $productId): int
+    private function getDeliveredByOthers(int $orderItemId): int
     {
-        $query = OrderDeliveryItems::query()->join('order_items', 'order_delivery_items.order_item_id', '=', 'order_items.id')->join('order_deliveries', 'order_delivery_items.order_delivery_id', '=', 'order_deliveries.id')->where('order_deliveries.order_id', $this->order_id)->where('order_items.product_id', $productId);
+        $query = OrderDeliveryItems::query()
+            ->join('order_deliveries', 'order_delivery_items.order_delivery_id', '=', 'order_deliveries.id')
+            ->where('order_deliveries.order_id', $this->order_id)
+            ->where('order_delivery_items.order_item_id', $orderItemId);
 
         if ($this->editing && $this->deliveryModel) {
             $query->where('order_delivery_items.order_delivery_id', '!=', $this->deliveryModel->id);
@@ -379,26 +389,26 @@ class OrderDelivery extends Component
 
         // STEP 2: หักยอดที่จัดส่งไปแล้วในบิลย่อยอื่น ๆ ของใบสั่งซื้อนี้
         // โดยใช้ helper function getDeliveredByOthers
-        foreach ($left as $pid => $qty) {
-            $left[$pid] = max(0, $qty - $this->getDeliveredByOthers($pid));
+        foreach ($left as $orderItemId => $qty) {
+            $left[$orderItemId] = max(0, $qty - $this->getDeliveredByOthers($orderItemId));
         }
 
         // STEP 3: หักยอดที่กรอกในฟอร์มปัจจุบัน ($this->items)
         foreach ($this->items as $row) {
-            $pid = $row['product_id'] ?? null;
-            if (!is_null($pid) && isset($left[$pid])) {
+            $orderItemId = $row['order_item_id'] ?? null;
+            if (!is_null($orderItemId) && isset($left[$orderItemId])) {
                 $qtyInForm = (int) ($row['quantity'] ?? 0);
-                $left[$pid] = max(0, $left[$pid] - $qtyInForm);
-            } elseif (!is_null($pid) && !isset($left[$pid])) {
-                // กรณี product_id มี แต่ไม่มีใน base stocks (อาจเป็นไปไม่ได้ถ้า orderItems ถูกโหลดถูกต้อง)
-                $left[$pid] = 0;
+                $left[$orderItemId] = max(0, $left[$orderItemId] - $qtyInForm);
+            } elseif (!is_null($orderItemId) && !isset($left[$orderItemId])) {
+                // กรณี order_item_id มี แต่ไม่มีใน base stocks 
+                $left[$orderItemId] = 0;
             }
         }
 
-        // STEP 4: ตรวจสอบให้แน่ใจว่า product_id ทุกตัวใน orderItems มีใน stocksLeft ด้วย
+        // STEP 4: ตรวจสอบให้แน่ใจว่า order_item_id ทุกตัวใน orderItems มีใน stocksLeft ด้วย
         foreach ($this->orderItems as $oi) {
-            if (!isset($left[$oi->product_id])) {
-                $left[$oi->product_id] = 0;
+            if (!isset($left[$oi->id])) {
+                $left[$oi->id] = 0;
             }
         }
 
@@ -475,9 +485,9 @@ class OrderDelivery extends Component
     private function mapItemsForInsert(): array
     {
         return collect($this->items)
-            ->filter(fn($row) => ($row['product_id'] ?? null) !== null && ($row['quantity'] ?? 0) > 0)
+            ->filter(fn($row) => ($row['order_item_id'] ?? null) !== null && ($row['quantity'] ?? 0) > 0)
             ->map(function ($row) {
-                $orderItem = $this->orderItems->firstWhere('product_id', $row['product_id']);
+                $orderItem = $this->orderItems->firstWhere('id', $row['order_item_id']);
 
                 return [
                     'order_item_id' => $orderItem->id ?? null,

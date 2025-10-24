@@ -155,14 +155,13 @@
                                             <td class="align-top"><?php echo e($i + 1); ?></td>
                                             <td style="min-width: 250px;">
                                                 <select class="form-select form-select-sm"
-                                                    wire:model.live="items.<?php echo e($i); ?>.product_id">
+                                                    wire:model.live="items.<?php echo e($i); ?>.order_item_id">
                                                     <option value="">-- เลือกสินค้า --</option>
                                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $orderItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $oi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                    <?php $left = $stocksLeft[$oi->product_id] ?? 0; ?>
-                                                    <option value="<?php echo e($oi->product_id); ?>" <?php if($left === 0): echo 'disabled'; endif; ?>>
+                                                    <?php $left = $stocksLeft[$oi->id] ?? 0; ?>
+                                                    <option value="<?php echo e($oi->id); ?>" <?php if($left === 0): echo 'disabled'; endif; ?>>
                                                         <?php echo e($oi->product->product_name); ?>ขนาด<?php echo e($oi->product->product_length); ?> เมตร
-                                                        (<?php echo e($left); ?>) <?php echo e($oi->product_calculation); ?>
-
+                                                        (เหลือ: <?php echo e($left); ?>)
                                                     </option>
                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                                 </select>
