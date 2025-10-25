@@ -3,6 +3,7 @@
 namespace App\Livewire\Orders;
 
 use App\Models\DeliveryPrint;
+use App\Services\DeliveryPdfService;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -81,13 +82,30 @@ class OrderDeliveryPrint extends Component
         $this->showPrintModal = false;
         $this->errorMessage = '';
         
-        // ส่งคำสั่ง JavaScript เพื่อพิมพ์เอกสาร
-        $this->dispatch('printDelivery');
+        // สร้าง PDF และดาวน์โหลด
+        $this->generateAndDownloadPDF();
     }
 
-    #[Layout('layouts.horizontal-print')]
+    public function generateAndDownloadPDF()
+    {
+        try {
+            // เปลี่ยนเป็นการ preview PDF ในหน้าต่างใหม่
+            $this->dispatch('previewPdfInNewTab', url: route('deliveries.pdf', ['delivery' => $this->delivery->id, 'preview' => 1]));
+            
+        } catch (\Exception $e) {
+            $this->errorMessage = 'เกิดข้อผิดพลาดในการสร้าง PDF: ' . $e->getMessage();
+            $this->showPrintModal = true;
+        }
+    }
+
+    public function downloadPDF()
+    {
+        return redirect()->route('deliveries.pdf', $this->delivery->id);
+    }
+
+    #[Layout('layouts.horizontal')]
     public function render()
     {
-        return view('livewire.orders.order-delivery-print', ['title' => 'Print Order Delivery']);
+        return view('livewire.orders.order-delivery-print-pdf', ['title' => 'PDF Order Delivery']);
     }
 }

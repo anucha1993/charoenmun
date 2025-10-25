@@ -2,6 +2,7 @@
 
 use App\Livewire\Dashboards;
 use App\Livewire\Orders\OrderForm;
+use Illuminate\Support\Facades\Log;
 
 // use App\Livewire\Customers\CustomerEdit;
 // use App\Livewire\Customers\CustomerIndex;
@@ -114,6 +115,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('orders/{order}/deliveries/create', OrderDelivery::class)->name('deliveries.create')->whereNumber('order');
     Route::get('orders/{order}/deliveries/{delivery}/edit', OrderDelivery::class)->name('deliveries.edit')->whereNumber('order')->whereNumber('delivery');
     Route::get('deliveries/{delivery}/print', OrderDeliveryPrint::class)->name('deliveries.printer');
+    Route::get('deliveries/{delivery}/pdf', [App\Http\Controllers\DeliveryPdfController::class, 'generatePdf'])->name('deliveries.pdf');
     
     // Delivery Calendar
     Route::get('/delivery-calendar', App\Livewire\Deliveries\DeliveryCalendar::class)->name('deliveries.calendar');
