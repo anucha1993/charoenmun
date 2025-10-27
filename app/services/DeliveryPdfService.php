@@ -348,7 +348,11 @@ class DeliveryPdfService
                         <td style="border: none; padding: 6px; text-align: center;">' . ($item->orderItem->product_unit ?? '') . '</td>
                         <td style="border: none; padding: 6px; text-align: left;">' . ($item->orderItem->product_name ?? '');
                         
-            if ($item->orderItem->product_length) {
+            // ตรวจสอบว่าเป็นสินค้าที่ต้องแสดงความยาวหรือไม่ (ไม่ใช่บริการ)
+            if ($item->orderItem->product_length && 
+                $item->orderItem->product_unit !== 'บริการ' && 
+                !str_contains(strtolower($item->orderItem->product_name ?? ''), 'บริการ') &&
+                !str_contains(strtolower($item->orderItem->product_name ?? ''), 'ค่าบริการ')) {
                 $html .= ' ' . $item->orderItem->product_length . ' ' . ($item->orderItem->productMeasure?->value ?? 'เมตร');
             }
             
