@@ -618,7 +618,7 @@
                             @if($this->isCreate) 
                                 <i class="ri-add-circle-line me-3"></i>สร้างใบเสนอราคา 
                             @else 
-                                <i class="ri-edit-line me-3"></i>แก้ไขใบเสนอราคา 
+                                <i class="ri-edit-line me-3"></i>แก้ไขใบเสนอราคา
                             @endif
                         </h1>
                         <p class="page-subtitle">จัดการข้อมูลใบเสนอราคา รวดเร็วและแม่นยำ</p>

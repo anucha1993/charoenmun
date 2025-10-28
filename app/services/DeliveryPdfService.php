@@ -301,7 +301,7 @@ class DeliveryPdfService
         $html .= '</div>
                     </td>
                     <td style="border: 1px solid #000; padding: 8px; text-align: left; width: 30%; vertical-align: top;">
-                        <div><b>วันที่จัดส่ง :</b> ' . date('d/m/Y', strtotime($this->delivery->quote_date)) . '</div>
+                        <div><b>วันที่จัดส่ง :</b> ' . date('d/m/Y', strtotime($this->delivery->order_delivery_date)) . '</div>
                         <div><b>เลขที่บิลหลัก :</b> ' . $this->delivery->order->order_number . '</div>
                         <div><b>เลขที่บิลย่อย :</b> ' . $this->delivery->order_delivery_number . '</div>
                         <div><b>สถานะ :</b> ' . ($isCompleteDelivery ? 'ส่งครบ' : 'ยังไม่ครบ') . '</div>

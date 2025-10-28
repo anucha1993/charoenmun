@@ -618,7 +618,7 @@
                             <!--[if BLOCK]><![endif]--><?php if($this->isCreate): ?> 
                                 <i class="ri-add-circle-line me-3"></i>สร้างใบเสนอราคา 
                             <?php else: ?> 
-                                <i class="ri-edit-line me-3"></i>แก้ไขใบเสนอราคา 
+                                <i class="ri-edit-line me-3"></i>แก้ไขใบเสนอราคา
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </h1>
                         <p class="page-subtitle">จัดการข้อมูลใบเสนอราคา รวดเร็วและแม่นยำ</p>

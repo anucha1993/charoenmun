@@ -216,8 +216,9 @@
                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <!--[if BLOCK]><![endif]--><?php if($item->product_unit === 'แผ่น'): ?>
                                             <?php
-                                                $width = $item->unit_price; // ที่เก็บในฐานข้อมูล
-                                                $widthInMeter = $width / 10; // → 0.035 เมตร
+                                                $width = $item->quantity; // ที่เก็บในฐานข้อมูล
+                                                // $widthInMeter = $width / 10; // → 0.035 เมตร
+                                                $widthInMeter = $width*$item->product_length*$item->product_calculation;
                                             ?>
                                             <tr>
                                                 <td class="text-center"><?php echo e($loopIndex++); ?></td>
@@ -229,7 +230,7 @@
 
                                                     <b><?php echo e($item->product_name); ?> </b>
                                                    
-                                                    (<?php echo e(number_format($widthInMeter) . '/ตรม.'); ?>)<br />
+                                                    (<?php echo e($widthInMeter . '/ตรม.'); ?><br />
                                                     <p><?php echo e('ความหนา:'.$item->product_calculation); ?><br /></p>
                                                      
                                                     <?php echo e($item->globalSetValue()?->value ?? ''); ?>
@@ -240,12 +241,14 @@
                                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                                                 </td>
-                                                <td class="text-center"><?php echo e(number_format($item->product_length)); ?>
+                                                <td class="text-center"><?php echo e($item->product_length); ?>
 
                                                     <?php echo e($item->productMeasure?->value ?? ''); ?></td>
-                                                <td class="text-center"><?php echo e(number_format(($widthInMeter*$item->product_calculation), 2)); ?>/<?php echo e($item->product_unit); ?>
+                                                <td class="text-center">
+                                                    <?php echo e(number_format(($item->unit_price*$item->product_length*$item->product_calculation), 2)); ?>/<?php echo e($item->product_unit); ?>
 
                                                 </td>
+
                                                 <td class="text-end"><?php echo e(number_format($item->total, 2)); ?></td>
                                             </tr>
                                         <?php else: ?>
@@ -269,7 +272,7 @@
                                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                                                 </td>
-                                                <td class="text-center"><?php echo e(number_format($item->product_length)); ?>
+                                                <td class="text-center"><?php echo e($item->product_length); ?>
 
                                                     <?php echo e($item->productMeasure?->value ?? ''); ?></td>
                                                 <td><?php echo e(number_format($item->unit_price * $item->product_length, 2)); ?>/ <?php echo e($item->product_unit); ?>

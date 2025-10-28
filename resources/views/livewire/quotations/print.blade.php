@@ -216,8 +216,9 @@
                                     @foreach ($chunk as $item)
                                         @if ($item->product_unit === 'แผ่น')
                                             @php
-                                                $width = $item->unit_price; // ที่เก็บในฐานข้อมูล
-                                                $widthInMeter = $width / 10; // → 0.035 เมตร
+                                                $width = $item->quantity; // ที่เก็บในฐานข้อมูล
+                                                // $widthInMeter = $width / 10; // → 0.035 เมตร
+                                                $widthInMeter = $width*$item->product_length*$item->product_calculation;
                                             @endphp
                                             <tr>
                                                 <td class="text-center">{{ $loopIndex++ }}</td>
@@ -229,7 +230,7 @@
 
                                                     <b>{{ $item->product_name }} </b>
                                                    
-                                                    ({{ number_format($widthInMeter) . '/ตรม.' }})<br />
+                                                    ({{ $widthInMeter . '/ตรม.' }}<br />
                                                     <p>{{ 'ความหนา:'.$item->product_calculation}}<br /></p>
                                                      
                                                     {{ $item->globalSetValue()?->value ?? '' }}
@@ -238,10 +239,12 @@
                                                     @endif
 
                                                 </td>
-                                                <td class="text-center">{{ number_format($item->product_length) }}
+                                                <td class="text-center">{{ $item->product_length }}
                                                     {{ $item->productMeasure?->value ?? '' }}</td>
-                                                <td class="text-center">{{ number_format(($widthInMeter*$item->product_calculation), 2) }}/{{ $item->product_unit }}
+                                                <td class="text-center">
+                                                    {{ number_format(($item->unit_price*$item->product_length*$item->product_calculation), 2) }}/{{ $item->product_unit }}
                                                 </td>
+
                                                 <td class="text-end">{{ number_format($item->total, 2) }}</td>
                                             </tr>
                                         @else
@@ -262,7 +265,7 @@
                                                     @endif
 
                                                 </td>
-                                                <td class="text-center">{{ number_format($item->product_length) }}
+                                                <td class="text-center">{{ $item->product_length }}
                                                     {{ $item->productMeasure?->value ?? '' }}</td>
                                                 <td>{{ number_format($item->unit_price * $item->product_length, 2) }}/ {{ $item->product_unit }}
                                                 </td>

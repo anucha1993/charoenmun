@@ -8,7 +8,7 @@ use Livewire\Attributes\Layout;
 use App\Models\Orders\OrderModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\services\OrderDeliveryService;
+use App\Services\OrderDeliveryService;
 use App\Models\customers\customerModel;
 use App\Models\Orders\OrderDeliveryItems;
 use App\Models\Orders\OrderDeliverysModel;

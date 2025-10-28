@@ -80,7 +80,7 @@
                                         <tr wire:key="row-<?php echo e($p->product_id); ?>">
                                             <td><?php echo e($products->firstItem() + $i); ?></td>
                                             <td><?php echo e($p->product_code); ?></td>
-                                            <td><?php echo e($p->product_name."(".$p->product_size.")"); ?></td>
+                                            <td><?php echo e($p->product_name."(".$p->product_size.")".' '.$p->productWireType?->value); ?></td>
                                             <td class="text-end"><?php echo e(number_format($p->product_weight).'.Kg/เมตร'); ?></td>
                                             <td class="text-end"><?php echo e(number_format($p->product_price, 2)); ?></td>
                                             <td><?php echo e($p->productType->value?? 'ไม่ระบุ'); ?></td>
