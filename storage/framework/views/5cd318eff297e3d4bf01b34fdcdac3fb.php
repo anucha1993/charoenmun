@@ -85,10 +85,10 @@
                                 <td><?php echo e($customer->customer_contract_name); ?></td>
                                 <td><?php echo e($customer->customer_phone); ?></td>
                                 <td>
-                                    <span class="badge bg-primary"><?php echo e($customer->type->value); ?></span>
+                                    <span class="badge bg-primary"><?php echo e($customer->type?->value ?? '-'); ?></span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-success"><?php echo e($customer->level->value); ?></span>
+                                    <span class="badge bg-success"><?php echo e($customer->level?->value ?? '-'); ?></span>
                                 </td>
                                 <td>
                                     <a href="<?php echo e(route('customers.edit', $customer->id)); ?>" class="btn btn-sm btn-info">

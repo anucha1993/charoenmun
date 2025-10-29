@@ -160,7 +160,7 @@
                                                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $orderItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $oi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <?php $left = $stocksLeft[$oi->id] ?? 0; ?>
                                                     <option value="<?php echo e($oi->id); ?>" <?php if($left === 0): echo 'disabled'; endif; ?>>
-                                                        <?php echo e($oi->product->product_name); ?>ขนาด<?php echo e($oi->product->product_length); ?> เมตร
+                                                        <?php echo e($oi->product->product_name); ?> ขนาด <?php echo e($oi->product_length); ?> เมตร
                                                         (เหลือ: <?php echo e($left); ?>)
                                                     </option>
                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->

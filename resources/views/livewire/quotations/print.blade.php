@@ -231,7 +231,7 @@
                                                     <b>{{ $item->product_name }} </b>
                                                    
                                                     ({{ $widthInMeter . '/ตรม.' }}<br />
-                                                    <p>{{ 'ความหนา:'.$item->product_calculation}}<br /></p>
+                                                    <p>{{ 'ความกว้าง:'.$item->product_calculation}}<br /></p>
                                                      
                                                     {{ $item->globalSetValue()?->value ?? '' }}
                                                     @if ($item->product_note)

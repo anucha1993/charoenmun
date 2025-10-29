@@ -50,6 +50,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/auth/logout-2');
+        return redirect()->route('login')->with('status', 'ออกจากระบบเรียบร้อยแล้ว');
     }
 }

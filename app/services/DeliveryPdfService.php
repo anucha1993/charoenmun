@@ -31,9 +31,9 @@ class DeliveryPdfService
             'margin_left' => 15,
             'margin_right' => 15,
             'margin_top' => 15,
-            'margin_bottom' => 20,
+            'margin_bottom' => 40,
             'margin_header' => 5,
-            'margin_footer' => 5,
+            'margin_footer' => 25,
             'default_font' => 'thsarabunnew',
             'fontDir' => [public_path('fonts')],
             'fontdata' => [
@@ -51,17 +51,23 @@ class DeliveryPdfService
         
         // ตั้งค่า Footer ให้อยู่ล่างสุดเสมอ (รวมหมายเหตุ)
         $footerHtml = '
-        <div style="font-size: 20px; margin-bottom: 30px;">
+        <div style="font-size: 20px; margin-top: 20px; padding-top: 10px;">
+            <span><b>หมายเหตุ :</b></span>
+            <span>' . ($this->delivery->order_delivery_note ?? '') . '</span>
+        </div>
+
+        <hr style="margin: 15px 0;">
+        <div style="font-size: 20px; margin-bottom: 0px; padding-top: 10px;">
             <span><b>หมายเหตุการรับสินค้า :</b></span>
             <span>กรุณาตรวจสอบความถูกต้องของสินค้าและเซ็นรับสินค้าในวันที่ได้รับ หากไม่มีการตรวจสอบหรือเซ็นรับสินค้า
                 ทางบริษัทขอสงวนสิทธิ์ในการรับผิดชอบต่อความผิดพลาดทุกกรณี</span>
         </div>
-        <table style="width: 100%; font-size: 16pt; border: none;">
+        <table style="width: 100%; font-size: 16pt; border: none; margin-top: 50px;">
             <tr>
-                <td style="width: 50%; vertical-align: top; padding-right: 20px; border: none; padding-top: 30px;">
+                <td style="width: 50%; vertical-align: top; padding-right: 20px; border: none; padding-top: 20px;">
                     <p><strong>ลงชื่อผู้รับสินค้า...................................................ผู้รับสินค้า</strong></p>
                 </td>
-                <td style="width: 50%; vertical-align: top; text-align: right; border: none; padding-top: 30px;">
+                <td style="width: 50%; vertical-align: top; text-align: right; border: none; padding-top: 20px;">
                     <p><strong>ลงชื่อผู้ส่งสินค้า...................................................ผู้ส่งสินค้า</strong></p>
                 </td>
             </tr>
@@ -422,13 +428,13 @@ class DeliveryPdfService
             </table>';
 
         // หมายเหตุ
-        $html .= '
-        <div style="font-size: 20px;">
-            <br>
-            <span><b>หมายเหตุ :</b></span>
-            <span>' . ($this->delivery->order_delivery_note ?? '') . '</span>
-        </div>
-        <hr>';
+        // $html .= '
+        // <div style="font-size: 20px;">
+        //     <br>
+        //     <span><b>หมายเหตุ :</b></span>
+        //     <span>' . ($this->delivery->order_delivery_note ?? '') . '</span>
+        // </div>
+        // <hr>';
 
         // Footer - ย้ายไปใช้ SetHTMLFooter แล้ว (รวมหมายเหตุ)
         $html .= '

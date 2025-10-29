@@ -143,7 +143,7 @@
                                                     @foreach ($orderItems as $oi )
                                                     @php $left = $stocksLeft[$oi->id] ?? 0; @endphp
                                                     <option value="{{ $oi->id }}" @disabled($left === 0)>
-                                                        {{ $oi->product->product_name }}ขนาด{{ $oi->product->product_length}} เมตร
+                                                        {{ $oi->product->product_name }} ขนาด {{ $oi->product_length }} เมตร
                                                         (เหลือ: {{ $left }})
                                                     </option>
                                                     @endforeach

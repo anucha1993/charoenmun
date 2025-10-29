@@ -96,6 +96,7 @@ class OrderDelivery extends Component
                 }
 
                 return [
+                    'order_item_id' => $di->order_item_id, // ✅ เพิ่ม order_item_id เพื่อให้ dropdown selected ถูกต้อง
                     'product_id' => $oi->product_id,
                     'product_name' => $oi->product_name,
                     'product_type' => $oi->product_type,
