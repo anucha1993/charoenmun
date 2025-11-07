@@ -15,6 +15,8 @@ class OrderIndex extends Component
     // Search and Filter properties
     public $search = '';
     public $status = '';
+    // Pagination page (required when using page in query string)
+    public $page = 1;
     
     // Protected query string parameters
     protected $queryString = [
