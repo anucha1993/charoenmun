@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Log;
 use App\Models\Orders\OrderModel;
+use App\Models\Orders\OrderPayment;
 use App\Models\Orders\OrderDeliverysModel;
 
 class ScanInvoice extends Component
@@ -27,7 +28,9 @@ class ScanInvoice extends Component
     public ?OrderDeliverysModel $currentDelivery = null;
     public ?OrderModel $order = null;
     public array $deliveredQtyMap = [];
+    public $scannedDeliveryPayments = [];
     public $todayApprovedDeliveries = [];
+    public $allPendingPayments = [];
     
     // Filter properties
     public $filterType = 'today'; // today, date-range, pending, all
@@ -49,6 +52,25 @@ class ScanInvoice extends Component
         $this->currentDelivery = null;
         $this->order = null;
         $this->deliveredQtyMap = [];
+        $this->scannedDeliveryPayments = [];
+        $this->loadStats(); // Refresh รายการวันนี้และ pending payments
+    }
+
+    /**
+     * แยกหมายเลขใบส่งของจาก QR Code ที่อาจมีรูปแบบต่างๆ
+     * รองรับทั้ง: "OR25110036-001" และ "Delivery ID: 131 - OR25110036-001"
+     */
+    public function extractDeliveryNumber($input)
+    {
+        $input = trim($input);
+        
+        // ถ้าเป็นรูปแบบ "Delivery ID: 131 - OR25110036-001"
+        if (preg_match('/Delivery ID:\s*\d+\s*-\s*(.+)/', $input, $matches)) {
+            return trim($matches[1]);
+        }
+        
+        // ถ้าเป็นรูปแบบ "OR25110036-001" หรือรูปแบบอื่นๆ
+        return $input;
     }
 
     public function mount()
@@ -69,14 +91,36 @@ class ScanInvoice extends Component
             return;
         }
 
+        // แยกหมายเลขใบส่งของจาก QR Code ที่อาจมีรูปแบบ "Delivery ID: 131 - OR25110036-001"
+        $deliveryNumber = $this->extractDeliveryNumber($this->scanInput);
+        
+        // Log สำหรับ debug - เพิ่มข้อมูลมากขึ้น
+        Log::info('QR Code Scan Debug:', [
+            'step' => 'input_received',
+            'original_input' => $this->scanInput,
+            'extracted_number' => $deliveryNumber,
+            'input_length' => strlen($this->scanInput),
+            'extracted_length' => strlen($deliveryNumber),
+            'has_special_chars' => preg_match('/[^\w\-]/', $deliveryNumber) ? 'yes' : 'no'
+        ]);
+
         $delivery = OrderDeliverysModel::with([
                 'order.customer',
                 'order.items',
                 'order.deliveryAddress',
                 'order.deliveries.deliveryItems'
             ])
-            ->where('order_delivery_number', $this->scanInput)
+            ->where('order_delivery_number', $deliveryNumber)
             ->first();
+            
+        // Log ผลการค้นหา
+        Log::info('QR Code Search Result:', [
+            'step' => 'database_search',
+            'search_term' => $deliveryNumber,
+            'found' => $delivery ? 'yes' : 'no',
+            'delivery_id' => $delivery ? $delivery->id : null,
+            'status' => $delivery ? $delivery->order_delivery_status : null
+        ]);
 
         if ($delivery) {
             // Mark as success
@@ -84,28 +128,19 @@ class ScanInvoice extends Component
             $delivery->order_delivery_status_date = now();
             $delivery->save();
 
-            $this->currentDelivery = $delivery;
-            $this->order = $delivery->order;
+            // โหลดสลิปรอยืนยันของ order นี้
+            $this->loadScannedDeliveryPayments($delivery->order_id);
+            
+            // Refresh stats และรายการวันนี้
+            $this->loadStats();
 
-            // Update deliveredQtyMap only if we have data
-            if ($this->order) {
-                $this->deliveredQtyMap = OrderDeliverysModel::where('order_id', $this->order->id)
-                    ->with('deliveryItems')
-                    ->get()
-                    ->flatMap(fn($delivery) => $delivery->deliveryItems)
-                    ->groupBy('product_id')
-                    ->map(fn($group) => $group->sum('quantity'))
-                    ->toArray();
-            }
-
-            $this->dispatch('notify', type: 'success', message: 'ตรวจสอบการจัดส่งสำเร็จ ✅');
+            $this->dispatch('notify', type: 'success', message: 'ยืนยันการจัดส่งสำเร็จ ✅');
         } else {
             $this->resetScanData();
             $this->dispatch('notify', type: 'error', message: 'ไม่พบบิลย่อยนี้ ❌');
         }
 
         $this->scanInput = '';
-        $this->loadStats();
     }
 
     public function setFilter($type)
@@ -164,19 +199,114 @@ class ScanInvoice extends Component
 
     public function cancelSuccess($deliveryId)
     {
+        // ตรวจสอบสิทธิ์ในการยกเลิกการยืนยันการจัดส่ง
+        if (!auth()->user()->canConfirmDelivery()) {
+            session()->flash('error', 'คุณไม่มีสิทธิ์ในการยกเลิกการยืนยันการจัดส่ง');
+            $this->dispatch('notify', type: 'error', message: 'คุณไม่มีสิทธิ์ในการยกเลิกการยืนยันการจัดส่ง');
+            return;
+        }
+
         $delivery = OrderDeliverysModel::find($deliveryId);
         if ($delivery) {
             $delivery->order_delivery_status = 'pending';
             $delivery->order_delivery_status_date = null;
             $delivery->save();
             $this->loadStats();
-            $this->dispatch('notify', type: 'success', message: 'ยกเลิกการตรวจสอบสำเร็จ');
+            
+            // ถ้ายกเลิกบิลที่กำลังดูอยู่ ให้ clear ข้อมูล payments ด้วย
+            if ($this->currentDelivery && $this->currentDelivery->id === $deliveryId) {
+                $this->resetScanData();
+            }
+            $this->dispatch('notify', type: 'success', message: 'ยกเลิกการยืนยันสำเร็จ');
 
             // ถ้ายกเลิกบิลที่กำลังดูอยู่ ให้ clear current delivery
             if ($this->currentDelivery && $this->currentDelivery->id === $deliveryId) {
                 $this->resetScanData();
             }
         }
+    }
+
+    public function confirmPayment($paymentId)
+    {
+        // ตรวจสอบสิทธิ์ในการอนุมัติการชำระเงิน
+        if (!auth()->user()->canApprovePayment()) {
+            session()->flash('error', 'คุณไม่มีสิทธิ์ในการอนุมัติการชำระเงิน');
+            $this->dispatch('notify', type: 'error', message: 'คุณไม่มีสิทธิ์ในการอนุมัติการชำระเงิน');
+            return;
+        }
+
+        $payment = OrderPayment::find($paymentId);
+        if ($payment) {
+            $payment->status = 'ชำระเงินแล้ว';
+            $payment->save();
+            
+            // อัปเดตสถานะการชำระเงินของออเดอร์
+            $order = $payment->order;
+            $order->updatePaymentStatus();
+            
+            // Refresh payments list
+            $this->refreshPayments();
+            
+            session()->flash('success', 'ยืนยันสลิปเรียบร้อยแล้ว ✅');
+            $this->dispatch('notify', type: 'success', message: 'ยืนยันสลิปเรียบร้อยแล้ว ✅');
+        }
+    }
+
+    public function rejectWithReason($paymentId, $reason)
+    {
+        // ตรวจสอบสิทธิ์ในการปฏิเสธการชำระเงิน
+        if (!auth()->user()->canApprovePayment()) {
+            session()->flash('error', 'คุณไม่มีสิทธิ์ในการปฏิเสธการชำระเงิน');
+            $this->dispatch('notify', type: 'error', message: 'คุณไม่มีสิทธิ์ในการปฏิเสธการชำระเงิน');
+            return;
+        }
+
+        $payment = OrderPayment::find($paymentId);
+        if ($payment && trim($reason) !== '') {
+            $payment->status = 'ปฏิเสธ';
+            $payment->reject_reason = $reason;
+            $payment->save();
+            
+            // Refresh payments list
+            $this->refreshPayments();
+            
+            session()->flash('error', 'ปฏิเสธการชำระเงินเรียบร้อย ❌');
+            $this->dispatch('notify', type: 'error', message: 'ปฏิเสธการชำระเงินเรียบร้อย ❌');
+        } else {
+            session()->flash('error', 'กรุณากรอกเหตุผลในการปฏิเสธ');
+        }
+    }
+
+    private function loadScannedDeliveryPayments($orderId)
+    {
+        $this->scannedDeliveryPayments = OrderPayment::with('order')
+            ->where('order_id', $orderId)
+            ->where('status', 'รอยืนยันยอด')
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    private function refreshPayments()
+    {
+        // Refresh payments เฉพาะถ้ายังมี payments อยู่
+        if (!empty($this->scannedDeliveryPayments)) {
+            $firstPayment = collect($this->scannedDeliveryPayments)->first();
+            if ($firstPayment && $firstPayment['order_id']) {
+                $this->loadScannedDeliveryPayments($firstPayment['order_id']);
+            }
+        }
+        
+        // Refresh all pending payments ด้วย
+        $this->loadAllPendingPayments();
+    }
+
+    private function loadAllPendingPayments()
+    {
+        $this->allPendingPayments = OrderPayment::with(['order.customer'])
+            ->where('status', 'รอยืนยันยอด')
+            ->latest('created_at')
+            ->take(10) // จำกัดแค่ 10 รายการล่าสุด
+            ->get();
     }
 
     private function loadStats()
@@ -187,6 +317,9 @@ class ScanInvoice extends Component
             ->where('order_delivery_status', 'success')
             ->latest('order_delivery_status_date')
             ->get();
+
+        // Load all pending payments (ทุกสลิปที่รอยืนยัน)
+        $this->loadAllPendingPayments();
 
         // Today's stats
         $this->stats['today'] = [
@@ -256,10 +389,21 @@ class ScanInvoice extends Component
         // กรองตามสถานะ
         if ($this->deliveryStatus !== '') {
             $query->where('order_delivery_status', $this->deliveryStatus);
+        } else {
+            // ถ้าไม่ได้กรองสถานะ ให้แยกรายการที่ยืนยันแล้ววันนี้ออก
+            if ($this->filterType === 'today') {
+                $query->where(function($q) {
+                    $q->where('order_delivery_status', '!=', 'success')
+                      ->orWhere(function($subQ) {
+                          $subQ->where('order_delivery_status', 'success')
+                               ->whereDate('order_delivery_status_date', '!=', today());
+                      });
+                });
+            }
         }
 
         // Debug: แสดง SQL query
-        \Log::info('Delivery Query:', [
+        Log::info('Delivery Query:', [
             'sql' => $query->toSql(),
             'bindings' => $query->getBindings(),
             'filter_type' => $this->filterType,

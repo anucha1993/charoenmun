@@ -50,7 +50,7 @@
                         <div class="dropdown-menu" aria-labelledby="topnav-layouts">
                             <a href="<?php echo e(route('products.index')); ?>" class="dropdown-item">สิ้นค้าทั้งหมด</a>
                             <a href="<?php echo e(route('global-sets.index')); ?>" class="dropdown-item">GlobalSets</a>
-                            <?php if(auth()->user()->isAdmin()): ?>
+                            <?php if(auth()->user()->isAdmin() || auth()->user()->isSuperAdmin()): ?>
                                 <a href="<?php echo e(route('users.index')); ?>" class="dropdown-item">จัดการผู้ใช้งาน</a>
                             <?php endif; ?>
                         </div>

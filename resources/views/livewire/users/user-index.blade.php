@@ -38,8 +38,10 @@
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>
-                                            @if($user->type === 'admin')
-                                                <span class="badge bg-primary">ผู้ดูแลระบบ</span>
+                                            @if($user->type === 'SA')
+                                                <span class="badge bg-success">ผู้ดูแลระบบ</span>
+                                            @elseif($user->type === 'admin')
+                                                <span class="badge bg-primary">แอดมิน</span>
                                             @else
                                                 <span class="badge bg-info">สมาชิก</span>
                                             @endif

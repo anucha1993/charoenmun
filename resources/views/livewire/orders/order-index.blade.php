@@ -400,19 +400,27 @@
                         <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 8px; display: block;">
                             <i class="ri-search-line me-1"></i>ค้นหา
                         </label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            placeholder="ค้นหาเลขที่ออเดอร์, ชื่อลูกค้า, เบอร์โทร..."
-                            wire:model.debounce.500ms="search"
-                            style="padding: 12px 16px; font-size: 14px;"
-                        >
+                        <div class="position-relative">
+                            <input
+                                type="text"
+                                class="form-control"
+                                placeholder="ค้นหาเลขที่ออเดอร์, ชื่อลูกค้า, เบอร์โทร, ที่อยู่..."
+                                wire:model.live.debounce.500ms="search"
+                                value="{{ $search }}"
+                                style="padding: 12px 16px; font-size: 14px;"
+                            >
+                            <div wire:loading wire:target="search" class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%);">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="filter-col" style="flex: 0 0 200px;">
                         <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 8px; display: block;">
                             <i class="ri-filter-line me-1"></i>สถานะ
                         </label>
-                        <select class="form-select" wire:model="status" style="padding: 12px 16px; font-size: 14px;">
+                        <select class="form-select" wire:model.live="status" style="padding: 12px 16px; font-size: 14px;">
                             <option value="">ทั้งหมด</option>
                             <option value="pending">🕐 รอดำเนินการ</option>
                             <option value="success">✅ สำเร็จ</option>
@@ -423,9 +431,16 @@
                         <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 8px; display: block;">
                             &nbsp;
                         </label>
-                        <button class="btn btn-primary" style="width: 100%; justify-content: center;" wire:click="refreshData">
-                            <i class="ri-refresh-line me-1"></i>รีเฟรช
-                        </button>
+                        <div class="d-flex gap-2">
+                            @if($search || $status)
+                            <button class="btn" style="background: #ef4444; color: white; padding: 12px;" wire:click="clearFilters" title="ล้างการค้นหา">
+                                <i class="ri-close-line"></i>
+                            </button>
+                            @endif
+                            <button class="btn btn-primary" style="flex: 1; justify-content: center;" wire:click="refreshData">
+                                <i class="ri-refresh-line me-1"></i>รีเฟรช
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -433,7 +448,25 @@
             {{-- Data Table --}}
             <div class="data-table">
                 <div class="table-header">
-                    <h2 class="table-title">รายการคำสั่งซื้อ</h2>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="table-title">รายการคำสั่งซื้อ</h2>
+                        @if($search || $status)
+                        <div class="text-muted" style="font-size: 14px;">
+                            @if($search)
+                                ค้นหา: "<strong>{{ $search }}</strong>"
+                            @endif
+                            @if($status)
+                                | สถานะ: <strong>
+                                    @if($status === 'pending') รอดำเนินการ
+                                    @elseif($status === 'success') สำเร็จ
+                                    @elseif($status === 'cancel') ยกเลิก
+                                    @endif
+                                </strong>
+                            @endif
+                            | พบ {{ $orders->total() }} รายการ
+                        </div>
+                        @endif
+                    </div>
                 </div>
                 <table class="clean-table">
                     <thead>
@@ -512,8 +545,16 @@
                                 <td colspan="8">
                                     <div class="empty-state">
                                         <i class="ri-file-search-line"></i>
-                                        <h6>ไม่พบข้อมูลคำสั่งซื้อ</h6>
-                                        <p>ลองค้นหาด้วยคำอื่น หรือสร้างคำสั่งซื้อใหม่</p>
+                                        @if($search || $status)
+                                            <h6>ไม่พบผลการค้นหา</h6>
+                                            <p>ไม่พบคำสั่งซื้อที่ตรงกับเงื่อนไขการค้นหา</p>
+                                            <button class="btn btn-primary mt-2" wire:click="clearFilters">
+                                                <i class="ri-refresh-line me-1"></i>ล้างการค้นหา
+                                            </button>
+                                        @else
+                                            <h6>ไม่พบข้อมูลคำสั่งซื้อ</h6>
+                                            <p>ยังไม่มีคำสั่งซื้อในระบบ</p>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

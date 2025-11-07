@@ -48,4 +48,32 @@ class User extends Authenticatable
     {
         return $this->type === 'admin';
     }
+
+    public function isSuperAdmin()
+    {
+        return $this->type === 'SA';
+    }
+
+    public function isMember()
+    {
+        return $this->type === 'member';
+    }
+
+    // ตรวจสอบสิทธิ์ในการอนุมัติการชำระเงิน
+    public function canApprovePayment()
+    {
+        return $this->type === 'SA';
+    }
+
+    // ตรวจสอบสิทธิ์ในการยืนยันการจัดส่ง  
+    public function canConfirmDelivery()
+    {
+        return $this->type === 'SA';
+    }
+
+    // ตรวจสอบว่าเป็น Admin หรือ SA
+    public function hasAdminAccess()
+    {
+        return in_array($this->type, ['admin', 'SA']);
+    }
 }

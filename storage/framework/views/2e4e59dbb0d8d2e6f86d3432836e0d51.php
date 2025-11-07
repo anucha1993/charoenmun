@@ -1,4 +1,7 @@
 <div>
+
+
+    
     <br>
     <div class="row">
         <div class="col-12">
@@ -46,7 +49,8 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             <label class="form-label">ประเภทผู้ใช้ <span class="text-danger">*</span></label>
                             <select class="form-select" wire:model.live="state.type" required>
                                 <option value="">เลือกประเภท</option>
-                                <option value="admin">ผู้ดูแลระบบ</option>
+                                <option value="SA">ผู้ดูแลระบบ</option>
+                                <option value="admin">แอดมิน</option>
                                 <option value="member">สมาชิก</option>
                             </select>
                             <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['state.type'];
@@ -59,6 +63,7 @@ endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
 
+                        
                         <!--[if BLOCK]><![endif]--><?php if($editMode): ?>
                         <div class="mb-3">
                             <div class="form-check">

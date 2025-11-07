@@ -61,6 +61,10 @@
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                     </div>
                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+
+
+
                 </div>
             </div>
         </div>
@@ -69,45 +73,102 @@
         <div class="col-md-9">
             <!-- Stats -->
             <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="card border-0 bg-success bg-opacity-10">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="text-success mb-2">📅 รายการวันนี้</h6>
-                                    <h4 class="mb-0"><?php echo e(number_format($stats['today']['count'])); ?> รายการ</h4>
-                                    <small class="text-success"><?php echo e(number_format($stats['today']['amount'], 2)); ?> บาท</small>
+                <!--[if BLOCK]><![endif]--><?php if($currentDelivery && $scannedDeliveryPayments && count($scannedDeliveryPayments) > 0): ?>
+                    
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-success bg-opacity-10">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-success mb-2">📅 รายการวันนี้</h6>
+                                        <h4 class="mb-0"><?php echo e(number_format($stats['today']['count'])); ?> รายการ</h4>
+                                        <small class="text-success"><?php echo e(number_format($stats['today']['amount'], 2)); ?> บาท</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-0 bg-warning bg-opacity-10">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="text-warning mb-2">⚠️ ค้างตรวจสอบ</h6>
-                                    <h4 class="mb-0"><?php echo e(number_format($stats['pending']['count'])); ?> รายการ</h4>
-                                    <small class="text-warning"><?php echo e(number_format($stats['pending']['amount'], 2)); ?> บาท</small>
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-warning bg-opacity-10">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-warning mb-2">⚠️ ค้างตรวจสอบ</h6>
+                                        <h4 class="mb-0"><?php echo e(number_format($stats['pending']['count'])); ?> รายการ</h4>
+                                        <small class="text-warning"><?php echo e(number_format($stats['pending']['amount'], 2)); ?> บาท</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-0 bg-primary bg-opacity-10">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="text-primary mb-2">✅ ตรวจสอบแล้ว</h6>
-                                    <h4 class="mb-0"><?php echo e(number_format($stats['success']['count'])); ?> รายการ</h4>
-                                    <small class="text-primary"><?php echo e(number_format($stats['success']['amount'], 2)); ?> บาท</small>
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-primary bg-opacity-10">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-primary mb-2">✅ ตรวจสอบแล้ว</h6>
+                                        <h4 class="mb-0"><?php echo e(number_format($stats['success']['count'])); ?> รายการ</h4>
+                                        <small class="text-primary"><?php echo e(number_format($stats['success']['amount'], 2)); ?> บาท</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-info bg-opacity-10">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-info mb-2">💰 สลิปรอยืนยัน</h6>
+                                        <h4 class="mb-0"><?php echo e(number_format(collect($scannedDeliveryPayments)->count())); ?> สลิป</h4>
+                                        <small class="text-info"><?php echo e(number_format(collect($scannedDeliveryPayments)->sum('amount'), 2)); ?> บาท</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-success bg-opacity-10">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-success mb-2">� รายการวันนี้</h6>
+                                        <h4 class="mb-0"><?php echo e(number_format($stats['today']['count'])); ?> รายการ</h4>
+                                        <small class="text-success"><?php echo e(number_format($stats['today']['amount'], 2)); ?> บาท</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-warning bg-opacity-10">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-warning mb-2">⚠️ ค้างตรวจสอบ</h6>
+                                        <h4 class="mb-0"><?php echo e(number_format($stats['pending']['count'])); ?> รายการ</h4>
+                                        <small class="text-warning"><?php echo e(number_format($stats['pending']['amount'], 2)); ?> บาท</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-primary bg-opacity-10">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-primary mb-2">✅ ตรวจสอบแล้ว</h6>
+                                        <h4 class="mb-0"><?php echo e(number_format($stats['success']['count'])); ?> รายการ</h4>
+                                        <small class="text-primary"><?php echo e(number_format($stats['success']['amount'], 2)); ?> บาท</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </div>
 
             <!-- Monthly/Yearly Stats -->
@@ -143,107 +204,93 @@
             <!-- Scan Input -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="mb-3">🔍 สแกนบิล</h5>
+                    <h5 class="mb-3">🔍 สแกนเพื่อยืนยันการจัดส่ง</h5>
                     <input type="text" wire:model.live.debounce.500ms="scanInput" 
                         class="form-control form-control-lg" 
                         placeholder="ยิง QR Code หรือกรอกเลขบิล"
                         autofocus>
+                    <small class="text-muted mt-2 d-block">
+                        <i class="ri-information-line"></i> การสแกน QR Code = ยืนยันการจัดส่งอัตโนมัติ | การชำระเงินต้องยืนยันแยกต่างหาก
+                    </small>
                 </div>
             </div>
 
-            <!--[if BLOCK]><![endif]--><?php if($currentDelivery || $todayApprovedDeliveries->isNotEmpty()): ?>
-            <!-- Current Scanned Order and Today's Approved -->
-            <div class="card mb-4 border-success">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">✅ ตรวจสอบล่าสุด</h5>
+
+
+            <!-- Payment Approval Section (เฉพาะเมื่อมีการแจ้งชำระ) -->
+            <!--[if BLOCK]><![endif]--><?php if($scannedDeliveryPayments && count($scannedDeliveryPayments) > 0): ?>
+            <div class="card mb-4 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">💰 สลิปชำระเงินรอการยืนยัน</h5>
                 </div>
                 <div class="card-body">
-                    <!--[if BLOCK]><![endif]--><?php if($currentDelivery): ?>
-                    <div class="alert alert-success mb-4">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="d-flex flex-column">
-                                    <div class="mb-2">
-                                        <strong>เลขที่บิล:</strong> <?php echo e($currentDelivery->order_delivery_number); ?>
-
-                                        <small class="text-muted">(Order: <?php echo e($currentDelivery->order->order_number); ?>)</small>
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>ลูกค้า:</strong> <?php echo e($currentDelivery->order->customer->customer_name); ?>
-
-                                        <div class="small text-muted"><?php echo e($currentDelivery->order->customer->customer_address); ?></div>
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>วันที่จัดส่ง:</strong> <?php echo e($currentDelivery->order_delivery_date->format('d/m/Y')); ?>
-
-                                        <div class="small text-muted">
-                                            ตรวจสอบเมื่อ: <?php echo e($currentDelivery->order_delivery_status_date ? $currentDelivery->order_delivery_status_date->format('d/m/Y H:i') : '-'); ?>
-
+                    <div class="alert alert-warning">
+                        <small class="text-muted">⚠️ การชำระเงินต้องได้รับการยืนยันแยกต่างหาก กรุณาตรวจสอบสลิปและกดยืนยัน</small>
+                    </div>
+                    
+                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $scannedDeliveryPayments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="mb-3 p-3 border rounded bg-light">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <strong><?php echo e($payment->order->order_number); ?></strong><br>
+                                        <small class="text-muted"><?php echo e($payment->order->customer->customer_name); ?></small><br>
+                                        <div class="mt-1">
+                                            <span class="badge bg-success"><?php echo e(number_format($payment->amount, 2)); ?> บาท</span>
+                                            <small class="text-muted ms-2">โอนเมื่อ: <?php echo e(\Carbon\Carbon::parse($payment->transfer_at)->format('d/m/Y H:i')); ?></small>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex flex-column">
-                                    <!--[if BLOCK]><![endif]--><?php if($currentDelivery->selected_truck_type): ?>
-                                    <div class="mb-2">
-                                        <strong><i class="ri-truck-line me-1"></i>ประเภทรถ:</strong>
-                                        <div class="d-flex align-items-center mt-1">
-                                            <span class="me-2" style="font-size: 1.2em;">
-                                                <?php echo e(truck_type_icon($currentDelivery->selected_truck_type)); ?>
-
-                                            </span>
-                                            <div>
-                                                <?php echo truck_type_badge($currentDelivery->selected_truck_type); ?>
-
-                                                <!--[if BLOCK]><![endif]--><?php if($currentDelivery->total_weight_kg > 0): ?>
-                                                    <?php echo weight_status_badge($currentDelivery->total_weight_kg, $currentDelivery->selected_truck_type); ?>
-
-                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                            </div>
+                                        <!--[if BLOCK]><![endif]--><?php if($payment->sender_name): ?>
+                                        <div class="mt-1">
+                                            <small class="text-muted"><i class="ri-user-line"></i> ผู้โอน: <?php echo e($payment->sender_name); ?></small>
                                         </div>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                        <!--[if BLOCK]><![endif]--><?php if($payment->bank_name): ?>
+                                        <div class="mt-1">
+                                            <small class="text-muted"><i class="ri-bank-line"></i> บัญชี: <?php echo e($payment->bank_name); ?></small>
+                                        </div>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                        <!--[if BLOCK]><![endif]--><?php if($payment->remark): ?>
+                                        <div class="mt-1">
+                                            <small class="text-muted"><i class="ri-chat-3-line"></i> หมายเหตุ: <?php echo e($payment->remark); ?></small>
+                                        </div>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     </div>
-                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                    
-                                    <!--[if BLOCK]><![endif]--><?php if($currentDelivery->total_weight_kg > 0): ?>
-                                    <div class="mb-2">
-                                        <strong><i class="ri-weight-line me-1"></i>น้ำหนักรวม:</strong>
-                                        <div class="d-flex align-items-center mt-1">
-                                            <span class="fw-bold"><?php echo weight_display($currentDelivery->total_weight_kg); ?></span>
-                                            <!--[if BLOCK]><![endif]--><?php if($currentDelivery->isOverweight()): ?>
-                                                <small class="text-danger ms-2">
-                                                    <i class="ri-alert-line"></i> เกินขีดจำกัด
-                                                </small>
+                                    <div class="col-md-4 text-end">
+                                        <div class="btn-group">
+                                            <!--[if BLOCK]><![endif]--><?php if(auth()->user()->canApprovePayment()): ?>
+                                                <button class="btn btn-success btn-sm" wire:click="confirmPayment(<?php echo e($payment->id); ?>)" title="ยืนยัน">
+                                                    <i class="ri-check-line"></i> ยืนยัน
+                                                </button>
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                            <a href="<?php echo e(asset('storage/' . $payment->slip_path)); ?>" target="_blank" class="btn btn-primary btn-sm" title="ดูสลิป">
+                                                <i class="ri-eye-line"></i>
+                                            </a>
+                                            <!--[if BLOCK]><![endif]--><?php if(auth()->user()->canApprovePayment()): ?>
+                                                <button class="btn btn-danger btn-sm" onclick="confirmRejectSweetAlert('<?php echo e($payment->id); ?>')" title="ปฏิเสธ">
+                                                    <i class="ri-close-line"></i>
+                                                </button>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary">รอ SA อนุมัติ</span>
                                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </div>
-                                    </div>
-                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                    
-                                    <div class="mb-2">
-                                        <strong>จำนวนเงิน:</strong> <?php echo e(number_format($currentDelivery->order_delivery_grand_total, 2)); ?> บาท
-                                    </div>
-                                    
-                                    <div class="btn-group">
-                                        <button class="btn btn-warning" wire:click="cancelSuccess(<?php echo e($currentDelivery->id); ?>)">
-                                            <i class="ri-restart-line"></i> ยกเลิกการตรวจสอบ
-                                        </button>
-                                        <a href="<?php echo e(route('deliveries.printer', $currentDelivery->id)); ?>" class="btn btn-info">
-                                            <i class="ri-printer-line"></i> พิมพ์
-                                        </a>
-                                        <a href="<?php echo e(route('orders.show', $currentDelivery->order->id)); ?>" class="btn btn-secondary" target="_blank">
-                                            <i class="ri-external-link-line"></i> ดูรายละเอียด
-                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                </div>
+            </div>
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                    
-
-                    <!--[if BLOCK]><![endif]--><?php if($todayApprovedDeliveries->isNotEmpty()): ?>
-                    <h6 class="mb-3">รายการที่ตรวจสอบวันนี้:</h6>
+            <!-- Today's Approved Deliveries Section -->
+            <!--[if BLOCK]><![endif]--><?php if($todayApprovedDeliveries->isNotEmpty()): ?>
+            <div class="card mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">✅ รายการที่ยืนยันวันนี้ (<?php echo e($todayApprovedDeliveries->count()); ?> รายการ)</h5>
+                </div>
+                <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm table-striped table-hover mb-0" 
                                style="font-size:14px; background:white; border-radius:8px; overflow:hidden;">
@@ -255,6 +302,7 @@
                                     <th>ประเภทรถ</th>
                                     <th>น้ำหนักรวม</th>
                                     <th>จำนวนเงิน</th>
+                                    <th>การชำระเงิน</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -297,16 +345,53 @@
                                     </td>
                                     <td><?php echo e(number_format($delivery->order_delivery_grand_total, 2)); ?></td>
                                     <td>
+                                        <?php
+                                            // หาสลิปรอยืนยันของ order นี้
+                                            $orderPendingPayments = collect($allPendingPayments)->where('order_id', $delivery->order_id);
+                                        ?>
+                                        
+                                        <!--[if BLOCK]><![endif]--><?php if($orderPendingPayments->count() > 0): ?>
+                                            <div class="d-flex flex-column gap-1">
+                                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $orderPendingPayments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <span class="badge bg-warning text-dark"><?php echo e(number_format($payment->amount, 2)); ?> บาท</span>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <!--[if BLOCK]><![endif]--><?php if(auth()->user()->canApprovePayment()): ?>
+                                                            <button class="btn btn-success btn-sm" wire:click="confirmPayment(<?php echo e($payment->id); ?>)" title="ยืนยัน">
+                                                                <i class="ri-check-line"></i>
+                                                            </button>
+                                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                        <a href="<?php echo e(asset('storage/' . $payment->slip_path)); ?>" target="_blank" class="btn btn-primary btn-sm" title="ดูสลิป">
+                                                            <i class="ri-eye-line"></i>
+                                                        </a>
+                                                        <!--[if BLOCK]><![endif]--><?php if(auth()->user()->canApprovePayment()): ?>
+                                                            <button class="btn btn-danger btn-sm" onclick="confirmRejectSweetAlert('<?php echo e($payment->id); ?>')" title="ปฏิเสธ">
+                                                                <i class="ri-close-line"></i>
+                                                            </button>
+                                                        <?php else: ?>
+                                                            <span class="badge bg-secondary">รอ SA อนุมัติ</span>
+                                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                    </div>
+                                                </div>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    </td>
+                                    <td>
                                         <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-danger" wire:click="cancelSuccess(<?php echo e($delivery->id); ?>)" title="ยกเลิกการตรวจสอบ">
-                                                <i class="ri-close-circle-line"></i>
-                                            </button>
                                             <a href="<?php echo e(route('deliveries.printer', $delivery->id)); ?>" class="btn btn-info" title="พิมพ์">
                                                 <i class="ri-printer-line"></i>
                                             </a>
                                             <a href="<?php echo e(route('orders.show', $delivery->order->id)); ?>" class="btn btn-secondary" target="_blank" title="ดูรายละเอียด">
                                                 <i class="ri-external-link-line"></i>
                                             </a>
+                                            <?php if(auth()->user()->canConfirmDelivery()): ?>
+                                                <button class="btn btn-warning" wire:click="cancelSuccess(<?php echo e($delivery->id); ?>)" title="ยกเลิกการยืนยัน">
+                                                    <i class="ri-restart-line"></i>
+                                                </button>
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </div>
                                     </td>
                                 </tr>
@@ -314,12 +399,8 @@
                             </tbody>
                         </table>
                     </div>
-                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
-            </div>
             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
-          
 
             <!-- Deliveries Table -->
             
@@ -432,7 +513,7 @@
                                     <td class="align-middle text-center">
                                         <div class="btn-group btn-group-sm">
 
-                                            <!--[if BLOCK]><![endif]--><?php if($delivery->order_delivery_status === 'success'): ?>
+                                            <!--[if BLOCK]><![endif]--><?php if($delivery->order_delivery_status === 'success' && auth()->user()->canConfirmDelivery()): ?>
                                                 <button class="btn btn-outline-danger" wire:click="cancelSuccess(<?php echo e($delivery->id); ?>)" title="ยกเลิกการตรวจสอบ">
                                                     <i class="ri-close-circle-line"></i>
                                                 </button>
@@ -464,8 +545,9 @@
     </div>
 </div>
 
-<?php if (! $__env->hasRenderedOnce('dd762a24-70ec-4520-a45b-2291c439616f')): $__env->markAsRenderedOnce('dd762a24-70ec-4520-a45b-2291c439616f');
+<?php if (! $__env->hasRenderedOnce('dc61b13d-6446-45bb-98be-6499b5508d58')): $__env->markAsRenderedOnce('dc61b13d-6446-45bb-98be-6499b5508d58');
 $__env->startPush('scripts'); ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     
@@ -475,7 +557,30 @@ $__env->startPush('scripts'); ?>
         if (scanInput) {
             scanInput.focus();
         }
+
+        // กำหนดฟังก์ชันสำหรับการปฏิเสธสลิป
+        window.rejectPaymentWithReason = function(paymentId) {
+            Swal.fire({
+                title: 'กรุณาระบุเหตุผลการปฏิเสธ',
+                input: 'textarea',
+                inputPlaceholder: 'กรอกเหตุผล...',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันปฏิเสธ',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#dc3545',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'กรุณากรอกเหตุผล';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').call('rejectPayment', paymentId, result.value);
+                }
+            });
+        };
     });
+    
     // Re-focus scan input after successful scan
     document.addEventListener('notify', () => {
         setTimeout(() => {
@@ -487,6 +592,36 @@ $__env->startPush('scripts'); ?>
     });
 </script>
 
+<?php $__env->stopPush(); endif; ?>
+
+
+<?php if (! $__env->hasRenderedOnce('7322ded2-8995-433d-bd44-ed2faec83758')): $__env->markAsRenderedOnce('7322ded2-8995-433d-bd44-ed2faec83758');
+$__env->startPush('scripts'); ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        window.confirmRejectSweetAlert = function(paymentId) {
+            Swal.fire({
+                title: 'กรุณาระบุเหตุผลการปฏิเสธ',
+                input: 'textarea',
+                inputPlaceholder: 'กรอกเหตุผล...',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันปฏิเสธ',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#dc3545',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'กรุณากรอกเหตุผล';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').call('rejectWithReason', paymentId, result.value);
+                }
+            });
+        };
+    });
+</script>
 <?php $__env->stopPush(); endif; ?>
 
 

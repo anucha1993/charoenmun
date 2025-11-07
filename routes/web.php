@@ -85,8 +85,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/global-sets', GlobalSetManager::class)->name('global-sets.index');
     
-    // User Management (Admin Only)
-    Route::group(['middleware' => 'admin'], function () {
+    // User Management (Admin or SA only)
+    Route::group(['middleware' => 'admin.or.sa'], function () {
         Route::get('/users', \App\Livewire\Users\UserIndex::class)->name('users.index');
         Route::get('/users/create', \App\Livewire\Users\UserForm::class)->name('users.create');
         Route::get('/users/{user}/edit', \App\Livewire\Users\UserForm::class)->name('users.edit');
@@ -120,11 +120,11 @@ Route::middleware(['auth'])->group(function () {
     // Delivery Calendar
     Route::get('/delivery-calendar', App\Livewire\Deliveries\DeliveryCalendar::class)->name('deliveries.calendar');
 
-     //payment
-     Route::get('/confirm-payments', ConfirmPayments::class)->name('payments.confirm');
+     //payment (SA only)
+     Route::get('/confirm-payments', ConfirmPayments::class)->middleware('super.admin')->name('payments.confirm');
 
-     //SCANS QR CODE
-     Route::get('/scan-invoice', ScanInvoice::class)->name('scan.invoice');
+     //SCANS QR CODE (SA only)
+     Route::get('/scan-invoice', ScanInvoice::class)->middleware('super.admin')->name('scan.invoice');
 
      Route::get('/orders/{order}/payment', OrderPaymentForm::class)->name('orders.payment.livewire');
 });
@@ -170,3 +170,5 @@ Route::get('/test-truck-icons', function () {
 Route::get('/demo-truck-icons', function () {
     return view('truck-icons-demo');
 })->name('demo.truck.icons');
+
+

@@ -38,8 +38,10 @@
                                         <td><?php echo e($user->name); ?></td>
                                         <td><?php echo e($user->email); ?></td>
                                         <td>
-                                            <!--[if BLOCK]><![endif]--><?php if($user->type === 'admin'): ?>
-                                                <span class="badge bg-primary">ผู้ดูแลระบบ</span>
+                                            <!--[if BLOCK]><![endif]--><?php if($user->type === 'SA'): ?>
+                                                <span class="badge bg-success">ผู้ดูแลระบบ</span>
+                                            <?php elseif($user->type === 'admin'): ?>
+                                                <span class="badge bg-primary">แอดมิน</span>
                                             <?php else: ?>
                                                 <span class="badge bg-info">สมาชิก</span>
                                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->

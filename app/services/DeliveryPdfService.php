@@ -114,7 +114,7 @@ class DeliveryPdfService
     {
         try {
             // สร้าง QR Code ด้วย Endroid QR Code
-            $qrText = 'Delivery ID: ' . $this->delivery->id . ' - ' . $this->delivery->order_delivery_number;
+            $qrText = $this->delivery->order_delivery_number;
             
             Log::info('Attempting to generate QR Code for: ' . $qrText);
             
@@ -155,7 +155,7 @@ class DeliveryPdfService
     {
         try {
             // วิธี fallback ใช้ Google Charts API (ที่เชื่อถือได้)
-            $qrText = urlencode('Delivery ID: ' . $this->delivery->id . ' - ' . $this->delivery->order_delivery_number);
+            $qrText = urlencode($this->delivery->order_delivery_number);
             $qrUrl = "https://chart.googleapis.com/chart?chs=80x80&cht=qr&chl=" . $qrText;
             
             // ลองดึงภาพจาก Google Charts
