@@ -274,27 +274,40 @@
                                     <table class="table table-bordered table-sm mt-2">
                                         <thead>
                                             <tr>
+                                                <th>#</th>
                                                 <th>สินค้า</th>
-                                                <th>จำนวน</th>
-                                                <th>ความยาว</th>
+                                                <th>รายละเอียด</th>
+                                                <th>จำนวนสั่ง</th>
+                                                <th style="display:none;">จำนวนที่จัดส่งแล้ว</th>
+                                                <th>หน่วย</th>
+                                                <th>ความหนา</th>
+                                                <th>ความยาว:เมตร</th>
                                                 <th>ราคา/หน่วย</th>
                                                 <th>VAT</th>
-                                                <th>เหตุผลการเพิ่ม</th>
+                                                <th>เหตุผล</th>
                                                 <th>หมายเหตุ</th>
-                                                <th>ราคารวม</th>
+                                                <th class="text-end">ยอดรวม</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($newItems as $idx => $item)
                                                 <tr>
-                                                    <td style="min-width:100px;">
+                                                    <td style="text-align: center; width: 50px;">{{ $idx + 1 }}</td>
+                                                    <td style="min-width:120px;">
                                                         <div class="product-search-container">
-                                                            <input type="text" class="form-control form-control-sm"
-                                                                wire:model.live="newItems.{{ $idx }}.product_search"
-                                                                placeholder="ค้นหาสินค้า..."
-                                                                wire:focus="$set('newItems.{{ $idx }}.product_results_visible', true)"
-                                                                wire:keydown.escape="$set('newItems.{{ $idx }}.product_results_visible', false)">
+                                                            @if ($item['selected_from_dropdown'])
+                                                                <div><b>{{ $item['product_name'] ?? '-' }}</b></div>
+                                                                <button type="button"
+                                                                    class="btn btn-link btn-sm p-0 text-danger"
+                                                                    wire:click="clearProductSelectionForNewItem({{ $idx }})">เปลี่ยนสินค้า</button>
+                                                            @else
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    wire:model.live="newItems.{{ $idx }}.product_search"
+                                                                    placeholder="ค้นหาสินค้า..."
+                                                                    wire:focus="$set('newItems.{{ $idx }}.product_results_visible', true)"
+                                                                    wire:keydown.escape="$set('newItems.{{ $idx }}.product_results_visible', false)">
+                                                            @endif
                                                             @if (!empty($item['product_results_visible']) && !empty($item['product_results']))
                                                                 <div class="position-absolute w-100 mt-1"
                                                                     style="z-index: 1000;">
@@ -321,32 +334,23 @@
                                                                             </a>
                                                                         @endforeach
                                                                     </div>
-
-
-                                                                </div>
-                                                                {{-- ระบุความหนา --}}
-                                                            @endif
-                                                            @if (!empty($item['product_calculation']) && $item['product_calculation'] != 1)
-                                                                <input type="number" step="0.01"
-                                                                    class="form-control form-control-sm mt-1"
-                                                                    wire:model.live="newItems.{{ $idx }}.product_calculation"
-                                                                    placeholder="ความหนา" />
-                                                            @else
-                                                                <div class="text-muted small text-center">
-                                                                    {!! $item['product_detail'] ?? '-' !!}
                                                                 </div>
                                                             @endif
                                                         </div>
-                                                        @if ($item['selected_from_dropdown'])
-                                                            <span class="badge bg-success mt-1">เลือกแล้ว</span>
-                                                            <button type="button"
-                                                                class="btn btn-link btn-sm p-0 text-danger"
-                                                                wire:click="clearProductSelectionForNewItem({{ $idx }})">ล้าง</button>
-                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm"
+                                                            wire:model="newItems.{{ $idx }}.product_detail"
+                                                            placeholder="รายละเอียดสินค้า">
                                                     </td>
                                                     <td><input type="number" min="1"
                                                             wire:model.live="newItems.{{ $idx }}.quantity"
                                                             class="form-control form-control-sm"></td>
+                                                    <td style="display:none;"></td>
+                                                    <td>{{ $item['product_unit'] ?? '-' }}</td>
+                                                    <td><input type="number" step="0.01" min="0"
+                                                            wire:model.live="newItems.{{ $idx }}.product_calculation"
+                                                            class="form-control form-control-sm" placeholder="ความหนา"></td>
                                                     <td><input type="number" min="0" step="0.01"
                                                             wire:model.live="newItems.{{ $idx }}.product_length"
                                                             class="form-control form-control-sm" placeholder="ความยาว"></td>
@@ -360,8 +364,7 @@
                                                         <select wire:model.live="newItems.{{ $idx }}.added_reason"
                                                             class="form-control form-control-sm">
                                                             <option value="">เลือกเหตุผล</option>
-                                                            <option value="customer_request">เพิ่มตามคำขอลูกค้า
-                                                            </option>
+                                                            <option value="customer_request">เพิ่มตามคำขอลูกค้า</option>
                                                             <option value="claim">เพิ่มกรณีเคลม</option>
                                                         </select>
                                                     </td>
@@ -374,14 +377,10 @@
                                                             $unit = (float)($item['unit_price'] ?? 0);
                                                             $calc = (isset($item['product_calculation']) && $item['product_calculation'] !== '' && $item['product_calculation'] !== null) ? (float)$item['product_calculation'] : 1;
                                                             $len = (isset($item['product_length']) && $item['product_length'] !== '' && $item['product_length'] !== null) ? (float)$item['product_length'] : 1;
-                                                            // สูตรที่ถูกต้อง: ราคา/หน่วย × ความหนา × ความยาว × จำนวน
                                                             $total = $unit * $calc * $len * $qty;
-                                                            // Debug information to verify calculation
-                                                            $debug = "Unit: {$unit}, Calc: {$calc}, Len: {$len}, Qty: {$qty}, Total: {$total}";
                                                         @endphp
-                                                        <span title="{{ $debug }}">{{ number_format($total, 2) }}</span>
+                                                        <span>{{ number_format($total, 2) }}</span>
                                                     </td>
-
                                                     <td>
                                                         <button type="button" class="btn btn-danger btn-sm"
                                                             wire:click="removeRow({{ $idx }})">ลบ</button>

@@ -198,6 +198,7 @@ class OrderShow extends Component
             'product_name' => '',
             'product_type' => '',
             'product_unit' => '',
+            'product_note' => '',
             'product_detail' => '',
             'quantity' => 1,
             'unit_price' => 0,
@@ -240,12 +241,151 @@ class OrderShow extends Component
         $this->newItems[$index]['product_name'] = $product ? $product->product_name : '';
         $this->newItems[$index]['product_type'] = $product ? $product->product_type : '';
         $this->newItems[$index]['product_unit'] = $product ? $product->product_unit : '';
+        $this->newItems[$index]['product_note'] = $product ? $product->product_note : '';
+        $this->newItems[$index]['product_detail'] = ''; // ให้ user กรอกเอง
         $this->newItems[$index]['product_weight'] = $product ? $product->product_weight : 0;
         $this->newItems[$index]['product_results'] = [];
         $this->newItems[$index]['product_results_visible'] = false;
         $this->newItems[$index]['selected_from_dropdown'] = true;
         
         $this->calculateTotals();
+    }
+
+    /**
+     * ล้างการเลือกสินค้าและให้เลือกใหม่
+     */
+    public function clearProductSelectionForNewItem($index)
+    {
+        if (isset($this->newItems[$index])) {
+            $this->newItems[$index]['product_id'] = null;
+            $this->newItems[$index]['product_search'] = '';
+            $this->newItems[$index]['product_name'] = '';
+            $this->newItems[$index]['product_type'] = '';
+            $this->newItems[$index]['product_unit'] = '';
+            $this->newItems[$index]['product_note'] = '';
+            $this->newItems[$index]['product_detail'] = '';
+            $this->newItems[$index]['product_weight'] = 0;
+            $this->newItems[$index]['product_results'] = [];
+            $this->newItems[$index]['product_results_visible'] = false;
+            $this->newItems[$index]['selected_from_dropdown'] = false;
+            
+            $this->calculateTotals();
+        }
+    }
+
+    /**
+     * บันทึกรายการสินค้าใหม่ที่เพิ่มเข้ามา
+     */
+    public function saveNewItems()
+    {
+        try {
+            DB::beginTransaction();
+            
+            $validItems = [];
+            
+            // ตรวจสอบและกรองรายการที่สมบูรณ์
+            foreach ($this->newItems as $newItem) {
+                if (!empty($newItem['product_id']) && !empty($newItem['quantity']) && !empty($newItem['unit_price'])) {
+                    $validItems[] = $newItem;
+                }
+            }
+            
+            if (empty($validItems)) {
+                $this->dispatch('notify', type: 'warning', message: 'กรุณาเพิ่มรายละเอียดสินค้าให้ครบถ้วน');
+                return;
+            }
+            
+            // บันทึกรายการใหม่
+            foreach ($validItems as $newItem) {
+                \App\Models\Orders\OrderItemsModel::create([
+                    'order_id' => $this->order->id,
+                    'product_id' => $newItem['product_id'],
+                    'product_name' => $newItem['product_name'] ?? '',
+                    'product_note' => $newItem['product_note'] ?? '',
+                    'product_detail' => $newItem['product_detail'] ?? '',
+                    'product_unit' => $newItem['product_unit'] ?? '',
+                    'product_type' => $newItem['product_type'] ?? '',
+                    'quantity' => $newItem['quantity'],
+                    'unit_price' => $newItem['unit_price'],
+                    'product_vat' => $newItem['product_vat'] ?? false,
+                    'product_calculation' => $newItem['product_calculation'] ?? 1,
+                    'product_length' => $newItem['product_length'] ?? 0,
+                    'added_reason' => $newItem['added_reason'] ?? null,
+                    'added_note' => $newItem['added_note'] ?? '',
+                ]);
+            }
+            
+            // อัปเดตเรคคอร์ดออเดอร์ด้วยข้อมูลยอดรวมใหม่
+            $this->order->update([
+                'order_subtotal' => $this->order_subtotal,
+                'order_vat' => $this->order_vat,
+                'order_grand_total' => $this->order_grand_total,
+            ]);
+            
+            DB::commit();
+            
+            // รีโหลดข้อมูลและล้างฟอร์ม
+            $this->order = $this->order->fresh(['items']);
+            $this->newItems = [];
+            $this->addRowMode = false;
+            
+            $this->dispatch('notify', type: 'success', message: 'เพิ่มรายการสินค้าใหม่เรียบร้อยแล้ว');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('notify', type: 'error', message: 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * ลบแถวของรายการสินค้าใหม่
+     */
+    public function removeRow($index)
+    {
+        if (isset($this->newItems[$index])) {
+            unset($this->newItems[$index]);
+            // ทำให้ array index ติดต่อกัน
+            $this->newItems = array_values($this->newItems);
+            $this->calculateTotals();
+        }
+    }
+
+    /**
+     * ลบรายการสินค้าจาก Order
+     */
+    public function deleteOrderItem($itemId)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $orderItem = \App\Models\Orders\OrderItemsModel::find($itemId);
+            
+            if (!$orderItem) {
+                $this->dispatch('notify', type: 'error', message: 'ไม่พบรายการสินค้าที่ต้องการลบ');
+                return;
+            }
+            
+            // ตรวจสอบว่ารายการนี้อยู่ในออร์เดอร์ปัจจุบันหรือไม่
+            if ($orderItem->order_id !== $this->order->id) {
+                $this->dispatch('notify', type: 'error', message: 'ไม่สามารถลบรายการของออร์เดอร์อื่นได้');
+                return;
+            }
+            
+            // ลบรายการสินค้า
+            $orderItem->delete();
+            
+            DB::commit();
+            
+            // รีโหลดข้อมูลและคำนวณยอดรวมใหม่
+            $this->order = $this->order->fresh(['items']);
+            $this->calculateTotals();
+            
+            $this->dispatch('notify', type: 'success', message: 'ลบรายการสินค้าเรียบร้อยแล้ว');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('notify', type: 'error', message: 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
     }
 
     /**

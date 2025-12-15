@@ -312,27 +312,40 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                     <table class="table table-bordered table-sm mt-2">
                                         <thead>
                                             <tr>
+                                                <th>#</th>
                                                 <th>สินค้า</th>
-                                                <th>จำนวน</th>
-                                                <th>ความยาว</th>
+                                                <th>รายละเอียด</th>
+                                                <th>จำนวนสั่ง</th>
+                                                <th style="display:none;">จำนวนที่จัดส่งแล้ว</th>
+                                                <th>หน่วย</th>
+                                                <th>ความหนา</th>
+                                                <th>ความยาว:เมตร</th>
                                                 <th>ราคา/หน่วย</th>
                                                 <th>VAT</th>
-                                                <th>เหตุผลการเพิ่ม</th>
+                                                <th>เหตุผล</th>
                                                 <th>หมายเหตุ</th>
-                                                <th>ราคารวม</th>
+                                                <th class="text-end">ยอดรวม</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $newItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <tr>
-                                                    <td style="min-width:100px;">
+                                                    <td style="text-align: center; width: 50px;"><?php echo e($idx + 1); ?></td>
+                                                    <td style="min-width:120px;">
                                                         <div class="product-search-container">
-                                                            <input type="text" class="form-control form-control-sm"
-                                                                wire:model.live="newItems.<?php echo e($idx); ?>.product_search"
-                                                                placeholder="ค้นหาสินค้า..."
-                                                                wire:focus="$set('newItems.<?php echo e($idx); ?>.product_results_visible', true)"
-                                                                wire:keydown.escape="$set('newItems.<?php echo e($idx); ?>.product_results_visible', false)">
+                                                            <!--[if BLOCK]><![endif]--><?php if($item['selected_from_dropdown']): ?>
+                                                                <div><b><?php echo e($item['product_name'] ?? '-'); ?></b></div>
+                                                                <button type="button"
+                                                                    class="btn btn-link btn-sm p-0 text-danger"
+                                                                    wire:click="clearProductSelectionForNewItem(<?php echo e($idx); ?>)">เปลี่ยนสินค้า</button>
+                                                            <?php else: ?>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    wire:model.live="newItems.<?php echo e($idx); ?>.product_search"
+                                                                    placeholder="ค้นหาสินค้า..."
+                                                                    wire:focus="$set('newItems.<?php echo e($idx); ?>.product_results_visible', true)"
+                                                                    wire:keydown.escape="$set('newItems.<?php echo e($idx); ?>.product_results_visible', false)">
+                                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                             <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_results_visible']) && !empty($item['product_results'])): ?>
                                                                 <div class="position-absolute w-100 mt-1"
                                                                     style="z-index: 1000;">
@@ -361,33 +374,23 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                                             </a>
                                                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                                                     </div>
-
-
-                                                                </div>
-                                                                
-                                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                                            <!--[if BLOCK]><![endif]--><?php if(!empty($item['product_calculation']) && $item['product_calculation'] != 1): ?>
-                                                                <input type="number" step="0.01"
-                                                                    class="form-control form-control-sm mt-1"
-                                                                    wire:model.live="newItems.<?php echo e($idx); ?>.product_calculation"
-                                                                    placeholder="ความหนา" />
-                                                            <?php else: ?>
-                                                                <div class="text-muted small text-center">
-                                                                    <?php echo $item['product_detail'] ?? '-'; ?>
-
                                                                 </div>
                                                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                         </div>
-                                                        <!--[if BLOCK]><![endif]--><?php if($item['selected_from_dropdown']): ?>
-                                                            <span class="badge bg-success mt-1">เลือกแล้ว</span>
-                                                            <button type="button"
-                                                                class="btn btn-link btn-sm p-0 text-danger"
-                                                                wire:click="clearProductSelectionForNewItem(<?php echo e($idx); ?>)">ล้าง</button>
-                                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm"
+                                                            wire:model="newItems.<?php echo e($idx); ?>.product_detail"
+                                                            placeholder="รายละเอียดสินค้า">
                                                     </td>
                                                     <td><input type="number" min="1"
                                                             wire:model.live="newItems.<?php echo e($idx); ?>.quantity"
                                                             class="form-control form-control-sm"></td>
+                                                    <td style="display:none;"></td>
+                                                    <td><?php echo e($item['product_unit'] ?? '-'); ?></td>
+                                                    <td><input type="number" step="0.01" min="0"
+                                                            wire:model.live="newItems.<?php echo e($idx); ?>.product_calculation"
+                                                            class="form-control form-control-sm" placeholder="ความหนา"></td>
                                                     <td><input type="number" min="0" step="0.01"
                                                             wire:model.live="newItems.<?php echo e($idx); ?>.product_length"
                                                             class="form-control form-control-sm" placeholder="ความยาว"></td>
@@ -401,8 +404,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                         <select wire:model.live="newItems.<?php echo e($idx); ?>.added_reason"
                                                             class="form-control form-control-sm">
                                                             <option value="">เลือกเหตุผล</option>
-                                                            <option value="customer_request">เพิ่มตามคำขอลูกค้า
-                                                            </option>
+                                                            <option value="customer_request">เพิ่มตามคำขอลูกค้า</option>
                                                             <option value="claim">เพิ่มกรณีเคลม</option>
                                                         </select>
                                                     </td>
@@ -415,14 +417,10 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                             $unit = (float)($item['unit_price'] ?? 0);
                                                             $calc = (isset($item['product_calculation']) && $item['product_calculation'] !== '' && $item['product_calculation'] !== null) ? (float)$item['product_calculation'] : 1;
                                                             $len = (isset($item['product_length']) && $item['product_length'] !== '' && $item['product_length'] !== null) ? (float)$item['product_length'] : 1;
-                                                            // สูตรที่ถูกต้อง: ราคา/หน่วย × ความหนา × ความยาว × จำนวน
                                                             $total = $unit * $calc * $len * $qty;
-                                                            // Debug information to verify calculation
-                                                            $debug = "Unit: {$unit}, Calc: {$calc}, Len: {$len}, Qty: {$qty}, Total: {$total}";
                                                         ?>
-                                                        <span title="<?php echo e($debug); ?>"><?php echo e(number_format($total, 2)); ?></span>
+                                                        <span><?php echo e(number_format($total, 2)); ?></span>
                                                     </td>
-
                                                     <td>
                                                         <button type="button" class="btn btn-danger btn-sm"
                                                             wire:click="removeRow(<?php echo e($idx); ?>)">ลบ</button>
