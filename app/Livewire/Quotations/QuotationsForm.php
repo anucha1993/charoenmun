@@ -872,4 +872,96 @@ class QuotationsForm extends Component
             redirect()->route('order.show', $order->id);
         });
     }
+
+    /**
+     * ไม่อนุมัติใบเสนอราคา พร้อมเหตุผล
+     */
+    public function rejectQuotation($quotationId, $rejectReason = null)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $quotation = QuotationModel::find($quotationId);
+            
+            if (!$quotation) {
+                $this->dispatch('notify', type: 'error', message: 'ไม่พบใบเสนอราคา');
+                return;
+            }
+            
+            if ($quotation->quote_status !== QuotationStatus::Wait) {
+                $this->dispatch('notify', type: 'error', message: 'สถานะใบเสนอราคาไม่ถูกต้อง');
+                return;
+            }
+            
+            // ตรวจสอบว่ามีเหตุผลหรือไม่
+            if (empty($rejectReason) || trim($rejectReason) === '') {
+                $this->dispatch('notify', type: 'warning', message: 'กรุณาระบุเหตุผลการไม่อนุมัติ');
+                return;
+            }
+            
+            // อัปเดตสถานะและบันทึกเหตุผล
+            $quotation->update([
+                'quote_status' => QuotationStatus::Cancel,
+                'quote_note' => ($quotation->quote_note ? $quotation->quote_note . "\n\n" : '') . 
+                               "❌ เหตุผลการไม่อนุมัติ: " . $rejectReason . 
+                               "\n📅 วันที่: " . now()->format('d/m/Y H:i') . 
+                               "\n👤 โดย: " . Auth::user()->name
+            ]);
+            
+            DB::commit();
+            
+            $this->dispatch('notify', type: 'success', message: 'ไม่อนุมัติใบเสนอราคาเรียบร้อยแล้ว');
+            
+            // รีเฟรชข้อมูล
+            $this->quotation = $quotation->fresh();
+            $this->quote_status = $this->quotation->quote_status->value; // แปลง enum เป็น string
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('notify', type: 'error', message: 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * เปลี่ยนสถานะกลับเป็น รออนุมัติ (กรณีกดไม่อนุมัติผิด)
+     */
+    public function revertToWaitStatus($quotationId)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $quotation = QuotationModel::find($quotationId);
+            
+            if (!$quotation) {
+                $this->dispatch('notify', type: 'error', message: 'ไม่พบใบเสนอราคา');
+                return;
+            }
+            
+            if ($quotation->quote_status !== QuotationStatus::Cancel) {
+                $this->dispatch('notify', type: 'error', message: 'สามารถเปลี่ยนสถานะได้เฉพาะใบเสนอราคาที่ถูกยกเลิกเท่านั้น');
+                return;
+            }
+            
+            // เปลี่ยนสถานะกลับเป็น wait
+            $quotation->update([
+                'quote_status' => QuotationStatus::Wait,
+                'quote_note' => ($quotation->quote_note ? $quotation->quote_note . "\n\n" : '') . 
+                               "🔄 เปลี่ยนสถานะกลับเป็น รออนุมัติ" . 
+                               "\n📅 วันที่: " . now()->format('d/m/Y H:i') . 
+                               "\n👤 โดย: " . Auth::user()->name
+            ]);
+            
+            DB::commit();
+            
+            $this->dispatch('notify', type: 'success', message: 'เปลี่ยนสถานะเป็น รออนุมัติ เรียบร้อยแล้ว');
+            
+            // รีเฟรชข้อมูล
+            $this->quotation = $quotation->fresh();
+            $this->quote_status = $this->quotation->quote_status->value;
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('notify', type: 'error', message: 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
+    }
 }

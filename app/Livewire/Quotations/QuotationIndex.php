@@ -11,6 +11,7 @@ class QuotationIndex extends Component
 
     public string $search = '';
     public string $status = '';
+    public ?string $filterStatus = null; // สำหรับกรองตามเมนูที่เลือก
 
     // สอง public properties สำหรับเก็บข้อมูลกราฟ
     public array $statusData   = [];
@@ -23,6 +24,20 @@ class QuotationIndex extends Component
 
     public function mount()
     {
+        // ตรวจสอบ route name เพื่อกำหนดสถานะ
+        $routeName = request()->route()->getName();
+        
+        if ($routeName === 'quotations.pending') {
+            $this->filterStatus = 'wait';
+            $this->status = 'wait';
+        } elseif ($routeName === 'quotations.approved') {
+            $this->filterStatus = 'success';
+            $this->status = 'success';
+        } elseif ($routeName === 'quotations.cancelled') {
+            $this->filterStatus = 'cancel';
+            $this->status = 'cancel';
+        }
+        
         // คำนวณข้อมูลกราฟครั้งแรก (initial load)
         $this->computeChartData();
         // ** ไม่ต้อง dispatch ตรงนี้อีก เพราะเราจะฝัง $statusData/$customerData ลง Blade เลย **
@@ -156,8 +171,18 @@ class QuotationIndex extends Component
             ->paginate(15);
 
         $statuses = ['wait','success','cancel'];
+        
+        // กำหนด view ตามสถานะที่เลือก
+        $viewName = 'livewire.quotations.quotation-index';
+        if ($this->filterStatus === 'wait') {
+            $viewName = 'livewire.quotations.quotation-index-pending';
+        } elseif ($this->filterStatus === 'success') {
+            $viewName = 'livewire.quotations.quotation-index-approved';
+        } elseif ($this->filterStatus === 'cancel') {
+            $viewName = 'livewire.quotations.quotation-index-cancelled';
+        }
 
-        return view('livewire.quotations.quotation-index', compact('quotes','statuses'))
+        return view($viewName, compact('quotes','statuses'))
                ->layout('layouts.horizontal', ['title' => 'Quotations']);
     }
 }

@@ -98,6 +98,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('quotations.')
         ->group(function () {
             Route::get('/', QuotationIndex::class)->name('index');
+            Route::get('/pending', QuotationIndex::class)->name('pending');
+            Route::get('/approved', QuotationIndex::class)->name('approved');
+            Route::get('/cancelled', QuotationIndex::class)->name('cancelled');
             
             Route::get('/create', QuotationsForm::class)->name('create');
             Route::get('/{quotation}/edit', QuotationsForm::class)->name('edit');
@@ -127,6 +130,9 @@ Route::middleware(['auth'])->group(function () {
      Route::get('/scan-invoice', ScanInvoice::class)->middleware('super.admin')->name('scan.invoice');
 
      Route::get('/orders/{order}/payment', OrderPaymentForm::class)->name('orders.payment.livewire');
+     
+     // Reports
+     Route::get('/reports/sales', App\Livewire\Reports\SalesReport::class)->name('reports.sales');
 });
 
 Route::get('/quotations/{quotation}/print', QuotationPrint::class)->middleware('auth')->name('quotations.print');

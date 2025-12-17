@@ -65,14 +65,40 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="{{route('quotations.index')}}">
-                            <i class="ri-pages-line"></i>ใบเสนอราคา 
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="ri-pages-line"></i>ใบเสนอราคา <i class="mdi mdi-chevron-down"></i>
                         </a>
+                        <div class="dropdown-menu">
+                            <a href="{{route('quotations.index')}}" class="dropdown-item">
+                                <i class="ri-file-list-line me-2"></i>ทั้งหมด
+                            </a>
+                            <a href="{{route('quotations.pending')}}" class="dropdown-item">
+                                <i class="ri-time-line me-2 text-warning"></i>รออนุมัติ
+                            </a>
+                            <a href="{{route('quotations.approved')}}" class="dropdown-item">
+                                <i class="ri-checkbox-circle-line me-2 text-success"></i>อนุมัติแล้ว
+                            </a>
+                            <a href="{{route('quotations.cancelled')}}" class="dropdown-item">
+                                <i class="ri-close-circle-line me-2 text-danger"></i>ไม่อนุมัติ
+                            </a>
+                        </div>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="{{route('orders.index')}}">
                             <i class="ri-numbers-line"></i>คำสั่งซื้อ
                         </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="ri-bar-chart-box-line"></i>รายงาน <i class="mdi mdi-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="{{route('reports.sales')}}" class="dropdown-item">
+                                <i class="ri-user-star-line me-2"></i>สถิติการขายของ Sale
+                            </a>
+                        </div>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="{{route('scan.invoice')}}">

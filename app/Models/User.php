@@ -76,4 +76,10 @@ class User extends Authenticatable
     {
         return in_array($this->type, ['admin', 'SA']);
     }
+
+    // Relationship: User has many Quotations (as creator/sale)
+    public function quotations()
+    {
+        return $this->hasMany(\App\Models\Quotations\QuotationModel::class, 'created_by');
+    }
 }
