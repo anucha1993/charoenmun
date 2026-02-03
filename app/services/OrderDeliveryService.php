@@ -14,14 +14,21 @@ class OrderDeliveryService
     {
         return DB::transaction(function () use ($order, $payload) {
 
-            /* หา running number จากเลขสูงสุดที่มีอยู่ */
+            /* หา running number จากเลขสูงสุดที่มีอยู่ พร้อม lock เพื่อป้องกัน race condition */
             $prefix = $order->order_number . '-';
-            $maxNumber = OrderDeliverysModel::where('order_id', $order->id)
-                ->where('order_delivery_number', 'like', $prefix . '%')
-                ->selectRaw("MAX(CAST(SUBSTRING(order_delivery_number, ?) AS UNSIGNED)) as max_num", [strlen($prefix) + 1])
-                ->value('max_num');
+            $maxDeliveryNumber = OrderDeliverysModel::where('order_id', $order->id)
+                ->lockForUpdate()
+                ->orderByDesc('order_delivery_number')
+                ->value('order_delivery_number');
             
-            $running = ($maxNumber ?? 0) + 1;
+            if ($maxDeliveryNumber) {
+                // ดึงเลขท้ายหลังขีด เช่น "OR26010212-004" -> "004" -> 4
+                $lastPart = substr($maxDeliveryNumber, strrpos($maxDeliveryNumber, '-') + 1);
+                $running = intval($lastPart) + 1;
+            } else {
+                $running = 1;
+            }
+            
             $deliveryNo = sprintf('%s-%03d', $order->order_number, $running);
 
             /* รวม field ที่อนุญาต */
