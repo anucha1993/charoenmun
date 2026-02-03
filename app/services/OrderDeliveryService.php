@@ -14,8 +14,14 @@ class OrderDeliveryService
     {
         return DB::transaction(function () use ($order, $payload) {
 
-            /* หา running number */
-            $running = OrderDeliverysModel::where('order_id', $order->id)->count() + 1;
+            /* หา running number จากเลขสูงสุดที่มีอยู่ */
+            $prefix = $order->order_number . '-';
+            $maxNumber = OrderDeliverysModel::where('order_id', $order->id)
+                ->where('order_delivery_number', 'like', $prefix . '%')
+                ->selectRaw("MAX(CAST(SUBSTRING(order_delivery_number, ?) AS UNSIGNED)) as max_num", [strlen($prefix) + 1])
+                ->value('max_num');
+            
+            $running = ($maxNumber ?? 0) + 1;
             $deliveryNo = sprintf('%s-%03d', $order->order_number, $running);
 
             /* รวม field ที่อนุญาต */

@@ -366,6 +366,11 @@ class DeliveryPdfService
                 $html .= ' ' . $item->orderItem->product->productWireType->value;
             }
             
+            // เพิ่มหมายเหตุสินค้า
+            if ($item->product_note) {
+                $html .= '<br><span style="font-size: 12pt; color: #666;">[หมายเหตุ: ' . $item->product_note . ']</span>';
+            }
+            
             $html .= '</td>';
             
             if ($showPrice) {
