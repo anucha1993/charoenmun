@@ -14,11 +14,11 @@ class OrderDeliveryService
     {
         return DB::transaction(function () use ($order, $payload) {
 
-            /* หา running number จากเลขสูงสุดที่มีอยู่ พร้อม lock เพื่อป้องกัน race condition */
+            /* หา running number จากเลขสูงสุดที่มีอยู่ (ค้นหาทั้ง table เพราะ delivery_number unique globally) */
             $prefix = $order->order_number . '-';
-            $maxDeliveryNumber = OrderDeliverysModel::where('order_id', $order->id)
+            $maxDeliveryNumber = OrderDeliverysModel::where('order_delivery_number', 'like', $prefix . '%')
                 ->lockForUpdate()
-                ->orderByDesc('order_delivery_number')
+                ->orderByRaw("CAST(SUBSTRING(order_delivery_number, ?) AS UNSIGNED) DESC", [strlen($prefix) + 1])
                 ->value('order_delivery_number');
             
             if ($maxDeliveryNumber) {
