@@ -45,6 +45,7 @@ class OrderDelivery extends Component
     public ?string $order_delivery_note = null;
     public ?string $order_delivery_status = 'pending';
     public ?int $order_delivery_status_order = 0;
+    public bool $saving = false;
 
     public function mount(OrderModel $order, ?OrderDeliverysModel $delivery)
     {
@@ -515,6 +516,12 @@ class OrderDelivery extends Component
 
     public function saveDelivery()
     {
+        // ป้องกัน double submit
+        if ($this->saving) {
+            return;
+        }
+        $this->saving = true;
+
         $service = app(OrderDeliveryService::class);
 
         $payload = [

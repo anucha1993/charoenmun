@@ -21,6 +21,11 @@ class OrderDeliveryService
                 ->orderByRaw("CAST(SUBSTRING(order_delivery_number, ?) AS UNSIGNED) DESC", [strlen($prefix) + 1])
                 ->value('order_delivery_number');
             
+            \Log::info('Delivery Number Generation', [
+                'prefix' => $prefix,
+                'maxDeliveryNumber' => $maxDeliveryNumber,
+            ]);
+            
             if ($maxDeliveryNumber) {
                 // ดึงเลขท้ายหลังขีด เช่น "OR26010212-004" -> "004" -> 4
                 $lastPart = substr($maxDeliveryNumber, strrpos($maxDeliveryNumber, '-') + 1);
@@ -30,6 +35,11 @@ class OrderDeliveryService
             }
             
             $deliveryNo = sprintf('%s-%03d', $order->order_number, $running);
+            
+            \Log::info('Generated Delivery Number', [
+                'running' => $running,
+                'deliveryNo' => $deliveryNo,
+            ]);
 
             /* รวม field ที่อนุญาต */
             $data = Arr::only($payload, [

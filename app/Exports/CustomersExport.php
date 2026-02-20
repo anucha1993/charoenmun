@@ -82,9 +82,9 @@ class CustomersExport implements FromQuery, WithHeadings, WithMapping
             $customer->customer_phone,
             $customer->customer_email,
             $customer->customer_address,
-            $customer->type->value,
-            $customer->level->value,
-            $customer->created_at->format('d/m/Y')
+            $customer->type?->value ?? '',
+            $customer->level?->value ?? '',
+            $customer->created_at?->format('d/m/Y') ?? ''
         ];
     }
 }
